@@ -1,0 +1,4 @@
+{
+  "prompt": "I'm getting an error when I run the tests. The login function returns 401 but I don't know why.",
+  "transcript_path": "C:/_projects/frozenSkillz/mock_transcript.jsonl"
+}
