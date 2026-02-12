@@ -55,6 +55,8 @@ ADR-002 also documents the Windows subprocess gotchas (npm `.cmd` shims, long pr
 
 ## File Structure
 
+> **Updated** to include cross-project skills and rules directories.
+
 ```
 frozenSkillz/
 ├── CLAUDE.md                # This file — project docs and decision index
@@ -122,3 +124,35 @@ Copy the hook entry to `~/.claude/settings.json` (merging with existing hooks). 
 - **Latency:** Gemini CLI has ~10s startup on Windows (Node.js bootstrap + credential loading). This makes the hook synchronous and blocking. The REST API backend (Phase 2) is the fix.
 - **Skill paths are hardcoded:** `SUPERPOWERS_SKILLS_DIR` points to `C:/_projects/EVALUATION/superpowers/skills`. If the superpowers project moves, this breaks. Could be made configurable via env var.
 - **No SubagentStart support yet:** Only fires on `UserPromptSubmit`. Subagents spawned by Claude don't get skill suggestions.
+
+---
+
+## Cross-Project Assets (skills/ and rules/)
+
+In addition to the skill classifier hook, this repo serves as the **canonical source for cross-project agent skills and rules**. These are universal assets that get deployed to every project via the git submodule.
+
+### Skills (`skills/`)
+
+Portable workflow capsules with `SKILL.md` + optional references. These are tool-agnostic and project-agnostic.
+
+| Skill | Purpose |
+|-------|---------|
+| `agent-config-megaref` | Definitive reference for configuring any AI coding tool — config locations, precedence, schemas, verification |
+| `mcp-deployment-guide` | MCP server deployment across all tools — config formats, secrets patterns, common pitfalls |
+
+### Rules (`rules/`)
+
+Universal rule templates that can be deployed to any project's `.claude/rules/` (or equivalent). Each rule has a `paths:` trigger and a "Project Customization" section explaining what to override per-project.
+
+| Rule | Triggers On | What It Enforces |
+|------|------------|------------------|
+| `documentation-frontmatter.md` | `docs/**/*.md` | All docs need YAML frontmatter with required fields |
+| `ansible-playbooks.md` | `ansible/**/*.yml` | Playbook headers, no hardcoded secrets, no agent execution |
+| `submodule-workflow.md` | `**/skills/frozen/**`, `**/.gitmodules` | Don't modify submodule files directly + full workflow guide |
+
+### Deploying to a Project
+
+1. Add this repo as a submodule: `git submodule add https://github.com/Coldaine/frozenSkillz.git skills/frozen`
+2. Copy rules you want: `cp skills/frozen/rules/documentation-frontmatter.md .claude/rules/`
+3. Customize the copy with project-specific values (subsystems, exempt files, etc.)
+4. Skills are referenced directly from the submodule path — no copying needed
