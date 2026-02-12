@@ -20,6 +20,11 @@
       "name": "mcp-deployment-guide",
       "path": "skills/mcp-deployment-guide",
       "description": "MCP server deployment guide across all AI tools"
+    },
+    {
+      "name": "plugin-authoring-guide",
+      "path": "skills/plugin-authoring-guide",
+      "description": "Complete reference for creating Claude Code plugins, skills, agents, hooks, and marketplaces"
     }
   ]
 }

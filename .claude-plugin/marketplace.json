@@ -15,7 +15,7 @@
     {
       "name": "frozen-skills",
       "source": "./plugins/frozen-skills",
-      "description": "Universal cross-project skills for agent configuration and MCP deployment",
+      "description": "Universal cross-project skills for agent configuration, MCP deployment, and plugin authoring",
       "version": "1.0.0",
       "category": "reference",
       "author": {

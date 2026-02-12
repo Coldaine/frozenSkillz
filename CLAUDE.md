@@ -35,7 +35,8 @@ frozenSkillz/
 │   │   ├── .claude-plugin/plugin.json
 │   │   └── skills/
 │   │       ├── agent-config-megaref/SKILL.md
-│   │       └── mcp-deployment-guide/SKILL.md
+│   │       ├── mcp-deployment-guide/SKILL.md
+│   │       └── plugin-authoring-guide/SKILL.md
 │   ├── frozen-rules/          # Universal rules
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── rules/             # Raw rule templates
@@ -64,8 +65,9 @@ frozenSkillz/
 **Skills**:
 - `agent-config-megaref` — Definitive reference for configuring agents across Claude Code, Gemini CLI, VS Code, OpenCode, etc.
 - `mcp-deployment-guide` — MCP server deployment guide across all AI tools
+- `plugin-authoring-guide` — Complete reference for creating Claude Code plugins, skills, agents, hooks, and marketplaces
 
-**Use when**: Answering "how do I configure X?" or "where do I deploy MCP servers?"
+**Use when**: Answering "how do I configure X?", "where do I deploy MCP servers?", or "how do I write a plugin?"
 
 ### frozen-rules (standards)
 
