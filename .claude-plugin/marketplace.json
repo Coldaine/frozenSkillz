@@ -1,0 +1,50 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "coldaine-skills",
+  "owner": {
+    "name": "Coldaine",
+    "url": "https://github.com/Coldaine"
+  },
+  "metadata": {
+    "description": "Universal skills, rules, and tools for cross-project agent workflows. Includes configuration references, MCP deployment guides, and rule templates.",
+    "version": "1.0.0",
+    "repository": "https://github.com/Coldaine/frozenSkillz",
+    "license": "MIT"
+  },
+  "plugins": [
+    {
+      "name": "frozen-skills",
+      "source": "./plugins/frozen-skills",
+      "description": "Universal cross-project skills for agent configuration and MCP deployment",
+      "version": "1.0.0",
+      "category": "reference",
+      "author": {
+        "name": "Coldaine"
+      },
+      "tags": ["configuration", "mcp", "reference", "multi-tool"]
+    },
+    {
+      "name": "frozen-rules",
+      "source": "./plugins/frozen-rules",
+      "description": "Universal rule templates for Ansible, documentation, and git submodules",
+      "version": "1.0.0",
+      "category": "standards",
+      "author": {
+        "name": "Coldaine"
+      },
+      "tags": ["rules", "standards", "templates"]
+    },
+    {
+      "name": "skill-classifier",
+      "source": "./plugins/skill-classifier",
+      "description": "WIP: Gemini-powered skill classification hook",
+      "version": "0.1.0",
+      "category": "development",
+      "author": {
+        "name": "Coldaine"
+      },
+      "tags": ["hooks", "classification", "experimental"],
+      "status": "experimental"
+    }
+  ]
+}
