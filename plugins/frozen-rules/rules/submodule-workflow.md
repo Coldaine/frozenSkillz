@@ -20,7 +20,7 @@ This rule applies to any git submodule in the project. Submodules are separate r
 ## What You MUST NOT Do
 
 - **Edit, create, or delete files** inside the submodule directory
-- **Run `git add <submodule-path>`** or `git add .` from the repo root — this silently stages a submodule pointer change
+- **Accidentally stage submodule pointer changes** — avoid `git add <submodule-path>` or `git add .` from the repo root unless you are intentionally updating the pointer as described below
 - **Run `git checkout` inside the submodule** without understanding detached HEAD state
 
 ## How to Make Changes to Submodule Content

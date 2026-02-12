@@ -1,3 +1,4 @@
+---
 name: agent-config-megaref
 description: Definitive cross-harness reference for configuring agents (rules/instructions, prompts, skills, agents/subagents, hooks, tools/MCP, plugins/extensions, secrets, sandbox, verification). Use to answer "how do I configure X?" with exact file paths, precedence, schemas, and verification steps.
 version: 0.2.0
