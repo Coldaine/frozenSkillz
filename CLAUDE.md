@@ -1,124 +1,182 @@
-# frozenSkillz — LLM-Powered Skill Classifier Hook
+# frozenSkillz — Claude Code Plugin Marketplace
 
-## The Problem This Solves
+Universal skills, rules, and tools for cross-project agent workflows.
 
-Claude Code has a skill system — 14 skills covering debugging, planning, TDD, code review, etc. — but the model ignores them ~80% of the time. The superpowers project added a `SessionStart` hook that tells Claude "you must use skills" (the **policy** layer), but that only solves half the problem. Claude still doesn't know *which* skill applies to *this specific prompt* (the **discovery** layer).
+## What This Is
 
-This is why you can tell Claude "always use skills" and it'll still dive straight into debugging without invoking `systematic-debugging`, or start building a feature without `brainstorming` first.
+A **Claude Code plugin marketplace** containing three plugins:
 
-**frozenSkillz adds the discovery layer:** a `UserPromptSubmit` hook that reads the conversation, decides which skill is relevant *right now*, and injects a targeted "use THIS skill" directive before Claude sees the prompt.
+1. **frozen-skills** — Universal cross-project skills (agent config reference, MCP deployment guide)
+2. **frozen-rules** — Universal rule templates (Ansible, documentation, submodules)
+3. **skill-classifier** — WIP Gemini-powered skill discovery hook
 
-### Two-Layer Architecture
+## Installation
 
-| Layer | Hook | Project | What It Does |
-|-------|------|---------|-------------|
-| **Policy** | `SessionStart` | superpowers | "You must use skills" (general instruction) |
-| **Discovery** | `UserPromptSubmit` | frozenSkillz | "Use `systematic-debugging` NOW" (specific, contextual) |
-
-Policy without discovery = Claude knows it should use skills but doesn't know which one. Discovery without policy = Claude gets a suggestion but might ignore it. Together they close the loop.
-
-## Architecture
-
-```
-User hits Enter
-    ↓
-UserPromptSubmit fires → skill_classifier.py receives stdin JSON
-    ↓
-Parse payload → extract prompt + transcript_path
-    ↓
-Load skill catalog (disk-cached, 5-min TTL)
-    ↓
-Read last 10 messages from JSONL transcript
-    ↓
-Build classification prompt → call Gemini Flash 3 via CLI
-    ↓
-Parse JSON array response → validate against known skill names
-    ↓
-No match / error / timeout? → exit silently (zero output = no disruption)
-Match found? → output {"additionalContext": "<user-prompt-submit-hook>..."}
+### Add the marketplace:
+```bash
+/plugin marketplace add Coldaine/frozenSkillz
 ```
 
-## Design Decisions
+### Install individual plugins:
+```bash
+/plugin install frozen-skills@coldaine-skills
+/plugin install frozen-rules@coldaine-skills
+/plugin install skill-classifier@coldaine-skills  # Experimental
+```
 
-Full decision records with rationale, alternatives considered, and consequences live in `docs/decisions/`. Here's the index with the key takeaway from each:
-
-| ADR | Decision | Key Takeaway |
-|-----|----------|-------------|
-| [001](docs/decisions/001-llm-only-classification.md) | LLM-only classification, no keywords | Intent is ambiguous without context. Keywords rot. A wrong suggestion is worse than a slow one. |
-| [002](docs/decisions/002-gemini-flash-cli-mvp.md) | Gemini Flash 3 via CLI for MVP | Zero setup beats fast — validate the architecture first, optimize latency second. `classify()` is isolated for backend swaps. |
-| [003](docs/decisions/003-hook-output-format.md) | `additionalContext` with `<user-prompt-submit-hook>` tags | Documented pattern for UserPromptSubmit. Doesn't conflict with superpowers' system-level injection. Tags carry authority. |
-| [004](docs/decisions/004-silent-passthrough-failure-mode.md) | Silent passthrough on every failure | No suggestion is better than a wrong suggestion or a blocked prompt. The hook must never degrade the user experience. |
-| [005](docs/decisions/005-two-layer-skill-activation.md) | Two-layer architecture (Policy + Discovery) | Policy alone = Claude knows it should use skills but can't pick one. Discovery alone = Claude gets a suggestion but might ignore it. Both together close the loop. |
-| [006](docs/decisions/006-transcript-parsing-strategy.md) | JSONL parsing, 10 messages, 500 char truncation | Transcript is JSONL (not JSON). Skip `isMeta`. Handle content-block lists. 10 msgs × 500 chars ≈ 2,200 tokens total. |
-
-ADR-002 also documents the Windows subprocess gotchas (npm `.cmd` shims, long prompt escaping via temp files) discovered during implementation.
-
-## File Structure
+## Marketplace Structure
 
 ```
 frozenSkillz/
-├── CLAUDE.md                # This file — project docs and decision index
-├── skill_classifier.py      # The hook script (entry point)
-├── test_classifier.py       # Manual test harness (5 scenarios + latency batch)
-├── mock_input.json          # Test fixture: debugging scenario payload
-├── mock_transcript.jsonl    # Test fixture: 4-message auth conversation
-├── .gitignore               # Ignores .skills_cache.json and __pycache__
-├── .claude/
-│   └── settings.json        # Hook registration (project-scoped)
-└── docs/
-    └── decisions/           # Architecture Decision Records (ADRs)
-        ├── 001-llm-only-classification.md
-        ├── 002-gemini-flash-cli-mvp.md
-        ├── 003-hook-output-format.md
-        ├── 004-silent-passthrough-failure-mode.md
-        ├── 005-two-layer-skill-activation.md
-        └── 006-transcript-parsing-strategy.md
+├── .claude-plugin/
+│   └── marketplace.json       # Marketplace catalog
+├── plugins/
+│   ├── frozen-skills/         # Universal skills
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/
+│   │       ├── agent-config-megaref/SKILL.md
+│   │       ├── mcp-deployment-guide/SKILL.md
+│   │       └── plugin-authoring-guide/SKILL.md
+│   ├── frozen-rules/          # Universal rules
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── rules/             # Raw rule templates
+│   │   │   ├── ansible-playbooks.md
+│   │   │   ├── documentation-frontmatter.md
+│   │   │   └── submodule-workflow.md
+│   │   └── skills/
+│   │       └── setup-rules/SKILL.md
+│   └── skill-classifier/      # WIP discovery hook
+│       ├── .claude-plugin/plugin.json
+│       ├── hooks/hooks.json
+│       ├── scripts/skill_classifier.py
+│       ├── test_classifier.py
+│       ├── mock_input.json
+│       ├── mock_transcript.jsonl
+│       └── docs/decisions/    # 6 ADRs
+└── CLAUDE.md (this file)
 ```
 
-## How to Test
+## Plugin Descriptions
 
-### Quick smoke test
+### frozen-skills (reference)
+
+**Category**: reference  
+**Version**: 1.0.0  
+**Skills**:
+- `agent-config-megaref` — Definitive reference for configuring agents across Claude Code, Gemini CLI, VS Code, OpenCode, etc.
+- `mcp-deployment-guide` — MCP server deployment guide across all AI tools
+- `plugin-authoring-guide` — Complete reference for creating Claude Code plugins, skills, agents, hooks, and marketplaces
+
+**Use when**: Answering "how do I configure X?", "where do I deploy MCP servers?", or "how do I write a plugin?"
+
+### frozen-rules (standards)
+
+**Category**: standards  
+**Version**: 1.0.0  
+**Skills**:
+- `setup-rules` — Helps install and customize rule templates
+
+**Rule Templates**:
+- `ansible-playbooks.md` — Ansible playbook header format, secrets, manual execution
+- `documentation-frontmatter.md` — Documentation frontmatter requirements
+- `submodule-workflow.md` — Git submodule workflow rules
+
+**Use when**: Establishing project standards for Ansible, docs, or submodules
+
+**Note**: Rules must be copied to `.claude/rules/` in each project. The `setup-rules` skill guides you through this.
+
+### skill-classifier (development, experimental)
+
+**Category**: development  
+**Version**: 0.1.0  
+**Status**: WIP  
+
+**What it does**: UserPromptSubmit hook that calls Gemini Flash to classify user prompts and suggest relevant skills.
+
+**Architecture**: Two-layer skill activation:
+1. **Layer 1 (hook)**: Fast LLM classification (Gemini Flash) — "what category of task?"
+2. **Layer 2 (skills)**: Detailed guidance from loaded skills — "here's how to do it"
+
+**Requirements**:
+- Python >=3.9
+- `google-generativeai` package
+- `GEMINI_API_KEY` environment variable
+
+**ADRs**:
+- 001: LLM-only classification (no keyword matching)
+- 002: Gemini Flash CLI as MVP
+- 003: Hook output format (JSON with suggestions)
+- 004: Silent passthrough on failure
+- 005: Two-layer skill activation
+- 006: Transcript parsing strategy
+
+## Development
+
+This repo is on branch `feature/cross-project-skills-and-rules`.
+
+### Design Principles
+
+1. **Universal skills** — Work across Claude Code, Gemini CLI, VS Code, and other AI tools
+2. **Reference, not execution** — Skills explain *how to configure*, not *implement new harnesses*
+3. **Database of decisions** — ADRs document architecture choices for the classifier
+4. **Plugin-first** — All capability packaged as installable plugins, not monolithic repo
+
+### Why a Marketplace?
+
+Skills and rules need to:
+- **Be versioned** — Track what's deployed across projects
+- **Be discoverable** — Users install what they need, not everything
+- **Be portable** — Work in any Claude Code project
+- **Be maintainable** — Update once, deploy everywhere
+
+A marketplace solves all of these.
+
+## Usage Examples
+
+### Installing frozen-skills
+
 ```bash
-# Should output JSON with systematic-debugging suggestion
-python skill_classifier.py < mock_input.json
-
-# Should produce zero output (silent passthrough)
-echo '{"prompt":"hello","transcript_path":""}' | python skill_classifier.py
+/plugin marketplace add Coldaine/frozenSkillz
+/plugin install frozen-skills@coldaine-skills
 ```
 
-### Full test suite
+Then invoke skills:
+```
+/skill agent-config-megaref
+"How do I configure MCP servers in VS Code?"
+```
+
+### Installing frozen-rules
+
 ```bash
+/plugin install frozen-rules@coldaine-skills
+/skill setup-rules
+"Install the ansible-playbooks rule"
+```
+
+The agent will guide you through copying templates to `.claude/rules/`.
+
+### Testing skill-classifier (experimental)
+
+```bash
+/plugin install skill-classifier@coldaine-skills
+```
+
+Requires `GEMINI_API_KEY` set. Hook runs on every prompt, classifies it, and suggests skills.
+
+Test it:
+```bash
+cd plugins/skill-classifier
 python test_classifier.py
 ```
 
-Tests 5 scenarios: trivial message (silent), empty prompt (silent), debugging (should suggest), creative work (should suggest brainstorming), planning (should suggest writing-plans). Optional latency batch at the end.
+## Contributing
 
-### Live testing
+1. Skills go in `plugins/frozen-skills/skills/<name>/SKILL.md`
+2. Rules go in `plugins/frozen-rules/rules/<name>.md`
+3. Classifier improvements go in `plugins/skill-classifier/`
+4. Update plugin versions and marketplace.json when adding/changing plugins
 
-Open a Claude Code session in this directory. The hook auto-registers from `.claude/settings.json`. Every prompt you submit will go through the classifier.
+## License
 
-## Hook Registration
-
-### Project-scoped (current)
-Already in `.claude/settings.json`. Only active when Claude Code is launched from this directory.
-
-### Global deployment
-Copy the hook entry to `~/.claude/settings.json` (merging with existing hooks). The script uses absolute paths so it works from any working directory.
-
-## Relationship to Other Projects
-
-- **superpowers** (`C:/_projects/EVALUATION/superpowers/`) — The skill host. frozenSkillz reads skills *from* superpowers' `skills/` directory. superpowers' `SessionStart` hook provides the policy layer; frozenSkillz provides the discovery layer.
-- **intelligent_suggester.py** (`C:/_projects/EVALUATION/analysis/intelligent_suggester.py`) — The previous prototype. Used Gemini 2.0 Flash REST API directly. frozenSkillz inherits the caching pattern and prompt structure but improves transcript parsing (JSONL-aware), context window (10 msgs vs 5), and output format (user-prompt-submit-hook tags).
-
-## Phase 2 Roadmap
-
-- **Gemini REST API backend** — Drop CLI overhead from ~10s to ~300ms. The `classify()` function is already isolated for this swap.
-- **SubagentStart hook** — Inject suggestions into spawned subagents (Plan, Explore, etc.) which currently get 0% skill activation.
-- **Take over SessionStart** — Once discovery proves reliable, absorb the policy layer too, giving frozenSkillz full control of both layers.
-- **Response caching** — Cache LLM responses by conversation-state hash to avoid redundant calls.
-
-## Known Limitations
-
-- **Latency:** Gemini CLI has ~10s startup on Windows (Node.js bootstrap + credential loading). This makes the hook synchronous and blocking. The REST API backend (Phase 2) is the fix.
-- **Skill paths are hardcoded:** `SUPERPOWERS_SKILLS_DIR` points to `C:/_projects/EVALUATION/superpowers/skills`. If the superpowers project moves, this breaks. Could be made configurable via env var.
-- **No SubagentStart support yet:** Only fires on `UserPromptSubmit`. Subagents spawned by Claude don't get skill suggestions.
+MIT
