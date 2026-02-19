@@ -20,7 +20,7 @@ IS_WINDOWS = sys.platform == "win32"
 
 # --- Configuration ---
 
-SUPERPOWERS_SKILLS_DIR = Path("C:/_projects/EVALUATION/superpowers/skills")
+SUPERPOWERS_SKILLS_DIR = Path.home() / ".claude" / "plugins" / "cache" / "superpowers-marketplace" / "superpowers" / "4.1.0" / "skills"
 USER_SKILLS_DIR = Path.home() / ".claude" / "skills"
 CACHE_FILE = Path(__file__).parent / ".skills_cache.json"
 CACHE_TTL_SECONDS = 300  # 5 minutes

@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python C:/_projects/frozenSkillz/skill_classifier.py"
+            "command": "python C:/_projects/coldaine-infra/skills/frozen/skill_classifier.py"
           }
         ]
       }
