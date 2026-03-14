@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "frozen-skills",
   "description": "Universal cross-project skills for agent configuration and MCP deployment. Reference guides that work across Claude Code, Gemini CLI, VS Code, and other AI tools.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "category": "reference",
   "author": {
     "name": "Coldaine",
@@ -25,6 +25,11 @@
       "name": "plugin-authoring-guide",
       "path": "skills/plugin-authoring-guide",
       "description": "Complete reference for creating Claude Code plugins, skills, agents, hooks, and marketplaces"
+    },
+    {
+      "name": "gh-common-workflows",
+      "path": "skills/gh-common-workflows",
+      "description": "Opinionated GitHub CLI workflows for PR triage, review, merge, and close decisions"
     }
   ]
 }
