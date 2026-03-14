@@ -25,6 +25,11 @@
       "name": "plugin-authoring-guide",
       "path": "skills/plugin-authoring-guide",
       "description": "Complete reference for creating Claude Code plugins, skills, agents, hooks, and marketplaces"
+    },
+    {
+      "name": "gh-common-workflows",
+      "path": "skills/gh-common-workflows",
+      "description": "Opinionated GitHub CLI workflows for PR triage, review, merge, and close decisions"
     }
   ]
 }
