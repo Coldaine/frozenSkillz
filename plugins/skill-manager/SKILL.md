@@ -19,12 +19,12 @@ Manage your skill portfolio across all agent tools. Search for new skills, evalu
 
 | Command | Purpose | Script |
 |---------|---------|--------|
-| `/skill-manager search <query>` | Search skills.sh registry for skills matching query | `scripts/search-skills.ps1` |
-| `/skill-manager install <package>` | Install a skill from registry | `scripts/install-skill.ps1` |
-| `/skill-manager evaluate <skill-path>` | Score a skill against quality heuristics | Manual analysis |
-| `/skill-manager audit` | Review all installed skills for issues | `scripts/list-installed.ps1` |
-| `/skill-manager compare <skill1> <skill2>` | Compare two skills for overlap | Manual analysis |
-| `/skill-manager consolidate` | Identify merge opportunities | Manual analysis |
+| `/skill-manager search <query>` | Search skills.sh registry | `skills-cli.ps1 search` |
+| `/skill-manager install <package>` | Install a skill | `skills-cli.ps1 install` |
+| `/skill-manager list` | List installed skills | `skills-cli.ps1 list` |
+| `/skill-manager audit` | Review all skills for issues | `skills-audit.ps1` |
+| `/skill-manager evaluate <path>` | Score skill against heuristics | Manual analysis |
+| `/skill-manager compare <s1> <s2>` | Compare for overlap | Manual analysis |
 
 ## Workflow
 
@@ -39,13 +39,16 @@ Manage your skill portfolio across all agent tools. Search for new skills, evalu
 
 ```powershell
 # Search for skills
-scripts/search-skills.ps1 -Query "pr review" -Limit 5
+./scripts/skills-cli.ps1 search "pr review" -Limit 5
 
-# Install a skill
-scripts/install-skill.ps1 -Package "owner/repo@skill" -Yes
+# Install a skill  
+./scripts/skills-cli.ps1 install "owner/repo@skill" -Yes
 
 # List installed skills
-scripts/list-installed.ps1
+./scripts/skills-cli.ps1 list
+
+# Audit your skills
+./scripts/skills-audit.ps1
 ```
 
 See [instructions/search.md](instructions/search.md) for detailed search workflow.
@@ -85,4 +88,4 @@ Skills are discovered from:
 - `~/.agents/skills/` (Kimi CLI)
 - External registries (skills.sh, GitHub)
 
-Use `scripts/list-installed.ps1` to enumerate local skills.
+Use `skills-cli.ps1 list` or `skills-audit.ps1` to enumerate local skills.
