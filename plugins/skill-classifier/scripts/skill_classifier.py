@@ -20,8 +20,8 @@ IS_WINDOWS = sys.platform == "win32"
 
 # --- Configuration ---
 
-SUPERPOWERS_SKILLS_DIR = Path("C:/_projects/EVALUATION/superpowers/skills")
-USER_SKILLS_DIR = Path.home() / ".claude" / "skills"
+SUPERPOWERS_SKILLS_DIR = Path("/app/plugins/frozen-skills/skills")
+USER_SKILLS_DIR = Path("/app/plugins/skill-classifier/skills")
 CACHE_FILE = Path(__file__).parent / ".skills_cache.json"
 CACHE_TTL_SECONDS = 300  # 5 minutes
 LLM_TIMEOUT_SECONDS = 15  # Gemini CLI has ~8s startup on Windows; REST API would be ~1s
