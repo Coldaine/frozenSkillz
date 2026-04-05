@@ -5,7 +5,7 @@ description: >
   Covers config file locations, format differences, secrets management, and
   deployment patterns for Claude Code, VS Code, Gemini CLI, OpenCode,
   Kilo Code, Antigravity, and other MCP-compatible clients.
-version: 1.1.0
+version: 1.2.0
 tags:
   - mcp
   - deployment
@@ -70,10 +70,19 @@ Note: VS Code uses `${env:VAR}` not `${VAR}`.
 | **HTTP/SSE** | Remote or long-running | MCP on a Pi or VM |
 | **Docker** | Containerized | Docker MCP Toolkit |
 
+## Configuration Templates
+
+This repository provides ready-to-use MCP configuration templates in the `mcp/` directory:
+
+- **GitHub**: `mcp/github.json` — Standard configuration for `@modelcontextprotocol/server-github`.
+- **NotebookLM**: `mcp/notebooklm.json` — Placeholder configuration for NotebookLM.
+
+To use these templates, copy the content into your tool's configuration file (e.g., `.mcp.json` for Claude Code) and ensure the required environment variables are set.
+
 ## Adding a New MCP Server
 
 1. Set up the secret (add to store, sync to env vars)
-2. Configure in each tool using the formats above
+2. Configure in each tool using the formats above or use a template from `mcp/`
 3. Test connectivity in each configured tool
 
 ## Common Pitfalls

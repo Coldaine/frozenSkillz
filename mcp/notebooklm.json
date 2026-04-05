@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "notebooklm": {
+      "command": "echo",
+      "args": [
+        "NotebookLM MCP server is not yet public. See https://notebooklm.google.com/ for updates."
+      ],
+      "env": {
+        "NOTE": "This is a placeholder configuration for NotebookLM."
+      }
+    }
+  }
+}
