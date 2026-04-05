@@ -6,7 +6,7 @@ Universal skills, rules, and tools for cross-project agent workflows.
 
 A **Claude Code plugin marketplace** containing three plugins:
 
-1. **frozen-skills** — Universal cross-project skills (agent config reference, MCP deployment guide)
+1. **frozen-skills** — Universal cross-project skills (agent config reference, MCP deployment, workflow guides)
 2. **frozen-rules** — Universal rule templates (Ansible, documentation, submodules)
 3. **skill-classifier** — WIP Gemini-powered skill discovery hook
 
@@ -30,13 +30,17 @@ A **Claude Code plugin marketplace** containing three plugins:
 frozenSkillz/
 ├── .claude-plugin/
 │   └── marketplace.json       # Marketplace catalog
+├── docs/                      # General marketplace documentation
+│   └── README.md
 ├── plugins/
 │   ├── frozen-skills/         # Universal skills
 │   │   ├── .claude-plugin/plugin.json
 │   │   └── skills/
 │   │       ├── agent-config-megaref/SKILL.md
 │   │       ├── mcp-deployment-guide/SKILL.md
-│   │       └── plugin-authoring-guide/SKILL.md
+│   │       ├── plugin-authoring-guide/SKILL.md
+│   │       ├── gh-common-workflows/SKILL.md
+│   │       └── graphite-stacked-pr-workflow/SKILL.md
 │   ├── frozen-rules/          # Universal rules
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── rules/             # Raw rule templates
@@ -61,13 +65,15 @@ frozenSkillz/
 ### frozen-skills (reference)
 
 **Category**: reference  
-**Version**: 1.0.0  
+**Version**: 1.2.0
 **Skills**:
 - `agent-config-megaref` — Definitive reference for configuring agents across Claude Code, Gemini CLI, VS Code, OpenCode, etc.
 - `mcp-deployment-guide` — MCP server deployment guide across all AI tools
 - `plugin-authoring-guide` — Complete reference for creating Claude Code plugins, skills, agents, hooks, and marketplaces
+- `gh-common-workflows` — Opinionated GitHub CLI workflows for PR triage, review, merge, and close decisions
+- `graphite-stacked-pr-workflow` — Rules and workflows for managing stacked pull requests using the Graphite CLI
 
-**Use when**: Answering "how do I configure X?", "where do I deploy MCP servers?", or "how do I write a plugin?"
+**Use when**: Answering configuration questions, deploying MCP servers, writing plugins, or managing version control workflows with GitHub or Graphite.
 
 ### frozen-rules (standards)
 

@@ -10,7 +10,7 @@ import sys
 import time
 from pathlib import Path
 
-SCRIPT = Path(__file__).parent / "skill_classifier.py"
+SCRIPT = Path(__file__).parent / "scripts" / "skill_classifier.py"
 MOCK_INPUT = Path(__file__).parent / "mock_input.json"
 MOCK_TRANSCRIPT = Path(__file__).parent / "mock_transcript.jsonl"
 
@@ -127,6 +127,7 @@ def main():
     print("Using mock transcript:", MOCK_TRANSCRIPT)
 
     # Verify skills can be loaded
+    sys.path.append(str(Path(__file__).parent / "scripts"))
     from skill_classifier import get_skills
     skills = get_skills()
     print(f"\nLoaded {len(skills)} skills:")
