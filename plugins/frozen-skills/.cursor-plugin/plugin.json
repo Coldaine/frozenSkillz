@@ -1,0 +1,28 @@
+{
+  "name": "frozen-skills",
+  "description": "Universal cross-project skills for agent configuration and MCP deployment. Reference guides that work across Claude Code, Gemini CLI, VS Code, and other AI tools.",
+  "version": "1.1.0",
+  "author": {
+    "name": "Coldaine",
+    "url": "https://github.com/Coldaine"
+  },
+  "license": "MIT",
+  "skills": [
+    {
+      "name": "agent-config-megaref",
+      "path": "skills/agent-config-megaref"
+    },
+    {
+      "name": "mcp-deployment-guide",
+      "path": "skills/mcp-deployment-guide"
+    },
+    {
+      "name": "plugin-authoring-guide",
+      "path": "skills/plugin-authoring-guide"
+    },
+    {
+      "name": "gh-common-workflows",
+      "path": "skills/gh-common-workflows"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "frozen-rules",
+  "description": "Universal rule templates for Ansible playbooks, documentation frontmatter, and git submodule workflows. Includes setup skill to help install and customize rules in your project.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Coldaine",
+    "url": "https://github.com/Coldaine"
+  },
+  "license": "MIT",
+  "skills": [
+    {
+      "name": "setup-rules",
+      "path": "skills/setup-rules"
+    }
+  ]
+}
