@@ -1,16 +1,12 @@
 ---
 name: session-skill-inferencer
-description: >-
-  Analyze agentic coding sessions across Claude Code, Codex CLI, Cursor, Copilot, and other
-  tools to discover friction patterns and infer what skills, CLAUDE.md rules, hooks, and
-  workflows would most improve your AI-assisted development. Uses LLM analysis on session
-  transcripts to extract structured facets and generate actionable artifacts. Use when the
-  user wants to understand their agentic coding patterns, find recurring friction, generate
-  skills from session history, or optimize their AI assistant configuration. Use when you
-  need to run /insights or /reflect across multiple sessions or tools. Do NOT use for
-  analyzing a single session in isolation without cross-session context, or for non-agentic
-  coding tasks.
-allowed-tools: ["Read", "Glob", "Grep", "Bash", "Write", "Edit"]
+description: >
+  Analyze agentic coding sessions to discover friction patterns and generate skills, 
+  rules, and hooks. Use when running /insights across multiple sessions or optimizing 
+  AI assistant configuration. Do NOT use for single sessions or non-agentic tasks.
+license: MIT
+version: "1.0.0"
+tags: ["analysis", "skills", "session", "insights", "cross-tool"]
 ---
 
 # Session Skill Inferencer
@@ -30,19 +26,30 @@ Analyze agentic coding sessions across tools, extract structured facets via LLM 
 
 Discover session files at these locations:
 
-**Claude Code:** `~/.claude/projects/<encoded-path>/*.jsonl`
-**Codex CLI:** `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl`
-**Cursor:** `~/.cursor/projects/<project>/agent-transcripts/*.jsonl` (or SQLite at `state.vscdb`)
-**Copilot CLI:** `~/.copilot/session-state/*/events.jsonl`
-**VS Code Copilot:** workspaceStorage/<hash>/chatSessions/*.json
-**Gemini CLI:** `~/.gemini/tmp/*/chats/session-*.json`
-**Kiro CLI:** `~/.kiro/sessions/cli/*.jsonl`
+| Tool | Unix/macOS | Windows |
+|------|------------|---------|
+| **Claude Code** | `~/.claude/projects/<encoded-path>/*.jsonl` | `%USERPROFILE%\.claude\projects\<encoded-path>\*.jsonl` |
+| **Codex CLI** | `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` | `%USERPROFILE%\.codex\sessions\YYYY\MM\DD\rollout-*.jsonl` |
+| **Cursor** | `~/.cursor/projects/<project>/agent-transcripts/*.jsonl` | `%USERPROFILE%\.cursor\projects\<project>\agent-transcripts\*.jsonl` |
+| **Copilot CLI** | `~/.copilot/session-state/*/events.jsonl` | `%USERPROFILE%\.copilot\session-state\*\events.jsonl` |
+| **VS Code Copilot** | `workspaceStorage/<hash>/chatSessions/*.json` | Same (relative to workspace) |
+| **Gemini CLI** | `~/.gemini/tmp/*/chats/session-*.json` | `%USERPROFILE%\.gemini\tmp\*\chats\session-*.json` |
+| **Kiro CLI** | `~/.kiro/sessions/cli/*.jsonl` | `%USERPROFILE%\.kiro\sessions\cli\*.jsonl` |
 
+**Note:** Cursor also stores data in SQLite at `state.vscdb` (cross-platform).
+
+**Unix/macOS:**
 ```bash
-# Quick discovery
 find ~/.claude/projects -name "*.jsonl" -type f 2>/dev/null | wc -l
 find ~/.codex/sessions -name "*.jsonl" -type f 2>/dev/null | wc -l
 find ~/.cursor/projects -name "*.jsonl" -type f 2>/dev/null | wc -l
+```
+
+**Windows (PowerShell):**
+```powershell
+(Get-ChildItem -Path "$env:USERPROFILE\.claude\projects" -Filter "*.jsonl" -Recurse -ErrorAction SilentlyContinue).Count
+(Get-ChildItem -Path "$env:USERPROFILE\.codex\sessions" -Filter "*.jsonl" -Recurse -ErrorAction SilentlyContinue).Count
+(Get-ChildItem -Path "$env:USERPROFILE\.cursor\projects" -Filter "*.jsonl" -Recurse -ErrorAction SilentlyContinue).Count
 ```
 
 ## Session Parsing
@@ -96,11 +103,11 @@ For each friction cluster with 3+ occurrences, generate a SKILL.md using the pro
 ```yaml
 ---
 name: <kebab-case-name-matching-folder>
-description: >-
+description: >
   <Action verb> <what it does>.
   Use when <trigger conditions>.
   Do NOT use for <negative triggers>.
-allowed-tools: ["Read", "Glob", "Grep", "Bash", "Write", "Edit"]
+license: MIT
 ---
 ```
 
@@ -123,7 +130,7 @@ allowed-tools: ["Read", "Glob", "Grep", "Bash", "Write", "Edit"]
 ### Quality checklist for generated skills
 
 - [ ] Name is kebab-case and matches parent folder
-- [ ] Description has action verb + trigger phrases + negative triggers, under 1024 chars
+- [ ] Description has action verb + trigger phrases + negative triggers, under 300 chars
 - [ ] Body has numbered steps
 - [ ] Body has examples or code blocks
 - [ ] Includes "What Goes Wrong" section with real session examples
@@ -140,7 +147,9 @@ For friction patterns with 3+ occurrences, generate rules in imperative mood. Gr
 Map friction domains to hooks:
 
 - **CSS/Styling**: PreToolUse prompt — audit selectors before editing
-- **Testing**: PostToolUse command — run `npm test 2>&1 | tail -20`
+- **Testing**: PostToolUse command
+  - Unix: `npm test 2>&1 | tail -20`
+  - Windows: `npm test 2>&1 | Select-Object -Last 20`
 - **Debugging**: Stop prompt — verify root cause confirmed with evidence
 - **Scope/Boundary**: PreToolUse prompt — confirm scope boundaries before changes
 - **Imports**: PreToolUse prompt — verify against sibling conventions
@@ -151,6 +160,10 @@ Map friction domains to hooks:
 - **code-insights** (`npx code-insights`): Multi-tool parser (5 tools) + `reflect` command with real LLM analysis. The only tool that does cross-tool LLM-powered session analysis.
 - **agentsview** (`go install`): 22-tool session viewer with analytics dashboard. Pure stats, no LLM skill generation.
 - **Claude `/insights`**: Built-in Claude Code command. Haiku-powered multi-stage pipeline. Claude-only.
+
+## Related Tools
+
+This skill is conceptually related to **claude-insights** (npm package), which parses Claude Code `/insight` HTML reports into actionable improvements including CLAUDE.md rules, hook settings, MCP recommendations, and custom skills. While claude-insights is Claude-only and deterministic, this skill works across all agentic tools and uses LLM analysis for deeper pattern extraction.
 
 ## Troubleshooting
 
