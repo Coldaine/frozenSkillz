@@ -67,7 +67,8 @@ You are an expert skill developer. Implement a well-structured SKILL.md based on
 ### Frontmatter (YAML, between --- delimiters)
 - name: kebab-case, matching the folder name
 - description: Action verb + what it does + when to use + when NOT to use. Max 300 chars (modern best practice: 150-300 for optimal auto-invocation).
-- NO other fields in frontmatter (no metadata, no version, no allowed-tools — keep it minimal)
+- license: MIT (optional but recommended)
+- Avoid tool-specific fields like `allowed-tools` to keep skills portable across platforms
 
 ### Body (Markdown)
 - Start with a one-paragraph overview

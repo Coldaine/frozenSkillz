@@ -2,7 +2,7 @@
 name: session-skill-inferencer
 description: >
   Analyze agentic coding sessions to discover friction patterns and generate skills, 
-  rules, and hooks. Use when running /insights across multiple sessions or optimizing 
+  rules, and hooks. Use when running /insight across multiple sessions or optimizing 
   AI assistant configuration. Do NOT use for single sessions or non-agentic tasks.
 license: MIT
 version: "1.0.0"
@@ -35,10 +35,12 @@ Discover session files at these locations:
 | **VS Code Copilot** | `workspaceStorage/<hash>/chatSessions/*.json` | Same (relative to workspace) |
 | **Gemini CLI** | `~/.gemini/tmp/*/chats/session-*.json` | `%USERPROFILE%\.gemini\tmp\*\chats\session-*.json` |
 | **Kiro CLI** | `~/.kiro/sessions/cli/*.jsonl` | `%USERPROFILE%\.kiro\sessions\cli\*.jsonl` |
+| **OpenCode** | `~/.opencode/sessions/*.jsonl` | `%USERPROFILE%\.opencode\sessions\*.jsonl` |
 
 **Note:** Cursor also stores data in SQLite at `state.vscdb` (cross-platform).
 
 **Unix/macOS:**
+
 ```bash
 find ~/.claude/projects -name "*.jsonl" -type f 2>/dev/null | wc -l
 find ~/.codex/sessions -name "*.jsonl" -type f 2>/dev/null | wc -l
@@ -46,6 +48,7 @@ find ~/.cursor/projects -name "*.jsonl" -type f 2>/dev/null | wc -l
 ```
 
 **Windows (PowerShell):**
+
 ```powershell
 (Get-ChildItem -Path "$env:USERPROFILE\.claude\projects" -Filter "*.jsonl" -Recurse -ErrorAction SilentlyContinue).Count
 (Get-ChildItem -Path "$env:USERPROFILE\.codex\sessions" -Filter "*.jsonl" -Recurse -ErrorAction SilentlyContinue).Count
@@ -156,10 +159,10 @@ Map friction domains to hooks:
 
 ## Integration with Existing Tools
 
-- **claude-insights** (`npm install -g claude-insights`): Parses `/insights` HTML → generates deterministic skills from 7 domain templates. Claude-only, no LLM.
+- **claude-insights** (`npm install -g claude-insights`): Parses `/insight` HTML reports → generates deterministic skills from 7 domain templates. Claude-only, no LLM.
 - **code-insights** (`npx code-insights`): Multi-tool parser (5 tools) + `reflect` command with real LLM analysis. The only tool that does cross-tool LLM-powered session analysis.
 - **agentsview** (`go install`): 22-tool session viewer with analytics dashboard. Pure stats, no LLM skill generation.
-- **Claude `/insights`**: Built-in Claude Code command. Haiku-powered multi-stage pipeline. Claude-only.
+- **Claude `/insight`**: Built-in Claude Code command. Haiku-powered multi-stage pipeline. Claude-only.
 
 ## Related Tools
 

@@ -10,7 +10,8 @@ You are a senior staff engineer writing entries for a team's engineering knowled
 Your audience is a developer who has never seen this session but works on the same codebase. They need enough context to understand WHY a decision was made, WHAT specific gotcha was discovered, and WHEN this knowledge applies.
 
 Project: {projectName}
-{sessionSummary ? `Session Summary: {sessionSummary}\n` : ''}{formatSessionMetaLine(meta)}
+Session Summary: {sessionSummary}
+Session Meta: {sessionMetaLine}
 ```
 
 ## User Prompt — Session Facets + Insights
