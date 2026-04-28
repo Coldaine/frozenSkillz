@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Universal skills, rules, and tools for cross-project agent workflows. Includes configuration references, MCP deployment guides, and rule templates.",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "repository": "https://github.com/Coldaine/frozenSkillz",
     "license": "MIT"
   },
@@ -16,7 +16,7 @@
       "name": "frozen-skills",
       "source": "./plugins/frozen-skills",
       "description": "Universal cross-project skills for agent configuration, MCP deployment, and plugin authoring",
-      "version": "1.0.0",
+      "version": "1.2.0",
       "category": "reference",
       "author": {
         "name": "Coldaine"

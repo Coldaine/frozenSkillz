@@ -66,8 +66,10 @@ frozenSkillz/
 - `agent-config-megaref` — Definitive reference for configuring agents across Claude Code, Gemini CLI, VS Code, OpenCode, etc.
 - `mcp-deployment-guide` — MCP server deployment guide across all AI tools
 - `plugin-authoring-guide` — Complete reference for creating Claude Code plugins, skills, agents, hooks, and marketplaces
+- `gh-common-workflows` — Opinionated GitHub CLI workflows for PR triage, review, merge, and close decisions
+- `graphite-stacked-pr-workflow` — Graphite workflow for converging messy or clean work into reviewable stacked PRs
 
-**Use when**: Answering "how do I configure X?", "where do I deploy MCP servers?", or "how do I write a plugin?"
+**Use when**: Answering "how do I configure X?", "where do I deploy MCP servers?", "how do I write a plugin?", or "how do I get from a messy branch/PR state to a clean stacked PR workflow?"
 
 ### frozen-rules (standards)
 

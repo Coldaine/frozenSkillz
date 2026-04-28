@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "frozen-skills",
   "description": "Universal cross-project skills for agent configuration and MCP deployment. Reference guides that work across Claude Code, Gemini CLI, VS Code, and other AI tools.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "category": "reference",
   "author": {
     "name": "Coldaine",
@@ -30,6 +30,11 @@
       "name": "gh-common-workflows",
       "path": "skills/gh-common-workflows",
       "description": "Opinionated GitHub CLI workflows for PR triage, review, merge, and close decisions"
+    },
+    {
+      "name": "graphite-stacked-pr-workflow",
+      "path": "skills/graphite-stacked-pr-workflow",
+      "description": "Graphite workflow for creating, repairing, and maintaining stacked pull requests from clean or messy starting states"
     }
   ]
 }
