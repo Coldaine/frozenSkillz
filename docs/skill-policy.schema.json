@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coldaine.local/frozenSkillz/skill-policy.schema.json",
+  "title": "frozenSkillz skill policy",
+  "type": "object",
+  "required": [
+    "version",
+    "mode",
+    "clients",
+    "rules"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "mode": {
+      "type": "string",
+      "const": "dry-run"
+    },
+    "clients": {
+      "type": "object",
+      "properties": {
+        "gemini": {
+          "$ref": "#/$defs/clientPolicy"
+        },
+        "shared_agents": {
+          "$ref": "#/$defs/clientPolicy"
+        },
+        "claude": {
+          "$ref": "#/$defs/clientPolicy"
+        },
+        "codex": {
+          "$ref": "#/$defs/clientPolicy"
+        },
+        "opencode": {
+          "$ref": "#/$defs/clientPolicy"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/clientPolicy"
+      }
+    },
+    "rules": {
+      "type": "object",
+      "properties": {
+        "plugin_internals": {
+          "type": "string"
+        },
+        "live_mutation": {
+          "type": "string",
+          "const": "disabled"
+        },
+        "archive_location": {
+          "type": "string"
+        },
+        "report_location": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "clientPolicy": {
+      "type": "object",
+      "properties": {
+        "enabled_only": {
+          "$ref": "#/$defs/nameList"
+        },
+        "allowed": {
+          "$ref": "#/$defs/nameList"
+        },
+        "mode": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "nameList": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  }
+}

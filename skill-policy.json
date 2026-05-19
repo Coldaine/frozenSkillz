@@ -1,0 +1,38 @@
+{
+  "$schema": "./docs/skill-policy.schema.json",
+  "version": 1,
+  "mode": "dry-run",
+  "description": "Desired-state policy for skill inventory reports. This file is intentionally smaller than the generated inventory; it records only policy decisions.",
+  "clients": {
+    "gemini": {
+      "enabled_only": [
+        "skill-finder"
+      ],
+      "notes": "Gemini may discover .agents and .gemini skills, but only skill-finder should be enabled until the rest are reviewed."
+    },
+    "shared_agents": {
+      "allowed": [
+        "skill-finder"
+      ],
+      "notes": "The shared .agents root is treated as a review surface. Additional skills can exist there, but the dry-run report should flag them unless they are explicitly allowed."
+    },
+    "claude": {
+      "mode": "inventory-only",
+      "notes": "Claude personal skills are inventoried. OMC/plugin skills are external and should not be mirrored into personal skill folders."
+    },
+    "codex": {
+      "mode": "inventory-only",
+      "notes": "Codex system skills and plugin cache are external inventory. Stale configured skill paths should be reported."
+    },
+    "opencode": {
+      "mode": "reference-report-only",
+      "notes": "Do not manage Opencode agents in v1. Report only local SKILL files and stale skill-path references."
+    }
+  },
+  "rules": {
+    "plugin_internals": "inventory-only",
+    "live_mutation": "disabled",
+    "archive_location": "removed-needs-rework",
+    "report_location": "reports/latest-skill-state.md"
+  }
+}

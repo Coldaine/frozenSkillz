@@ -45,6 +45,17 @@
       },
       "tags": ["hooks", "classification", "experimental"],
       "status": "experimental"
+    },
+    {
+      "name": "skill-manager",
+      "source": "./plugins/skill-manager",
+      "description": "Dry-run skill portfolio inventory and reconciliation tooling",
+      "version": "0.2.0",
+      "category": "development",
+      "author": {
+        "name": "Coldaine"
+      },
+      "tags": ["skills", "inventory", "dry-run", "portfolio"]
     }
   ]
 }

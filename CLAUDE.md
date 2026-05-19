@@ -4,11 +4,13 @@ Universal skills, rules, and tools for cross-project agent workflows.
 
 ## What This Is
 
-A **Claude Code plugin marketplace** containing three plugins:
+A **Claude Code plugin marketplace** containing four plugins:
 
 1. **frozen-skills** — Universal cross-project skills (agent config reference, MCP deployment guide)
 2. **frozen-rules** — Universal rule templates (Ansible, documentation, submodules)
 3. **skill-classifier** — WIP Gemini-powered skill discovery hook
+
+4. **skill-manager** - Dry-run skill inventory, policy, and reconciliation reports
 
 ## Installation
 
@@ -22,6 +24,7 @@ A **Claude Code plugin marketplace** containing three plugins:
 /plugin install frozen-skills@coldaine-skills
 /plugin install frozen-rules@coldaine-skills
 /plugin install skill-classifier@coldaine-skills  # Experimental
+/plugin install skill-manager@coldaine-skills     # Dry-run skill state manager
 ```
 
 ## Marketplace Structure
@@ -112,9 +115,24 @@ frozenSkillz/
 - 005: Two-layer skill activation
 - 006: Transcript parsing strategy
 
+### skill-manager (development)
+
+**Category**: development
+**Version**: 0.2.0
+**Status**: Dry-run only
+
+**What it does**: Inventories live and archived skill roots across Claude, Codex, Gemini, OpenCode, shared `.agents`, plugin caches, and this repository, then compares that inventory to `skill-policy.json`.
+
+**Commands**:
+- `scripts/skills-state.ps1 inventory` - print discovered skill/config state
+- `scripts/skills-state.ps1 plan` - print proposed actions without mutating live folders
+- `scripts/skills-state.ps1 report` - write `skill-state.lock.json` and `reports/latest-skill-state.md`
+
+**Use when**: Deciding which skills should remain enabled, which duplicated skill copies need review, or whether stale config references exist before touching any live client folders.
+
 ## Development
 
-This repo is on branch `feature/cross-project-skills-and-rules`.
+This repo uses regular Git branches. Check `git status` for the current branch before committing.
 
 ### Design Principles
 
@@ -122,6 +140,8 @@ This repo is on branch `feature/cross-project-skills-and-rules`.
 2. **Reference, not execution** — Skills explain *how to configure*, not *implement new harnesses*
 3. **Database of decisions** — ADRs document architecture choices for the classifier
 4. **Plugin-first** — All capability packaged as installable plugins, not monolithic repo
+
+5. **Dry-run before mutation** - Skill portfolio changes are planned and reported before any live client root is edited
 
 ### Why a Marketplace?
 
@@ -172,12 +192,24 @@ cd plugins/skill-classifier
 python test_classifier.py
 ```
 
+### Testing skill-manager (dry-run)
+
+```bash
+cd plugins/skill-manager
+pwsh ./scripts/skills-state.ps1 inventory
+pwsh ./scripts/skills-state.ps1 plan
+pwsh ./scripts/skills-state.ps1 report
+```
+
+`report` writes `skill-state.lock.json` and `reports/latest-skill-state.md` at the repo root. The script reports proposed actions only; live client folders are not modified.
+
 ## Contributing
 
 1. Skills go in `plugins/frozen-skills/skills/<name>/SKILL.md`
 2. Rules go in `plugins/frozen-rules/rules/<name>.md`
 3. Classifier improvements go in `plugins/skill-classifier/`
-4. Update plugin versions and marketplace.json when adding/changing plugins
+4. Skill portfolio policy changes go in `skill-policy.json`
+5. Update plugin versions and marketplace.json when adding/changing plugins
 
 ## License
 

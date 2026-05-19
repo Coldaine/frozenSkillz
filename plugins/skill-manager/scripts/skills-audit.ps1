@@ -1,73 +1,91 @@
 #!/usr/bin/env pwsh
-# Audit installed skills - check structure, extract metadata, find issues
+# Audit installed skills - check structure, extract metadata, find issues.
 # Usage: skills-audit.ps1 [-SkillPath <path>] [-Detailed]
 
 param(
     [Parameter()]
     [string]$SkillPath = "",
-    
+
     [Parameter()]
     [switch]$Detailed
 )
 
-function Get-SkillMetadata($path) {
-    $skillMd = Join-Path $path "SKILL.md"
-    if (-not (Test-Path $skillMd)) { return $null }
-    
-    $content = Get-Content $skillMd -Raw
-    $meta = @{ Path = $path; Name = Split-Path $path -Leaf }
-    
-    if ($content -match '^---\s*\r?\n(.*?)\r?\n---') {
-        $fm = $matches[1]
-        if ($fm -match '^name:\s*(.+)') { $meta.Name = $matches[1].Trim() }
-        if ($fm -match '^description:\s*(.+)') { $meta.Description = $matches[1].Trim() }
-        $meta.DisableModelInvocation = $fm -match 'disable-model-invocation:\s*true'
+$ErrorActionPreference = "Stop"
+
+function Get-SkillMetadata {
+    param([string]$Path)
+
+    $skillMd = Join-Path $Path "SKILL.md"
+    if (-not (Test-Path -LiteralPath $skillMd)) { return $null }
+
+    $content = Get-Content -LiteralPath $skillMd -Raw
+    $meta = [ordered]@{
+        Path = $Path
+        Name = Split-Path $Path -Leaf
+        Description = ""
+        DisableModelInvocation = $false
     }
-    
-    # Check structure
-    $meta.HasInstructions = Test-Path (Join-Path $path "instructions")
-    $meta.HasScripts = Test-Path (Join-Path $path "scripts")
-    $meta.HasTemplates = Test-Path (Join-Path $path "templates")
-    $meta.IsMonolithic = ((Get-ChildItem $path -Recurse -File).Count -eq 1) -or ((Get-Content $skillMd).Count -gt 200)
-    
-    return $meta
+
+    if ($content -match '(?s)^---\s*\r?\n(.*?)\r?\n---') {
+        $frontmatter = $matches[1]
+        if ($frontmatter -match '(?m)^name:\s*(.+)$') { $meta.Name = $matches[1].Trim().Trim('"') }
+        if ($frontmatter -match '(?m)^description:\s*(.+)$') { $meta.Description = $matches[1].Trim().Trim('"') }
+        $meta.DisableModelInvocation = $frontmatter -match 'disable-model-invocation:\s*true'
+    }
+
+    $fileCount = @(Get-ChildItem -LiteralPath $Path -Recurse -Force -File -ErrorAction SilentlyContinue).Count
+    $lineCount = @(Get-Content -LiteralPath $skillMd -ErrorAction SilentlyContinue).Count
+    $meta.HasInstructions = Test-Path -LiteralPath (Join-Path $Path "instructions")
+    $meta.HasScripts = Test-Path -LiteralPath (Join-Path $Path "scripts")
+    $meta.HasTemplates = Test-Path -LiteralPath (Join-Path $Path "templates")
+    $meta.IsMonolithic = ($fileCount -eq 1) -or ($lineCount -gt 200)
+
+    return [pscustomobject]$meta
 }
 
-# Find all skills
-$agents = @(
-    @{ Name = "claude-code"; Path = "$env:USERPROFILE\.claude\skills" },
-    @{ Name = "codex"; Path = "$env:USERPROFILE\.codex\skills" },
-    @{ Name = "kimi"; Path = "$env:USERPROFILE\.agents\skills" }
-)
+if ($SkillPath) {
+    $agents = @(@{ Name = "custom"; Path = $SkillPath })
+} else {
+    $agents = @(
+        @{ Name = "claude-code"; Path = "$env:USERPROFILE\.claude\skills" },
+        @{ Name = "codex"; Path = "$env:USERPROFILE\.codex\skills" },
+        @{ Name = "shared-agents"; Path = "$env:USERPROFILE\.agents\skills" },
+        @{ Name = "gemini"; Path = "$env:USERPROFILE\.gemini\skills" }
+    )
+}
 
 $skills = @()
-foreach ($a in $agents) {
-    if (-not (Test-Path $a.Path)) { continue }
-    Get-ChildItem -Path $a.Path -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+foreach ($agent in $agents) {
+    if (-not (Test-Path -LiteralPath $agent.Path)) { continue }
+    Get-ChildItem -LiteralPath $agent.Path -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object {
         $meta = Get-SkillMetadata $_.FullName
         if ($meta) {
-            $meta.Agent = $a.Name
+            $meta | Add-Member -NotePropertyName Agent -NotePropertyValue $agent.Name -Force
             $skills += $meta
         }
     }
 }
 
-# Summary
 Write-Host "`n=== Skill Audit Summary ===" -ForegroundColor Cyan
 Write-Host "Total skills: $($skills.Count)" -ForegroundColor White
 $skills | Group-Object Agent | ForEach-Object { Write-Host "  $($_.Name): $($_.Count)" }
 
-# Issues
 Write-Host "`n=== Potential Issues ===" -ForegroundColor Yellow
 $issues = @()
-foreach ($s in $skills) {
-    if ($s.IsMonolithic) { $issues += "$($s.Name): Monolithic (no progressive disclosure)" }
-    if (-not $s.HasScripts) { $issues += "$($s.Name): No scripts folder" }
-    if (-not $s.Description) { $issues += "$($s.Name): No description in frontmatter" }
+foreach ($skill in $skills) {
+    if ($skill.IsMonolithic) { $issues += "$($skill.Name): Monolithic or single-file skill" }
+    if (-not $skill.HasScripts) { $issues += "$($skill.Name): No scripts folder" }
+    if (-not $skill.Description) { $issues += "$($skill.Name): No description in frontmatter" }
 }
-if ($issues) { $issues | ForEach-Object { Write-Host "  ⚠ $_" -ForegroundColor DarkYellow } }
-else { Write-Host "  ✓ No major issues found" -ForegroundColor Green }
 
-# Output table
+if ($issues) {
+    $issues | ForEach-Object { Write-Host "  WARN $_" -ForegroundColor DarkYellow }
+} else {
+    Write-Host "  OK No major issues found" -ForegroundColor Green
+}
+
 Write-Host "`n=== Installed Skills ===" -ForegroundColor Cyan
-$skills | Select-Object Agent, Name, @{N="HasScripts";E={$_.HasScripts}}, @{N="HasTemplates";E={$_.HasTemplates}}, @{N="Monolithic";E={$_.IsMonolithic}} | Format-Table -AutoSize
+$skills |
+    Select-Object Agent, Name, HasScripts, HasTemplates, IsMonolithic |
+    Sort-Object Agent, Name |
+    Format-Table -AutoSize

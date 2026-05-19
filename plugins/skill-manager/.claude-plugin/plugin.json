@@ -1,0 +1,37 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "skill-manager",
+  "description": "Dry-run skill portfolio inventory and reconciliation tooling for Claude, Codex, Gemini, Opencode, shared .agents roots, and frozenSkillz archives.",
+  "version": "0.2.0",
+  "category": "development",
+  "author": {
+    "name": "Coldaine",
+    "url": "https://github.com/Coldaine"
+  },
+  "license": "MIT",
+  "tags": ["skills", "inventory", "dry-run", "portfolio", "configuration"],
+  "skills": [
+    {
+      "name": "skill-manager",
+      "path": ".",
+      "description": "Manage and audit multi-client skill state without mutating live runtime folders"
+    }
+  ],
+  "scripts": [
+    {
+      "name": "skills_state",
+      "path": "scripts/skills-state.ps1",
+      "description": "Dry-run inventory, plan, and report generator"
+    },
+    {
+      "name": "skills_audit",
+      "path": "scripts/skills-audit.ps1",
+      "description": "Installed skill structure audit"
+    },
+    {
+      "name": "skills_cli",
+      "path": "scripts/skills-cli.ps1",
+      "description": "Search, install, list, and info helper"
+    }
+  ]
+}
