@@ -8,6 +8,7 @@ These folders are intentionally not placed under the active `plugins/frozen-skil
 
 - `morph-skills/`: Morph-authored skills removed from active `.agents`, `.claude`, and `.codex` skill roots because they referenced Morph-specific tools (`edit_file`, `codebase_search`, `github_codebase_search`) that were not confirmed as available in the current client toolkit.
 - `pr-review-canvas/`: tombstone for a broken skill reference. Claude and Codex referenced it, but no live source directory was present at cleanup time.
+- `claude-local-skills-removed/`: Claude-local skill entries removed from `~/.claude/skills` to reduce active skill clutter. Shared `.agents/skills` copies were left in place unless explicitly removed elsewhere.
 
 ## Rework Rule
 
