@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PR #{{NUMBER}}: {{TITLE}}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root {
+  --bg: #0f0f23;
+  --surface: #1a1a2e;
+  --card: #16213e;
+  --border: #252540;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  
+  --risk-low: #4ade80;
+  --risk-medium: #fbbf24;
+  --risk-high: #fb923c;
+  --risk-critical: #ef4444;
+  
+  --type-feature: #3b82f6;
+  --type-bugfix: #22c55e;
+  --type-refactor: #a855f7;
+  --type-security: #dc2626;
+  --type-deps: #f59e0b;
+  --type-docs: #64748b;
+  --type-tests: #14b8a6;
+  --type-ci: #6366f1;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 24px;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.header-meta {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* View Switcher */
+.view-switcher {
+  display: flex;
+  gap: 4px;
+  padding: 12px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.view-switcher button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.view-switcher button:hover {
+  background: var(--card);
+  color: var(--text-primary);
+}
+
+.view-switcher button.active {
+  background: var(--accent);
+  color: white;
+}
+
+.view-switcher .icon {
+  font-size: 16px;
+}
+
+/* Views */
+.view-container {
+  padding: 24px;
+}
+
+.view {
+  display: none;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.view.active {
+  display: block;
+}
+
+/* Summary View */
+.summary-view {
+  text-align: center;
+}
+
+.summary-svg {
+  display: inline-block;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+/* Mermaid Diagrams */
+.mermaid-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 20px 0;
+}
+
+.mermaid {
+  display: flex;
+  justify-content: center;
+}
+
+/* Changes View */
+.changes-view .section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 28px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.changes-view .section-title:first-child {
+  margin-top: 0;
+}
+
+/* File Cards */
+.file-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.file-card.core {
+  border-left: 3px solid var(--accent);
+}
+
+.file-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--card);
+  cursor: pointer;
+}
+
+.file-header:hover {
+  background: #1e2a4a;
+}
+
+.filename {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--accent);
+  flex: 1;
+}
+
+.stats {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.badge.large { background: rgba(251, 146, 60, 0.2); color: var(--risk-high); }
+.badge.security { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+.badge.warning { background: rgba(251, 191, 36, 0.2); color: var(--risk-medium); }
+
+.annotation {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: rgba(59, 130, 246, 0.05);
+  border-bottom: 1px solid var(--border);
+}
+
+.annotation strong {
+  color: var(--text-primary);
+}
+
+/* Diff Container */
+.diff-container {
+  padding: 0;
+}
+
+.diff-container:empty {
+  display: none;
+}
+
+/* Boilerplate Section */
+.bp-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.bp-header {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bp-header:hover {
+  background: var(--card);
+}
+
+.bp-header::after {
+  content: '▶';
+  font-size: 10px;
+  transition: transform 0.15s;
+}
+
+.bp-header.open::after {
+  transform: rotate(90deg);
+}
+
+.bp-body {
+  display: none;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.bp-body.open {
+  display: block;
+}
+
+.bp-body ul {
+  list-style: none;
+  padding: 0;
+}
+
+.bp-body li {
+  padding: 4px 0;
+  color: var(--text-secondary);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+}
+
+/* Checklist */
+.checklist {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 28px;
+}
+
+.checklist h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.checklist ul {
+  list-style: none;
+}
+
+.checklist li {
+  padding: 8px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checklist input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .view-switcher {
+    padding: 8px 16px;
+  }
+  
+  .view-switcher button {
+    padding: 8px 12px;
+  }
+  
+  .view-switcher .label {
+    display: none;
+  }
+  
+  .view-container {
+    padding: 16px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-content">
+    <h1>{{TITLE}}</h1>
+    <div class="header-meta">
+      PR #{{NUMBER}} by @{{AUTHOR}} • Review Dashboard
+    </div>
+  </div>
+</div>
+
+<nav class="view-switcher">
+  <button onclick="showView('summary')" class="active" data-view="summary">
+    <span class="icon">📊</span>
+    <span class="label">Summary</span>
+  </button>
+  <button onclick="showView('architecture')" data-view="architecture">
+    <span class="icon">🏗️</span>
+    <span class="label">Architecture</span>
+  </button>
+  <button onclick="showView('flow')" data-view="flow">
+    <span class="icon">🌊</span>
+    <span class="label">Flow</span>
+  </button>
+  <button onclick="showView('changes')" data-view="changes">
+    <span class="icon">📝</span>
+    <span class="label">Changes</span>
+  </button>
+</nav>
+
+<div class="view-container">
+  <!-- Summary View -->
+  <div id="summary-view" class="view active summary-view">
+    <div class="summary-svg">
+      {{SUMMARY_SVG}}
+    </div>
+  </div>
+  
+  <!-- Architecture View -->
+  <div id="architecture-view" class="view">
+    <div class="mermaid-container">
+      <div class="mermaid">
+{{ARCHITECTURE_DIAGRAM}}
+      </div>
+    </div>
+  </div>
+  
+  <!-- Flow View -->
+  <div id="flow-view" class="view">
+    <div class="mermaid-container">
+      <div class="mermaid">
+{{FLOW_DIAGRAM}}
+      </div>
+    </div>
+  </div>
+  
+  <!-- Changes View -->
+  <div id="changes-view" class="view changes-view">
+    {{CHANGES_HTML}}
+  </div>
+</div>
+
+<!-- Patches data for diff rendering -->
+<script id="pr-patches" type="application/json">{{PATCHES_JSON}}</script>
+
+<script>
+// View switching
+function showView(viewName) {
+  // Hide all views
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.view-switcher button').forEach(b => b.classList.remove('active'));
+  
+  // Show selected view
+  document.getElementById(viewName + '-view').classList.add('active');
+  event.target.closest('button').classList.add('active');
+  
+  // Re-render mermaid diagrams if needed
+  if (viewName === 'architecture' || viewName === 'flow') {
+    mermaid.init(undefined, '.mermaid');
+  }
+}
+
+// Toggle boilerplate sections
+function toggle(header) {
+  const body = header.nextElementSibling;
+  header.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+// Initialize mermaid
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'dark',
+  themeVariables: {
+    primaryColor: '#1e2a4a',
+    primaryTextColor: '#e2e8f0',
+    primaryBorderColor: '#3b82f6',
+    lineColor: '#64748b',
+    secondaryColor: '#16213e',
+    tertiaryColor: '#0f0f23'
+  }
+});
+
+// Initialize first mermaid render
+document.addEventListener('DOMContentLoaded', function() {
+  // Summary view is active by default
+});
+</script>
+
+</body>
+</html>
