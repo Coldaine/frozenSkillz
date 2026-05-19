@@ -45,3 +45,5 @@ Before reactivation, inspect:
 - whether the skill duplicates plugin-provided skills;
 - whether the instructions are still accurate;
 - whether the skill belongs in a global shared root, a client-local root, or a project-local root.
+
+Note: `gemini-extractor` and `omc-reference` were empty directories at archive time. They are represented with `EMPTY-DIRECTORY.md` placeholders so the snapshot preserves the full directory inventory.
