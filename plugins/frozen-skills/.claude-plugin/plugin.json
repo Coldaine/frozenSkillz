@@ -40,6 +40,11 @@
       "name": "stacked-pr-workflow",
       "path": "skills/stacked-pr-workflow",
       "description": "Convert messy branch or PR state into reviewable stacked pull requests with git, gh, and optional Graphite compatibility"
+    },
+    {
+      "name": "doppler",
+      "path": "skills/doppler",
+      "description": "Doppler secrets management platform. Use when installing or configuring the Doppler CLI, setting up doppler.yaml, running commands with doppler run, adding CI service tokens, debugging secret injection without exposing values, using fallback files, mounting secrets, or managing dev/staging/production configs."
     }
   ]
 }
