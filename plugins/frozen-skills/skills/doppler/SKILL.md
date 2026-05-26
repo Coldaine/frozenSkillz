@@ -1,18 +1,13 @@
 ---
 name: doppler
-description: >-
-  Use when any task touches secrets, credentials, API keys, tokens, .env files,
-  environment variables, CI secrets, service tokens, private keys, auth headers,
-  cookies, signed URLs, Doppler CLI/config, or secret injection debugging.
-  CRITICAL: load before reading, printing, moving, storing, committing, or
-  running commands that depend on secrets.
+description: "CRITICAL: You must load this skill before working with secrets, tokens, API keys, .env files, CI credentials, or Doppler secret injection."
 ---
 
 # Doppler
 
 ## Critical Trigger
 
-Use this skill before any action involving secrets: API keys, tokens, passwords, private keys, `.env` files, service tokens, OAuth credentials, webhook secrets, cloud credentials, signed URLs, cookies, auth headers, or environment variables that may carry credentials.
+You must load this skill before any action involving secrets: API keys, tokens, passwords, private keys, `.env` files, service tokens, OAuth credentials, webhook secrets, cloud credentials, signed URLs, cookies, auth headers, or environment variables that may carry credentials.
 
 If unsure whether a value is a secret, treat it as a secret. Keep secret values out of chat, logs, diffs, committed files, and durable docs.
 
