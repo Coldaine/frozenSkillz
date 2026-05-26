@@ -1,4 +1,4 @@
 interface:
   display_name: "Doppler"
-  short_description: "Use Doppler CLI secrets safely across local, CI, and production runs"
-  default_prompt: "Use $doppler to set up or debug Doppler secret injection without exposing secret values."
+  short_description: "Critical workflow for any secrets, tokens, API keys, and Doppler secret injection"
+  default_prompt: "Use $doppler before handling any secrets, tokens, API keys, .env files, CI secrets, or Doppler secret injection."

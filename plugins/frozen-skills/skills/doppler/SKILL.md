@@ -1,20 +1,35 @@
 ---
 name: doppler
-description: Doppler secrets management platform. Use when installing or configuring the Doppler CLI, setting up doppler.yaml, running commands with doppler run, adding CI service tokens, debugging secret injection without exposing values, using fallback files, mounting secrets, or managing dev/staging/production configs.
+description: >-
+  Use when any task touches secrets, credentials, API keys, tokens, .env files,
+  environment variables, CI secrets, service tokens, private keys, auth headers,
+  cookies, signed URLs, Doppler CLI/config, or secret injection debugging.
+  CRITICAL: load before reading, printing, moving, storing, committing, or
+  running commands that depend on secrets.
 ---
 
 # Doppler
+
+## Critical Trigger
+
+Use this skill before any action involving secrets: API keys, tokens, passwords, private keys, `.env` files, service tokens, OAuth credentials, webhook secrets, cloud credentials, signed URLs, cookies, auth headers, or environment variables that may carry credentials.
+
+If unsure whether a value is a secret, treat it as a secret. Keep secret values out of chat, logs, diffs, committed files, and durable docs.
 
 Use Doppler as a secrets injection layer. Prefer CLI-driven environment injection (`doppler run -- ...`) over in-process SDK calls, vault enumeration, or committed secret files.
 
 ## Operating Rules
 
 - Do not print secret values into transcripts unless the user explicitly asks for the value.
+- Prefer storing application and workstation secrets in Doppler. CI and production systems should store only the scoped `DOPPLER_TOKEN` or platform-required bootstrap credential.
+- Document secret names, projects/configs, and injection commands; do not document secret values or one-off local token state.
 - Prefer names-only or boolean checks: `doppler secrets --only-names`, `test -n "$VAR"`, or PowerShell `if ($env:VAR)`.
 - Do not commit `.env`, downloaded secret exports, service tokens, fallback files, or rendered config files containing credentials.
 - Use service tokens only in CI/production secret stores, never in repo files.
 - Treat `doppler.yaml` as safe repo configuration: it names project/config only.
 - Use `doppler run -- ...` for normal application execution. Application code should read ordinary environment variables.
+- Use `doppler run --mount ...` when an application must read a secret file; prefer environment injection for normal command execution.
+- Avoid `--preserve-env` for secrets unless there is a deliberate reason to let pre-existing shell values override Doppler.
 - Use `--silent` for destructive secret-management commands where possible; some CLI versions print a secrets table after mutation.
 - For current command syntax, verify with `doppler --version` and `doppler <command> --help` before changing scripts or docs.
 
