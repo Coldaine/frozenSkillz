@@ -1,46 +1,83 @@
-# frozenSkillz — Claude Code Plugin Marketplace
+# frozenSkillz
 
-Universal skills, rules, and tools for cross-project agent workflows, distributed as a Claude Code plugin marketplace.
+Cross-platform agent skills, rules, and plugin metadata for reusable agent workflows.
+
+This repository is maintained as a plugin marketplace and source/registry boundary for shared skills. It is not intended to be a junk drawer for every local client cache or experimental skill copy.
 
 ## Plugins
 
-| Plugin | Category | Status | Description |
-|--------|----------|--------|-------------|
-| **frozen-skills** | reference | ✅ Active | Universal cross-project skills (agent config reference, MCP deployment guide, plugin authoring guide) |
-| **frozen-rules** | standards | ✅ Active | Universal rule templates (Ansible, documentation, submodules) with setup skill |
-| **skill-classifier** | development | 🚧 Experimental | Gemini-powered skill discovery hook — classifies user prompts and suggests relevant skills |
+| Plugin | Category | Status | Purpose |
+| --- | --- | --- | --- |
+| `frozen-skills` | reference | active | Shared skills for agent configuration, MCP deployment, plugin authoring, GitHub PR work, stacked PR workflows, session-skill inference, and Doppler secret handling. |
+| `frozen-rules` | standards | active | Rule templates for Ansible, documentation frontmatter, and submodule workflows, plus the `setup-rules` helper skill. |
+| `skill-classifier` | development | experimental | UserPromptSubmit hook and skill docs for LLM-assisted skill suggestions. |
+| `skill-manager` | development | dry-run | Skill inventory, policy, and reconciliation reporting across local agent client roots. |
 
-## Installation
+## Install
+
+Claude Code marketplace:
 
 ```bash
-# Add the marketplace
 /plugin marketplace add Coldaine/frozenSkillz
-
-# Install individual plugins
 /plugin install frozen-skills@coldaine-skills
 /plugin install frozen-rules@coldaine-skills
-/plugin install skill-classifier@coldaine-skills  # Experimental
+/plugin install skill-classifier@coldaine-skills
+/plugin install skill-manager@coldaine-skills
 ```
 
-## Skills Included
+Cross-platform manifests are also present for Codex, Cursor, and Gemini-compatible consumers where supported by those clients.
 
-### frozen-skills
-- `agent-config-megaref` — Definitive reference for configuring agents across Claude Code, Gemini CLI, VS Code, OpenCode, etc.
-- `mcp-deployment-guide` — MCP server deployment guide across all AI tools
-- `plugin-authoring-guide` — Complete reference for creating Claude Code plugins, skills, agents, hooks, and marketplaces
+## Key Skills
 
-### frozen-rules
-- `setup-rules` — Install and customize rule templates into `.claude/rules/`
-- Rule templates: `ansible-playbooks.md`, `documentation-frontmatter.md`, `submodule-workflow.md`
+`frozen-skills` currently registers:
 
-### skill-classifier (experimental)
-- Two-layer skill activation: fast LLM classification (Gemini Flash) + detailed guidance from loaded skills
-- Requires `GEMINI_API_KEY` environment variable
-- See `plugins/skill-classifier/docs/decisions/` for 6 ADRs documenting architecture
+- `agent-config-megaref`: reference for configuring agent clients and harnesses
+- `mcp-deployment-guide`: MCP server deployment guidance across AI tools
+- `plugin-authoring-guide`: plugin, skill, agent, hook, and marketplace authoring guidance
+- `gh-common-workflows`: GitHub CLI workflows for PR triage, review, merge, and close decisions
+- `session-skill-inferencer`: analyze coding sessions and generate reusable skills, rules, or hooks
+- `stacked-pr-workflow`: convert messy branch or PR state into reviewable stacked PRs using `git`, `gh`, and optional Graphite compatibility
+- `doppler`: Doppler CLI and secret-injection workflow guidance that avoids exposing secret values
 
-## Design Principles
+## Repository Layout
 
-- **Universal skills** — Work across Claude Code, Gemini CLI, VS Code, and other AI tools
-- **Reference, not execution** — Skills explain *how to configure*, not *implement new harnesses*
-- **Plugin-first** — All capability packaged as installable plugins, not monolithic repo
-- **Versioned and discoverable** — Marketplace enables versioning, selective install, and portability
+```text
+.claude-plugin/                  Marketplace catalog
+.codex-plugin/                   Codex-facing marketplace metadata
+.cursor-plugin/                  Cursor-facing marketplace metadata
+gemini-marketplace.json          Gemini-facing marketplace metadata
+plugins/
+  frozen-skills/                 Shared reusable skills
+  frozen-rules/                  Rule templates and setup helper
+  skill-classifier/              Experimental skill-classifier hook
+  skill-manager/                 Dry-run skill state manager
+docs/
+  stacked-pr-workflow/           Design notes and helper-script docs
+  experimentation/               Experimental or exploratory notes, if present
+removed-needs-rework/            Quarantined material that is not active publication content
+```
+
+## Validation
+
+This repo does not use a single package manager. Validate the touched surface directly:
+
+```powershell
+# JSON manifests
+Get-Content .claude-plugin/marketplace.json -Raw | ConvertFrom-Json | Out-Null
+Get-Content plugins/frozen-skills/.claude-plugin/plugin.json -Raw | ConvertFrom-Json | Out-Null
+
+# Skill-manager dry-run checks
+powershell -NoProfile -File plugins\skill-manager\scripts\skills-state.ps1 inventory
+powershell -NoProfile -File plugins\skill-manager\scripts\skills-state.ps1 plan
+powershell -NoProfile -File plugins\skill-manager\scripts\skills-audit.ps1
+```
+
+For skill additions, verify every manifest `skills[].path` exists under the plugin directory and run `git diff --check` before publishing or merging.
+
+## Contribution Rules
+
+- Add shared skills under `plugins/frozen-skills/skills/<name>/SKILL.md`.
+- Add rule templates under `plugins/frozen-rules/rules/<name>.md`.
+- Keep plugin manifests and marketplace versions aligned when adding public skills.
+- Keep archived or questionable imports under `removed-needs-rework/` until reviewed.
+- Do not commit secret values, client runtime caches, or local installed-skill copies.
