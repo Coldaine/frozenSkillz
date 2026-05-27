@@ -113,17 +113,20 @@ When asked "how do I configure ___":
 - Rules: rules/ directory
 - Skills: SKILL.md + scripts/assets/references
 - Config: config.toml
+- Plugins: .codex-plugin/plugin.json
 
-## VS Code + GitHub Copilot
+## VS Code + GitHub Copilot (and Cursor)
 - Instructions: .github/copilot-instructions.md, AGENTS.md
 - Agents: .github/agents/*.agent.md
 - MCP: .vscode/mcp.json (project), %APPDATA%/Code/User/mcp.json (global)
+- Plugins: .cursor-plugin/plugin.json (Cursor)
 
 ## Gemini CLI
 - User settings: ~/.gemini/settings.json
 - Project: .gemini/settings.json
 - Instructions: GEMINI.md
 - Extensions: ~/.gemini/extensions/
+- Plugins: gemini-extension.json
 
 ## OpenCode
 - Config: ~/.config/opencode/, opencode.json (project)

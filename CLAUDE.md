@@ -1,14 +1,15 @@
-# frozenSkillz — Claude Code Plugin Marketplace
+# frozenSkillz — Cross-Platform Agent Plugin Marketplace
 
-Universal skills, rules, and tools for cross-project agent workflows.
+Universal skills, rules, and tools for cross-project agent workflows. Works across Claude Code, Codex, Cursor, and Gemini.
 
 ## What This Is
 
-A **Claude Code plugin marketplace** containing three plugins:
+A **cross-platform plugin marketplace** containing four plugins:
 
 1. **frozen-skills** — Universal cross-project skills (agent config reference, MCP deployment guide)
 2. **frozen-rules** — Universal rule templates (Ansible, documentation, submodules)
 3. **skill-classifier** — WIP Gemini-powered skill discovery hook
+4. **skill-manager** — Skill portfolio management and auditing tool
 
 ## Installation
 
@@ -30,9 +31,15 @@ A **Claude Code plugin marketplace** containing three plugins:
 frozenSkillz/
 ├── .claude-plugin/
 │   └── marketplace.json       # Marketplace catalog
+├── .codex-plugin/             # Codex manifests
+├── .cursor-plugin/            # Cursor manifests
+├── gemini-extension.json      # Gemini manifests
 ├── plugins/
 │   ├── frozen-skills/         # Universal skills
 │   │   ├── .claude-plugin/plugin.json
+│   │   ├── .codex-plugin/plugin.json
+│   │   ├── .cursor-plugin/plugin.json
+│   │   ├── gemini-extension.json
 │   │   └── skills/
 │   │       ├── agent-config-megaref/SKILL.md
 │   │       ├── mcp-deployment-guide/SKILL.md

@@ -1,5 +1,4 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "coldaine-skills",
   "owner": {
     "name": "Coldaine",
@@ -17,22 +16,14 @@
       "source": "./plugins/frozen-skills",
       "description": "Universal cross-project skills for agent configuration, MCP deployment, and plugin authoring",
       "version": "1.0.0",
-      "category": "reference",
-      "author": {
-        "name": "Coldaine"
-      },
-      "tags": ["configuration", "mcp", "reference", "multi-tool"]
+      "category": "reference"
     },
     {
       "name": "frozen-rules",
       "source": "./plugins/frozen-rules",
       "description": "Universal rule templates for Ansible, documentation, and git submodules",
       "version": "1.0.0",
-      "category": "standards",
-      "author": {
-        "name": "Coldaine"
-      },
-      "tags": ["rules", "standards", "templates"]
+      "category": "standards"
     },
     {
       "name": "skill-classifier",
@@ -40,10 +31,6 @@
       "description": "WIP: Gemini-powered skill classification hook",
       "version": "0.1.0",
       "category": "development",
-      "author": {
-        "name": "Coldaine"
-      },
-      "tags": ["hooks", "classification", "experimental"],
       "status": "experimental"
     },
     {
@@ -51,10 +38,7 @@
       "source": "./plugins/skill-manager",
       "description": "Manage your skill portfolio - search, evaluate, compare, audit, and consolidate skills across Claude Code, Codex, and Kimi CLI.",
       "version": "1.0.0",
-      "category": "development",
-      "author": {
-        "name": "Coldaine"
-      }
+      "category": "development"
     }
   ]
 }

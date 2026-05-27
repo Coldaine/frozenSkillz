@@ -22,8 +22,13 @@ tags:
 
 ```
 my-plugin/
-├── .claude-plugin/
+├── .claude-plugin/           # Claude Code manifest directory
 │   └── plugin.json           # Manifest (optional — auto-discovery works without it)
+├── .codex-plugin/            # Codex CLI manifest directory
+│   └── plugin.json
+├── .cursor-plugin/           # Cursor manifest directory
+│   └── plugin.json
+├── gemini-extension.json      # Gemini CLI manifest
 ├── skills/                   # Agent skills (SKILL.md in subdirectories)
 │   └── my-skill/
 │       ├── SKILL.md          # Required — instructions + frontmatter
@@ -48,6 +53,14 @@ my-plugin/
 ## Plugin Manifest (plugin.json)
 
 Located at `.claude-plugin/plugin.json`. Optional — if omitted, Claude Code auto-discovers components and derives the plugin name from the directory name.
+
+### Cross-Platform Manifests
+To support multiple agent products, include manifests for each:
+- **Codex**: `.codex-plugin/plugin.json`
+- **Cursor**: `.cursor-plugin/plugin.json`
+- **Gemini**: `gemini-extension.json`
+
+Manifests follow a universal structure:
 
 ```json
 {
