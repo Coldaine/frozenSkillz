@@ -70,13 +70,15 @@ frozenSkillz/
 ### frozen-skills (reference)
 
 **Category**: reference  
-**Version**: 1.0.0  
+**Version**: 1.2.0  
 **Skills**:
 - `agent-config-megaref` — Definitive reference for configuring agents across Claude Code, Gemini CLI, VS Code, OpenCode, etc.
 - `mcp-deployment-guide` — MCP server deployment guide across all AI tools
 - `plugin-authoring-guide` — Complete reference for creating Claude Code plugins, skills, agents, hooks, and marketplaces
+- `gh-common-workflows` — Opinionated GitHub CLI workflows for PR triage, review, merge, and close decisions
+- `session-skill-inferencer` — Analyze agentic coding sessions to discover friction patterns and generate skills, rules, and hooks
 
-**Use when**: Answering "how do I configure X?", "where do I deploy MCP servers?", or "how do I write a plugin?"
+**Use when**: Answering "how do I configure X?", "where do I deploy MCP servers?", "how do I write a plugin?", or analyzing session patterns to generate skills
 
 ### frozen-rules (standards)
 
