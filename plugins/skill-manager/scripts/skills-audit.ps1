@@ -65,8 +65,8 @@ foreach ($s in $skills) {
     if (-not $s.HasScripts) { $issues += "$($s.Name): No scripts folder" }
     if (-not $s.Description) { $issues += "$($s.Name): No description in frontmatter" }
 }
-if ($issues) { $issues | ForEach-Object { Write-Host "  ⚠ $_" -ForegroundColor DarkYellow } }
-else { Write-Host "  ✓ No major issues found" -ForegroundColor Green }
+if ($issues) { $issues | ForEach-Object { Write-Host "  [WARN] $_" -ForegroundColor DarkYellow } }
+else { Write-Host "  [OK] No major issues found" -ForegroundColor Green }
 
 # Output table
 Write-Host "`n=== Installed Skills ===" -ForegroundColor Cyan
