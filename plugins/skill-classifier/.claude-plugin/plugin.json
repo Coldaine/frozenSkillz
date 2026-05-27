@@ -17,6 +17,13 @@
       "path": "hooks/hooks.json"
     }
   ],
+  "skills": [
+    {
+      "name": "skill-classifier",
+      "path": "skills/skill-classifier",
+      "description": "LLM-powered skill discovery hook that suggests relevant skills."
+    }
+  ],
   "scripts": [
     {
       "name": "skill_classifier",

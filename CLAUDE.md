@@ -49,6 +49,8 @@ frozenSkillz/
 │       ├── .claude-plugin/plugin.json
 │       ├── hooks/hooks.json
 │       ├── scripts/skill_classifier.py
+│       ├── skills/
+│       │   └── skill-classifier/SKILL.md
 │       ├── test_classifier.py
 │       ├── mock_input.json
 │       ├── mock_transcript.jsonl
@@ -90,6 +92,8 @@ frozenSkillz/
 **Category**: development  
 **Version**: 0.1.0  
 **Status**: WIP  
+**Skills**:
+- `skill-classifier` — LLM-powered skill discovery hook documentation
 
 **What it does**: UserPromptSubmit hook that calls Gemini Flash to classify user prompts and suggest relevant skills.
 

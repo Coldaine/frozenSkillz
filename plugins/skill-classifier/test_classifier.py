@@ -10,7 +10,7 @@ import sys
 import time
 from pathlib import Path
 
-SCRIPT = Path(__file__).parent / "skill_classifier.py"
+SCRIPT = Path(__file__).parent / "scripts" / "skill_classifier.py"
 MOCK_INPUT = Path(__file__).parent / "mock_input.json"
 MOCK_TRANSCRIPT = Path(__file__).parent / "mock_transcript.jsonl"
 
