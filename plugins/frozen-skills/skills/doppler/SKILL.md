@@ -192,7 +192,7 @@ doppler run --fallback ./doppler.json --passphrase "$DOPPLER_FALLBACK_PASSPHRASE
 
 ```shell
 doppler run --mount secrets.json -- cat secrets.json
-doppler run --mount .env --mount-format env -- ./start.sh
+doppler run --mount .env --format env -- ./start.sh
 doppler run --mount config.yml --mount-template config.yml.tmpl -- ./start.sh
 ```
 
