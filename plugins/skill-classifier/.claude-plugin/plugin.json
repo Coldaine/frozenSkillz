@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "skill-classifier",
-  "description": "WIP: UserPromptSubmit hook that uses a small local LLM (Ollama by default, Gemini CLI fallback) to classify user prompts and suggest relevant skills. Two-layer architecture: local LLM for classification, skills for detailed guidance.",
-  "version": "0.2.0",
+  "description": "WIP: two LLM-backed hooks (Ollama by default, Gemini CLI fallback) — a UserPromptSubmit classifier that suggests relevant skills, and a PreToolUse subagent-prompt quality gate that injects advisory feedback before agent dispatch. Two-layer architecture: local LLM for classification, skills for detailed guidance.",
+  "version": "0.3.0",
   "category": "development",
   "author": {
     "name": "Coldaine",
@@ -11,12 +11,7 @@
   "license": "MIT",
   "tags": ["hooks", "classification", "ollama", "gemini", "wip", "experimental"],
   "status": "experimental",
-  "hooks": [
-    {
-      "type": "UserPromptSubmit",
-      "path": "hooks/hooks.json"
-    }
-  ],
+  "hooks": "./hooks/hooks.json",
   "skills": [
     {
       "name": "skill-classifier",
@@ -34,6 +29,11 @@
       "name": "llm_backend",
       "path": "scripts/llm_backend.py",
       "description": "Swappable LLM backend shared by classifier hooks"
+    },
+    {
+      "name": "prompt_quality_gate",
+      "path": "scripts/prompt_quality_gate.py",
+      "description": "PreToolUse hook: advisory quality review of subagent prompts"
     }
   ],
   "requirements": {

@@ -37,8 +37,8 @@
     {
       "name": "skill-classifier",
       "source": "./plugins/skill-classifier",
-      "description": "WIP: skill classification hook with a swappable local LLM backend (Ollama default, Gemini CLI fallback)",
-      "version": "0.2.0",
+      "description": "WIP: two LLM-backed hooks (Ollama default, Gemini CLI fallback) — a skill classifier and a subagent-prompt quality gate",
+      "version": "0.3.0",
       "category": "development",
       "author": {
         "name": "Coldaine"
