@@ -5,8 +5,8 @@
     "url": "https://github.com/Coldaine"
   },
   "metadata": {
-    "description": "Universal skills, rules, and tools for cross-project agent workflows. Includes configuration references, MCP deployment guides, and rule templates.",
-    "version": "1.0.0",
+    "description": "Universal skills for cross-project agent workflows. Most reference skills are gated in _incubator/ pending a quality review pass (see docs/skill-review/README.md); only the Doppler secrets skill is active. skill-classifier ships as experimental.",
+    "version": "2.0.0",
     "repository": "https://github.com/Coldaine/frozenSkillz",
     "license": "MIT"
   },
@@ -14,16 +14,9 @@
     {
       "name": "frozen-skills",
       "source": "./plugins/frozen-skills",
-      "description": "Universal cross-project skills for agent configuration, MCP deployment, and plugin authoring",
-      "version": "1.0.0",
+      "description": "Doppler secrets-management skill. Other reference skills are gated in _incubator/ pending review (see docs/skill-review).",
+      "version": "2.0.0",
       "category": "reference"
-    },
-    {
-      "name": "frozen-rules",
-      "source": "./plugins/frozen-rules",
-      "description": "Universal rule templates for Ansible, documentation, and git submodules",
-      "version": "1.0.0",
-      "category": "standards"
     },
     {
       "name": "skill-classifier",
@@ -32,13 +25,6 @@
       "version": "0.1.0",
       "category": "development",
       "status": "experimental"
-    },
-    {
-      "name": "skill-manager",
-      "source": "./plugins/skill-manager",
-      "description": "Manage your skill portfolio - search, evaluate, compare, audit, and consolidate skills across Claude Code, Codex, and Kimi CLI.",
-      "version": "1.0.0",
-      "category": "development"
     }
   ]
 }
