@@ -8,9 +8,11 @@
 **Gate decision:** strict — only `doppler` is active and on the marketplace menu; every other
 reference/workflow skill is gated pending review.
 **Holding location:** `_incubator/` (in-repo, easy to promote back; not installable).
-**Linear:** planning now lives in Linear — parent [MOO-561](https://linear.app/moosegoose/issue/MOO-561)
-(*AI tools platform*), one triage sub-issue per gated skill (MOO-562 … MOO-570). This file stays the
-in-repo source of truth for required work; Linear tracks status. Keep the two in sync.
+**Linear:** planning lives in Linear — project **frozenSkillz** (under the *ClaudeReconfigurations*
+initiative, team Moosegoose/MOO), parent intake [MOO-561](https://linear.app/moosegoose/issue/MOO-561)
++ one triage sub-issue per gated skill (MOO-562 … MOO-570). Also registered in Notion → Builder Lab →
+Projects (per the documented "Issues live in Linear; design/projects live in Builder Lab" split).
+This file stays the in-repo source of truth for required work; Linear tracks status. Keep them in sync.
 
 ---
 
