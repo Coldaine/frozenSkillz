@@ -6,7 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python ${CLAUDE_PLUGIN_ROOT}/scripts/skill_classifier.py"
+            "command": "python ${CLAUDE_PLUGIN_ROOT}/scripts/skill_classifier.py",
+            "timeout": 8
           }
         ]
       }

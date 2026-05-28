@@ -99,21 +99,23 @@ frozenSkillz/
 ### skill-classifier (development, experimental)
 
 **Category**: development  
-**Version**: 0.1.0  
+**Version**: 0.2.0  
 **Status**: WIP  
 **Skills**:
 - `skill-classifier` — LLM-powered skill discovery hook documentation
 
-**What it does**: UserPromptSubmit hook that calls Gemini Flash to classify user prompts and suggest relevant skills.
+**What it does**: UserPromptSubmit hook that uses a small local LLM to classify user prompts and suggest relevant skills. The LLM backend is swappable — Ollama (local, default) with a Gemini CLI fallback.
 
 **Architecture**: Two-layer skill activation:
-1. **Layer 1 (hook)**: Fast LLM classification (Gemini Flash) — "what category of task?"
+1. **Layer 1 (hook)**: Fast LLM classification (Ollama by default) — "what category of task?"
 2. **Layer 2 (skills)**: Detailed guidance from loaded skills — "here's how to do it"
 
 **Requirements**:
-- Python >=3.9
-- `google-generativeai` package
-- `GEMINI_API_KEY` environment variable
+- Python >=3.9 (standard library only — no extra packages for the default backend)
+- **Ollama backend (default)**: a running [Ollama](https://ollama.com) server with a small model pulled (`SKILL_CLASSIFIER_MODEL`, default `llama3.2:3b`)
+- **Gemini backend (fallback)**: the `gemini` CLI on `PATH` plus `GEMINI_API_KEY`
+
+See `plugins/skill-classifier/README.md` for the full backend configuration.
 
 **ADRs**:
 - 001: LLM-only classification (no keyword matching)
@@ -122,6 +124,7 @@ frozenSkillz/
 - 004: Silent passthrough on failure
 - 005: Two-layer skill activation
 - 006: Transcript parsing strategy
+- 007: Swappable LLM backend with Ollama as default (supersedes 002)
 
 ## Development
 
@@ -175,7 +178,7 @@ The agent will guide you through copying templates to `.claude/rules/`.
 /plugin install skill-classifier@coldaine-skills
 ```
 
-Requires `GEMINI_API_KEY` set. Hook runs on every prompt, classifies it, and suggests skills.
+By default the hook uses a local Ollama model (no API key). To use the Gemini fallback instead, set `GEMINI_API_KEY`. The hook runs on every prompt, classifies it, and suggests skills. See `plugins/skill-classifier/README.md` for backend configuration.
 
 Test it:
 ```bash
