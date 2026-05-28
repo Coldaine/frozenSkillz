@@ -6,7 +6,7 @@
     "url": "https://github.com/Coldaine"
   },
   "metadata": {
-    "description": "Universal skills for cross-project agent workflows. Most reference skills are gated in _incubator/ pending a quality review pass (see docs/skill-review/README.md); only the Doppler secrets skill is active. skill-classifier ships as experimental.",
+    "description": "Universal skills for cross-project agent workflows. Most skills are gated in _incubator/ pending a quality review pass (see docs/skill-review/); only the Doppler secrets skill is active.",
     "version": "2.0.0",
     "repository": "https://github.com/Coldaine/frozenSkillz",
     "license": "MIT"
@@ -15,25 +15,13 @@
     {
       "name": "frozen-skills",
       "source": "./plugins/frozen-skills",
-      "description": "Doppler secrets-management skill. Other reference skills are gated in _incubator/ pending review (see docs/skill-review).",
+      "description": "Doppler secrets-management skill. Other reference skills are gated in _incubator/ pending review (see docs/skill-review/).",
       "version": "2.0.0",
       "category": "reference",
       "author": {
         "name": "Coldaine"
       },
       "tags": ["secrets", "doppler", "reference"]
-    },
-    {
-      "name": "skill-classifier",
-      "source": "./plugins/skill-classifier",
-      "description": "WIP: two LLM-backed hooks (Ollama default, Gemini CLI fallback) — a skill classifier and a subagent-prompt quality gate",
-      "version": "0.3.0",
-      "category": "development",
-      "author": {
-        "name": "Coldaine"
-      },
-      "tags": ["hooks", "classification", "ollama", "gemini", "experimental"],
-      "status": "experimental"
     }
   ]
 }

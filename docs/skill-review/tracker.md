@@ -2,10 +2,11 @@
 
 > **Source of truth** for the skill quality gate. Most skills are held in `_incubator/`
 > (de-registered from the marketplace) until they pass a review pass. Only the **Doppler**
-> skill is currently active and promoted. `skill-classifier` ships separately as **experimental**.
+> skill is currently active and promoted.
 
 **Established:** 2026-05-28
-**Gate decision:** strict — only `doppler` active; every other reference/workflow skill is gated pending review.
+**Gate decision:** strict — only `doppler` is active and on the marketplace menu; every other
+reference/workflow skill is gated pending review.
 **Holding location:** `_incubator/` (in-repo, easy to promote back; not installable).
 
 ---
@@ -14,9 +15,9 @@
 
 1. Gated skills live under `_incubator/` and are **not** listed in any marketplace catalog, so they cannot be installed.
 2. Each skill below has a status and a list of required work. Take a pass at one, do the work, then **promote** it.
-3. **Promote** = move the skill dir back to its plugin's `skills/` folder, re-add it to the four manifests
-   (`.claude-plugin`/`.codex-plugin`/`.cursor-plugin` marketplace catalogs as needed, plus the plugin's own
-   `plugin.json` / `gemini-extension.json` `skills[]` array), and bump the plugin version.
+3. **Promote** = move the skill dir back to its plugin's `skills/` folder, re-add it to the relevant manifests
+   (the three root marketplace catalogs + the plugin's own `plugin.json` / `gemini-extension.json` `skills[]` array),
+   and bump the plugin version.
 4. Update this tracker when status changes.
 
 ### Promotion bar ("ready")
@@ -35,7 +36,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 
 | Skill | Tier | Status | Location | Required work |
 |---|---|---|---|---|
-| `doppler` | A | ✅ **ACTIVE** | `plugins/frozen-skills/skills/doppler` | None — reference standard. |
+| `doppler` | A | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/doppler` | None — reference standard. |
 | `plugin-authoring-guide` ("skill guide") | A | 🛑 gated · **rework** | `_incubator/frozen-skills/skills/` | **Rework** (user directive). |
 | `mcp-deployment-guide` ("MCP guide") | A | 🛑 gated · **update** | `_incubator/frozen-skills/skills/` | **Update** (user directive). |
 | `agent-config-megaref` | A | 🛑 gated · **light update** | `_incubator/frozen-skills/skills/` | Light update **+ confer/cross-reference with the LLM archiver project** (user directive). |
@@ -44,9 +45,9 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `stacked-pr-workflow` | B | 🛑 gated | `_incubator/frozen-skills/skills/` | Run + verify the 7 PowerShell helpers; decide if niche is worth keeping. |
 | `skill-manager` | B | 🛑 gated | `_incubator/skill-manager/` | Verify scripts + registry assumptions (`skills.sh`, `~/.agents/skills`). |
 | `session-skill-inferencer` | C | 🛑 gated · **highest concern** | `_incubator/frozen-skills/skills/` | Fix generation quality before any promotion (see below). |
-| `skill-classifier` | C | 🧪 experimental (registered) | `plugins/skill-classifier/` | Not gated — actively being refactored (swappable backend). Re-review after that lands. |
+| `skill-classifier` | C | 🧪 **inert code, NOT on menu** | `plugins/skill-classifier/` | Rename it (it injects, doesn't classify); keep un-installed; review/test in a separate environment. |
 
-Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 experimental · Tier A = strong reference, B = functional/narrow, C = rework.
+Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental · Tier A = strong reference, B = functional/narrow, C = rework.
 
 ---
 
@@ -97,10 +98,18 @@ Use it as the quality bar for everything else.
   until the generation prompts produce clean, well-named, genuinely useful skills. See
   `docs/skill-review/session-skill-inferencer-changes.md` for prior refactor rationale.
 
-### `skill-classifier` — experimental, not gated
-- Left registered as experimental and **physically in place** (`plugins/skill-classifier/`) because it has active
-  uncommitted refactor work on branch `feat/skill-classifier-swappable-backend` (swappable Ollama/Gemini backend +
-  subagent-prompt quality gate). Gating it would stomp in-flight work. Re-review once that refactor lands.
+### `skill-classifier` — inert code, NOT installed, NOT on the menu
+- Built by a parallel session and merged to `main` (PRs #22/#23): two hooks sharing a swappable LLM backend
+  (Ollama default, Gemini CLI fallback) — a `UserPromptSubmit` hook that injects a skill suggestion, and a
+  `PreToolUse` (Agent/Task) hook that injects advisory feedback on subagent prompts.
+- **Status check (2026-05-28):** the hooks are declared in `plugins/skill-classifier/hooks/hooks.json` but the plugin
+  is **not installed or enabled** anywhere (`~/.claude/settings.json`, `~/.claude.json`, and this repo have no
+  reference / no `enabledPlugins`). **The hooks do not run.** It is dormant code only.
+- Removed from all three marketplace catalogs so it cannot be installed by accident. Code left in place under
+  `plugins/skill-classifier/` for later review.
+- **TODO:** rename — it *injects* a skill, it doesn't classify one. Candidates: `skill-injector`, `skill-suggester`,
+  or an umbrella like `prompt-hooks` (it's two hooks now). Review and beta-test in a separate environment before any
+  install/enable.
 
 ---
 
@@ -108,7 +117,5 @@ Use it as the quality bar for everything else.
 
 - **`mcp/` templates** (`mcp/github.json`, `mcp/notebooklm.json`) left at repo root; `mcp-deployment-guide` references them.
 - **`docs/stacked-pr-workflow/`** supplementary docs left in place for the gated `stacked-pr-workflow` skill.
-- **codex/cursor catalogs** still carry a stale `skill-classifier` v0.1.0 entry (claude catalog is v0.3.0); sync when the
-  classifier refactor lands.
 - **Root `README.md`** and **`CLAUDE.md`** still describe the pre-gate skill lineup — update them to point here once the
   gate is settled.
