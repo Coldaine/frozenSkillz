@@ -8,7 +8,7 @@ A **cross-platform plugin marketplace** containing four plugins:
 
 1. **frozen-skills** — Universal cross-project skills (agent config reference, MCP deployment guide)
 2. **frozen-rules** — Universal rule templates (Ansible, documentation, submodules)
-3. **skill-classifier** — WIP Gemini-powered skill discovery hook
+3. **skill-classifier** — WIP local-LLM skill discovery hook + subagent prompt quality gate
 4. **skill-manager** — Skill portfolio management and auditing tool
 
 ## Installation
@@ -61,7 +61,7 @@ frozenSkillz/
 │       ├── test_classifier.py
 │       ├── mock_input.json
 │       ├── mock_transcript.jsonl
-│       └── docs/decisions/    # 6 ADRs
+│       └── docs/decisions/    # 8 ADRs
 └── CLAUDE.md (this file)
 ```
 
@@ -99,12 +99,14 @@ frozenSkillz/
 ### skill-classifier (development, experimental)
 
 **Category**: development  
-**Version**: 0.2.0  
+**Version**: 0.3.0  
 **Status**: WIP  
 **Skills**:
 - `skill-classifier` — LLM-powered skill discovery hook documentation
 
-**What it does**: UserPromptSubmit hook that uses a small local LLM to classify user prompts and suggest relevant skills. The LLM backend is swappable — Ollama (local, default) with a Gemini CLI fallback.
+**What it does**: Two small-LLM-backed hooks sharing one swappable backend (Ollama local default, Gemini CLI fallback):
+1. **Skill classifier** (`UserPromptSubmit`) — classifies user prompts and suggests relevant skills.
+2. **Subagent prompt quality gate** (`PreToolUse` on `Agent`/`Task`) — reviews the subagent prompt against a quality checklist and injects advisory, non-blocking feedback before dispatch.
 
 **Architecture**: Two-layer skill activation:
 1. **Layer 1 (hook)**: Fast LLM classification (Ollama by default) — "what category of task?"
@@ -125,6 +127,7 @@ See `plugins/skill-classifier/README.md` for the full backend configuration.
 - 005: Two-layer skill activation
 - 006: Transcript parsing strategy
 - 007: Swappable LLM backend with Ollama as default (supersedes 002)
+- 008: Subagent prompt quality gate (PreToolUse advisory hook)
 
 ## Development
 
