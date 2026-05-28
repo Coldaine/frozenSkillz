@@ -6,8 +6,8 @@
     "url": "https://github.com/Coldaine"
   },
   "metadata": {
-    "description": "Universal skills for cross-project agent workflows. Most skills are gated in _incubator/ pending a quality review pass (see docs/skill-review/); only the Doppler secrets skill is active.",
-    "version": "2.0.0",
+    "description": "Universal skills for cross-project agent workflows. Most reference skills are gated in _incubator/ pending a quality review pass (see docs/skill-review/). Active: the Doppler secrets skill. Experimental/untested: skill-injector.",
+    "version": "2.1.0",
     "repository": "https://github.com/Coldaine/frozenSkillz",
     "license": "MIT"
   },
@@ -22,6 +22,18 @@
         "name": "Coldaine"
       },
       "tags": ["secrets", "doppler", "reference"]
+    },
+    {
+      "name": "skill-injector",
+      "source": "./plugins/skill-injector",
+      "description": "WIP, UNTESTED: prompt-submit hook that injects a relevant-skill suggestion + a subagent-prompt quality gate (Ollama default, Gemini fallback). Review/test before installing or enabling.",
+      "version": "0.3.0",
+      "category": "development",
+      "author": {
+        "name": "Coldaine"
+      },
+      "tags": ["hooks", "skill-injection", "untested", "experimental"],
+      "status": "experimental"
     }
   ]
 }

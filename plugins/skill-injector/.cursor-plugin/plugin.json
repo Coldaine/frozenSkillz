@@ -1,0 +1,10 @@
+{
+  "name": "skill-injector",
+  "description": "WIP, UNTESTED: two LLM-backed hooks (Ollama default, Gemini CLI fallback) — a UserPromptSubmit hook that injects a relevant-skill suggestion, and a PreToolUse subagent-prompt quality gate. Not yet tested end-to-end; review before installing/enabling.",
+  "version": "0.3.0",
+  "author": {
+    "name": "Coldaine",
+    "url": "https://github.com/Coldaine"
+  },
+  "license": "MIT"
+}

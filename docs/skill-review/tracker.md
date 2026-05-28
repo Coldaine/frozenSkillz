@@ -45,7 +45,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `stacked-pr-workflow` | B | 🛑 gated | `_incubator/frozen-skills/skills/` | Run + verify the 7 PowerShell helpers; decide if niche is worth keeping. |
 | `skill-manager` | B | 🛑 gated | `_incubator/skill-manager/` | Verify scripts + registry assumptions (`skills.sh`, `~/.agents/skills`). |
 | `session-skill-inferencer` | C | 🛑 gated · **highest concern** | `_incubator/frozen-skills/skills/` | Fix generation quality before any promotion (see below). |
-| `skill-classifier` | C | 🧪 **inert code, NOT on menu** | `plugins/skill-classifier/` | Rename it (it injects, doesn't classify); keep un-installed; review/test in a separate environment. |
+| `skill-injector` (was skill-classifier) | C | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Test end-to-end before enabling; finish internal rename (scripts/module + ADR/doc prose still say "classifier"). |
 
 Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental · Tier A = strong reference, B = functional/narrow, C = rework.
 
@@ -98,18 +98,17 @@ Use it as the quality bar for everything else.
   until the generation prompts produce clean, well-named, genuinely useful skills. See
   `docs/skill-review/session-skill-inferencer-changes.md` for prior refactor rationale.
 
-### `skill-classifier` — inert code, NOT installed, NOT on the menu
+### `skill-injector` (renamed from `skill-classifier`) — registered, experimental/UNTESTED
 - Built by a parallel session and merged to `main` (PRs #22/#23): two hooks sharing a swappable LLM backend
-  (Ollama default, Gemini CLI fallback) — a `UserPromptSubmit` hook that injects a skill suggestion, and a
+  (Ollama default, Gemini CLI fallback) — a `UserPromptSubmit` hook that injects a relevant-skill suggestion, and a
   `PreToolUse` (Agent/Task) hook that injects advisory feedback on subagent prompts.
-- **Status check (2026-05-28):** the hooks are declared in `plugins/skill-classifier/hooks/hooks.json` but the plugin
-  is **not installed or enabled** anywhere (`~/.claude/settings.json`, `~/.claude.json`, and this repo have no
-  reference / no `enabledPlugins`). **The hooks do not run.** It is dormant code only.
-- Removed from all three marketplace catalogs so it cannot be installed by accident. Code left in place under
-  `plugins/skill-classifier/` for later review.
-- **TODO:** rename — it *injects* a skill, it doesn't classify one. Candidates: `skill-injector`, `skill-suggester`,
-  or an umbrella like `prompt-hooks` (it's two hooks now). Review and beta-test in a separate environment before any
-  install/enable.
+- **Renamed 2026-05-28:** the plugin directory, the skill folder, and all four plugin manifests are now
+  `skill-injector`. Re-registered in all four marketplace catalogs, flagged `experimental` / UNTESTED.
+- **Still NOT installed or enabled** anywhere (`~/.claude/settings.json`, `~/.claude.json`, this repo — no
+  `enabledPlugins`). The hooks do **not** run; it is dormant code until someone installs + enables the plugin.
+- **TODO before relying on it:** test end-to-end; then finish the rename internally — the Python scripts/module
+  (`skill_classifier.py`), the env vars (`SKILL_CLASSIFIER_*`), the ADRs, and the SKILL.md/README prose still say
+  "classifier". Left as-is for now to avoid breaking the untested hook wiring.
 
 ---
 
@@ -117,5 +116,5 @@ Use it as the quality bar for everything else.
 
 - **`mcp/` templates** (`mcp/github.json`, `mcp/notebooklm.json`) left at repo root; `mcp-deployment-guide` references them.
 - **`docs/stacked-pr-workflow/`** supplementary docs left in place for the gated `stacked-pr-workflow` skill.
-- **Root `README.md`** and **`CLAUDE.md`** still describe the pre-gate skill lineup — update them to point here once the
-  gate is settled.
+- **Root `README.md`** and **`CLAUDE.md`** still describe the pre-gate lineup and the old `skill-classifier` name —
+  update them (and the plugin's own README + ADRs) to `skill-injector`, and point them here, once the gate is settled.
