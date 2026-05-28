@@ -26,6 +26,7 @@ Configuration (env):
 """
 
 import json
+import os
 import sys
 
 import llm_backend
@@ -39,13 +40,11 @@ PROMPT_KEYS = ("description", "prompt", "instructions", "task")
 
 
 def _gate_enabled() -> bool:
-    import os
     val = os.environ.get("SUBAGENT_PROMPT_GATE", "").strip().lower()
     return val not in ("0", "off", "false", "no")
 
 
 def _min_chars() -> int:
-    import os
     try:
         return int(os.environ.get("SUBAGENT_PROMPT_GATE_MIN_CHARS", DEFAULT_MIN_CHARS))
     except (TypeError, ValueError):
@@ -92,8 +91,9 @@ def review(agent_prompt: str) -> str:
     if not raw:
         return ""
     text = raw.strip()
-    # Model judged it fine.
-    if text.upper() == "OK" or text.upper().startswith("OK\n") or text.upper().startswith("OK "):
+    # Model judged it fine: the whole reply is "OK" (allow trailing punctuation).
+    # Must NOT match an advisory that merely starts with "OK " (e.g. "OK but...").
+    if text.upper().rstrip(".!") == "OK":
         return ""
     # Keep only advisory bullet lines; bound length.
     lines = [ln.strip() for ln in text.splitlines() if ln.strip().startswith("-")]

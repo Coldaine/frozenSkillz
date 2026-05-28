@@ -96,6 +96,25 @@ class TestReview(unittest.TestCase):
         finally:
             llm_backend.complete = c
 
+    def test_ok_with_trailing_punctuation_suppressed(self):
+        c = llm_backend.complete
+        try:
+            for fine in ("OK", "OK.", "OK!", "ok"):
+                llm_backend.complete = lambda *a, _f=fine, **k: _f
+                self.assertEqual(gate.review("anything"), "", f"{fine!r} should suppress")
+        finally:
+            llm_backend.complete = c
+
+    def test_advisory_starting_with_ok_not_silenced(self):
+        # Regression: an advisory that merely starts with "OK " must NOT be
+        # swallowed by the well-formed check.
+        c = llm_backend.complete
+        try:
+            llm_backend.complete = lambda *a, **k: "OK but split the five questions into focused lookups"
+            self.assertIn("split the five questions", gate.review("anything"))
+        finally:
+            llm_backend.complete = c
+
 
 class TestMain(unittest.TestCase):
     def test_non_agent_tool_silent(self):
