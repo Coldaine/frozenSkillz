@@ -1,7 +1,7 @@
 {
   "name": "skill-classifier",
-  "description": "WIP: UserPromptSubmit hook that uses Gemini Flash to classify user prompts and suggest relevant skills. Two-layer architecture: local LLM for classification, skills for detailed guidance.",
-  "version": "0.1.0",
+  "description": "WIP: UserPromptSubmit hook that uses a small local LLM (Ollama by default, Gemini CLI fallback) to classify user prompts and suggest relevant skills. Two-layer architecture: local LLM for classification, skills for detailed guidance.",
+  "version": "0.2.0",
   "author": {
     "name": "Coldaine",
     "url": "https://github.com/Coldaine"

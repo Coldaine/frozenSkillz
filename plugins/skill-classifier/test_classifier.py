@@ -5,14 +5,27 @@ Run: python test_classifier.py
 """
 
 import json
+import os
 import subprocess
 import sys
 import time
 from pathlib import Path
 
-SCRIPT = Path(__file__).parent / "scripts" / "skill_classifier.py"
+SCRIPTS_DIR = Path(__file__).parent / "scripts"
+SCRIPT = SCRIPTS_DIR / "skill_classifier.py"
 MOCK_INPUT = Path(__file__).parent / "mock_input.json"
 MOCK_TRANSCRIPT = Path(__file__).parent / "mock_transcript.jsonl"
+
+# Make ``from skill_classifier import ...`` resolve regardless of CWD.
+sys.path.insert(0, str(SCRIPTS_DIR))
+
+# Force UTF-8 so the test labels (which contain '->' arrows) don't crash on a
+# Windows console / redirected pipe under the cp1252 code page.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):
+        pass
 
 
 def run_classifier(input_data: dict, label: str) -> dict | None:
@@ -126,6 +139,10 @@ def main():
     print("frozenSkillz — Test Harness")
     print("Using mock transcript:", MOCK_TRANSCRIPT)
 
+    # Report the active backend so failures are easy to diagnose.
+    import llm_backend
+    print("Active LLM backend:", llm_backend.active_backend_label())
+
     # Verify skills can be loaded
     from skill_classifier import get_skills
     skills = get_skills()
@@ -140,9 +157,15 @@ def main():
     test_creative_work()
     test_plan_request()
 
-    # Latency
-    run_latency = input("\nRun latency batch test? (y/N): ").strip().lower()
-    if run_latency == "y":
+    # Latency batch is opt-in. Enable with `--latency` or RUN_LATENCY=1 so the
+    # harness runs headlessly in CI / non-interactive verification.
+    run_latency = "--latency" in sys.argv or os.environ.get("RUN_LATENCY") == "1"
+    if not run_latency and sys.stdin.isatty():
+        try:
+            run_latency = input("\nRun latency batch test? (y/N): ").strip().lower() == "y"
+        except (EOFError, KeyboardInterrupt):
+            run_latency = False  # non-interactive / piped stdin
+    if run_latency:
         test_latency_batch()
 
     print("\n" + "="*60)

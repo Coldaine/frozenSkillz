@@ -4,29 +4,48 @@
 UserPromptSubmit hook that classifies user intent against available skills
 and injects targeted suggestions. Silent passthrough on any failure.
 
-Backend: Gemini Flash 3 via CLI (swappable).
+Backend: pluggable via ``llm_backend`` (Ollama by default, Gemini CLI
+fallback). See ``llm_backend.py`` and the plugin README for configuration.
 """
 
 import json
 import os
 import re
-import subprocess
 import sys
-import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 
-IS_WINDOWS = sys.platform == "win32"
+import llm_backend
 
 # --- Configuration ---
 
-SUPERPOWERS_SKILLS_DIR = Path("/app/plugins/frozen-skills/skills")
-USER_SKILLS_DIR = Path("/app/plugins/skill-classifier/skills")
-CACHE_FILE = Path(__file__).parent / ".skills_cache.json"
+SCRIPT_DIR = Path(__file__).resolve().parent
+# Plugin root: ``${CLAUDE_PLUGIN_ROOT}`` at runtime, else the dir above scripts/.
+PLUGIN_ROOT = Path(os.environ.get("CLAUDE_PLUGIN_ROOT", SCRIPT_DIR.parent)).resolve()
+# ``plugins/`` dir of the marketplace (sibling-plugin lookups work in-repo and
+# when the marketplace is installed flat).
+PLUGINS_DIR = PLUGIN_ROOT.parent
+
+CACHE_FILE = SCRIPT_DIR / ".skills_cache.json"
 CACHE_TTL_SECONDS = 300  # 5 minutes
-LLM_TIMEOUT_SECONDS = 15  # Gemini CLI has ~8s startup on Windows; REST API would be ~1s
 MAX_TRANSCRIPT_MESSAGES = 10
 MAX_CONTENT_LENGTH = 500
+
+
+def skill_dirs() -> list[Path]:
+    """Resolve directories to scan for SKILL.md files.
+
+    Order of precedence:
+    1. ``SKILL_CLASSIFIER_SKILL_DIRS`` (os.pathsep-separated) — explicit override.
+    2. This plugin's own ``skills/`` and the sibling ``frozen-skills/skills``.
+    """
+    override = os.environ.get("SKILL_CLASSIFIER_SKILL_DIRS", "").strip()
+    if override:
+        return [Path(p).expanduser() for p in override.split(os.pathsep) if p.strip()]
+    return [
+        PLUGIN_ROOT / "skills",
+        PLUGINS_DIR / "frozen-skills" / "skills",
+    ]
 
 
 def log(msg: str) -> None:
@@ -71,7 +90,7 @@ def get_skills() -> list[dict]:
         except Exception:
             pass
 
-    skills = scan_skills([SUPERPOWERS_SKILLS_DIR, USER_SKILLS_DIR])
+    skills = scan_skills(skill_dirs())
     try:
         CACHE_FILE.write_text(json.dumps({
             "timestamp": datetime.now().isoformat(),
@@ -153,11 +172,10 @@ def load_transcript(transcript_path: str) -> str:
 # --- LLM Backend (Swappable) ---
 
 def classify(prompt: str, context: str, skills: list[dict]) -> list[str]:
-    """Classify user intent against skills using LLM.
+    """Classify user intent against skills using the configured LLM backend.
 
-    This is the swappable backend function.
-    Current: Gemini Flash 3 via CLI.
-    Alternatives: Anthropic SDK (Haiku), Gemini REST API.
+    Backend selection/transport lives in ``llm_backend`` (Ollama by default,
+    Gemini CLI fallback). This function owns only the prompt and parsing.
 
     Returns list of relevant skill names, or empty list.
     """
@@ -181,76 +199,35 @@ RULES:
 5. Never suggest more than 3 skills.
 6. Do NOT explain your reasoning. Output ONLY the JSON array."""
 
-    return _call_gemini_cli(classification_prompt)
+    output = llm_backend.complete(classification_prompt)
+    return _parse_skill_array(output)
 
 
-def _call_gemini_cli(prompt: str) -> list[str]:
-    """Call Gemini via CLI subprocess.
+def _parse_skill_array(output: str) -> list[str]:
+    """Parse a JSON array of skill-name strings from raw LLM output."""
+    if not output:
+        return []
+    output = output.strip()
 
-    Uses a temp file for the prompt to avoid shell quoting issues on Windows
-    with long multi-line prompts containing special characters.
-    """
-    tmp = None
+    # Direct parse
     try:
-        # Write prompt to temp file to avoid shell argument escaping issues
-        tmp = tempfile.NamedTemporaryFile(
-            mode="w", suffix=".txt", delete=False, encoding="utf-8"
-        )
-        tmp.write(prompt)
-        tmp.close()
+        parsed = json.loads(output)
+        if isinstance(parsed, list):
+            return [s for s in parsed if isinstance(s, str)]
+    except json.JSONDecodeError:
+        pass
 
-        # Pipe the prompt file via stdin; -p "" tells gemini to use stdin
-        with open(tmp.name, "r", encoding="utf-8") as f:
-            result = subprocess.run(
-                ["gemini",
-                 "--model", "gemini-3-flash-preview",
-                 "--output-format", "text"],
-                stdin=f,
-                capture_output=True,
-                text=True,
-                timeout=LLM_TIMEOUT_SECONDS,
-                shell=IS_WINDOWS,
-            )
-        if result.returncode != 0:
-            log(f"Gemini CLI error: {result.stderr.strip()}")
-            return []
-
-        output = result.stdout.strip()
-
-        # Parse JSON array from response
+    # Fallback: extract the first JSON array from surrounding text
+    match = re.search(r"\[.*?\]", output, re.DOTALL)
+    if match:
         try:
-            parsed = json.loads(output)
+            parsed = json.loads(match.group(0))
             if isinstance(parsed, list):
                 return [s for s in parsed if isinstance(s, str)]
         except json.JSONDecodeError:
             pass
 
-        # Fallback: extract JSON array from surrounding text
-        match = re.search(r"\[.*?\]", output, re.DOTALL)
-        if match:
-            try:
-                parsed = json.loads(match.group(0))
-                if isinstance(parsed, list):
-                    return [s for s in parsed if isinstance(s, str)]
-            except json.JSONDecodeError:
-                pass
-
-        return []
-    except subprocess.TimeoutExpired:
-        log("Gemini CLI timed out")
-        return []
-    except FileNotFoundError:
-        log("Gemini CLI not found")
-        return []
-    except Exception as e:
-        log(f"Gemini CLI failed: {e}")
-        return []
-    finally:
-        if tmp is not None:
-            try:
-                os.unlink(tmp.name)
-            except OSError:
-                pass
+    return []
 
 
 # --- Hook Entry Point ---

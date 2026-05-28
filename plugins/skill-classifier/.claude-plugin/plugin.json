@@ -1,15 +1,15 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "skill-classifier",
-  "description": "WIP: UserPromptSubmit hook that uses Gemini Flash to classify user prompts and suggest relevant skills. Two-layer architecture: local LLM for classification, skills for detailed guidance.",
-  "version": "0.1.0",
+  "description": "WIP: UserPromptSubmit hook that uses a small local LLM (Ollama by default, Gemini CLI fallback) to classify user prompts and suggest relevant skills. Two-layer architecture: local LLM for classification, skills for detailed guidance.",
+  "version": "0.2.0",
   "category": "development",
   "author": {
     "name": "Coldaine",
     "url": "https://github.com/Coldaine"
   },
   "license": "MIT",
-  "tags": ["hooks", "classification", "gemini", "wip", "experimental"],
+  "tags": ["hooks", "classification", "ollama", "gemini", "wip", "experimental"],
   "status": "experimental",
   "hooks": [
     {
@@ -28,12 +28,21 @@
     {
       "name": "skill_classifier",
       "path": "scripts/skill_classifier.py",
-      "description": "Gemini-powered skill classifier"
+      "description": "Skill classifier hook (Ollama default, Gemini CLI fallback)"
+    },
+    {
+      "name": "llm_backend",
+      "path": "scripts/llm_backend.py",
+      "description": "Swappable LLM backend shared by classifier hooks"
     }
   ],
   "requirements": {
     "python": ">=3.9",
-    "packages": ["google-generativeai"],
-    "env": ["GEMINI_API_KEY"]
+    "packages": [],
+    "env": [],
+    "backends": {
+      "ollama": "Default. Local Ollama server (https://ollama.com); pull a small model and set SKILL_CLASSIFIER_MODEL. No Python packages required (stdlib urllib).",
+      "gemini": "Fallback. Requires the `gemini` CLI on PATH and GEMINI_API_KEY."
+    }
   }
 }
