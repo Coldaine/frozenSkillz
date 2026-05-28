@@ -31,8 +31,9 @@ All configuration is via environment variables — nothing is hard-coded.
 | `SKILL_CLASSIFIER_BACKEND` | `auto` | `ollama`, `gemini`, or `auto`. In `auto` the backends are tried in order (Ollama → Gemini); the first non-empty result wins. A named backend is tried first, then the others act as fallback. |
 | `SKILL_CLASSIFIER_MODEL` | `llama3.2:3b` | Ollama model tag. Use any small model you have pulled. |
 | `OLLAMA_HOST` | `http://localhost:11434` | Ollama base URL (or `host:port`). |
-| `SKILL_CLASSIFIER_TIMEOUT` | `10` | Per-call request timeout (seconds). |
+| `SKILL_CLASSIFIER_TIMEOUT` | `3` | Per-call request timeout (seconds). Deliberately tight — this is a per-prompt hook. |
 | `SKILL_CLASSIFIER_CONNECT_TIMEOUT` | `0.5` | TCP reachability pre-check timeout (seconds). |
+| `SKILL_CLASSIFIER_KEEP_ALIVE` | `10m` | How long Ollama keeps the model resident after a call (avoids cold starts). |
 | `GEMINI_MODEL` | `gemini-3-flash-preview` | Gemini CLI model. |
 | `GEMINI_API_KEY` | — | Required only for the Gemini backend. |
 | `SKILL_CLASSIFIER_SKILL_DIRS` | — | `os.pathsep`-separated dirs to scan for `SKILL.md`. Overrides the default (this plugin's `skills/` + sibling `frozen-skills/skills`). |
@@ -55,10 +56,17 @@ export GEMINI_API_KEY="your-api-key-here"
 
 ### Performance
 
-With Ollama resident, classification round-trip is typically well under 2s. When
-Ollama is **not** running, a fast TCP pre-check (~1s, bounded) short-circuits the
-call so a per-prompt hook never stalls — it then falls back to Gemini (in `auto`)
-or silently passes through.
+With Ollama resident, classification round-trip is typically well under 2s, and
+`keep_alive` (default `10m`) keeps the model loaded between prompts so you don't
+pay a cold start each time. When Ollama is **not** running, a fast TCP pre-check
+(~1s, bounded) short-circuits the call so a per-prompt hook never stalls — it
+then falls back to Gemini (in `auto`) or silently passes through.
+
+**Cold start:** the *first* call after Ollama evicts the model from memory still
+has to reload it, which can exceed the 3s `SKILL_CLASSIFIER_TIMEOUT`. In that
+case the hook silently passes through (no suggestion that turn) rather than
+blocking your prompt; the next prompt is warm. Raise `SKILL_CLASSIFIER_TIMEOUT`
+if you prefer to wait for the cold call.
 
 ## Failure policy
 

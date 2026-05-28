@@ -131,6 +131,43 @@ class TestSkillArrayParsing(unittest.TestCase):
         self.assertEqual(skill_classifier._parse_skill_array("no array"), [])
         self.assertEqual(skill_classifier._parse_skill_array(""), [])
 
+    def test_decoy_bracket_before_real_array(self):
+        # Small local models emit reasoning text with decoy brackets; the parser
+        # must skip them and find the real array (regression: non-greedy regex).
+        self.assertEqual(
+            skill_classifier._parse_skill_array('thinking [step 1] then ["systematic-debugging"]'),
+            ["systematic-debugging"],
+        )
+        self.assertEqual(
+            skill_classifier._parse_skill_array('Here is [the answer]: ["a", "b"]'),
+            ["a", "b"],
+        )
+
+
+class TestSkillCache(unittest.TestCase):
+    def setUp(self):
+        os.environ.pop("SKILL_CLASSIFIER_SKILL_DIRS", None)
+        self._cache = skill_classifier.CACHE_FILE
+        if self._cache.exists():
+            self._cache.unlink()
+
+    def tearDown(self):
+        os.environ.pop("SKILL_CLASSIFIER_SKILL_DIRS", None)
+        if self._cache.exists():
+            self._cache.unlink()
+
+    def test_cache_invalidates_on_dir_change(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
+            (Path(d1) / "SKILL.md").write_text(
+                "---\nname: tmp-skill\ndescription: x\n---\n", encoding="utf-8")
+            os.environ["SKILL_CLASSIFIER_SKILL_DIRS"] = d1
+            first = skill_classifier.get_skills()
+            self.assertEqual([s["name"] for s in first], ["tmp-skill"])
+            # Same TTL window, different dirs -> must NOT serve the stale cache.
+            os.environ["SKILL_CLASSIFIER_SKILL_DIRS"] = d2
+            self.assertEqual(skill_classifier.get_skills(), [])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

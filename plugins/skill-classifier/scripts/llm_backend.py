@@ -28,7 +28,11 @@ Configuration env vars
 - ``SKILL_CLASSIFIER_MODEL``    Ollama model tag (default ``llama3.2:3b``)
 - ``GEMINI_MODEL``              Gemini CLI model (default
   ``gemini-3-flash-preview``)
-- ``SKILL_CLASSIFIER_TIMEOUT``  per-call timeout seconds (default ``10``)
+- ``SKILL_CLASSIFIER_TIMEOUT``  per-call timeout seconds (default ``3`` — this
+  is a per-prompt hook, so the cap is deliberately tight; a slow/cold backend
+  silently passes through rather than blocking the prompt)
+- ``SKILL_CLASSIFIER_KEEP_ALIVE``  Ollama model keep-alive (default ``10m``) so
+  the model stays resident between prompts and avoids repeated cold starts
 
 Failure policy
 --------------
@@ -54,7 +58,10 @@ IS_WINDOWS = sys.platform == "win32"
 DEFAULT_OLLAMA_HOST = "http://localhost:11434"
 DEFAULT_OLLAMA_MODEL = "llama3.2:3b"
 DEFAULT_GEMINI_MODEL = "gemini-3-flash-preview"
-DEFAULT_TIMEOUT_SECONDS = 10
+# Tight per-call cap: this runs on every prompt, so a slow/cold backend should
+# pass through silently rather than block. Tune up via SKILL_CLASSIFIER_TIMEOUT.
+DEFAULT_TIMEOUT_SECONDS = 3
+DEFAULT_KEEP_ALIVE = "10m"
 # Fast reachability guard. When Ollama is down, some OSes (notably Windows with
 # its firewall) silently drop the SYN instead of refusing, so a normal connect
 # blocks for the full request timeout — twice, once per resolved address of
@@ -131,10 +138,13 @@ def _ollama_complete(prompt: str, timeout: float) -> str:
         return ""
     url = f"{base}/api/generate"
     model = os.environ.get("SKILL_CLASSIFIER_MODEL", DEFAULT_OLLAMA_MODEL).strip() or DEFAULT_OLLAMA_MODEL
+    keep_alive = os.environ.get("SKILL_CLASSIFIER_KEEP_ALIVE", DEFAULT_KEEP_ALIVE).strip() or DEFAULT_KEEP_ALIVE
     body = json.dumps({
         "model": model,
         "prompt": prompt,
         "stream": False,
+        # Keep the model resident between prompts to avoid repeated cold starts.
+        "keep_alive": keep_alive,
         # Deterministic, short output — this is a classification task.
         "options": {"temperature": 0},
     }).encode("utf-8")
@@ -227,7 +237,7 @@ def _backend_order() -> list:
     return [choice] + [b for b in _DEFAULT_ORDER if b != choice]
 
 
-def complete(prompt: str, timeout: float = None) -> str:
+def complete(prompt: str, timeout: "float | None" = None) -> str:
     """Return an LLM completion for ``prompt`` as text, or "" on failure.
 
     Tries each configured backend in order until one returns non-empty text.

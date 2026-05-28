@@ -80,20 +80,29 @@ def scan_skills(dirs: list[Path]) -> list[dict]:
 
 
 def get_skills() -> list[dict]:
-    """Return skill catalog, using disk cache with TTL."""
+    """Return skill catalog, using disk cache with TTL.
+
+    The cache is keyed on both the TTL and the resolved skill directories, so
+    changing ``SKILL_CLASSIFIER_SKILL_DIRS`` invalidates a stale catalog.
+    """
+    dirs = skill_dirs()
+    dirs_key = [str(d) for d in dirs]
+
     if CACHE_FILE.exists():
         try:
             data = json.loads(CACHE_FILE.read_text(encoding="utf-8"))
             cached_at = datetime.fromisoformat(data["timestamp"])
-            if datetime.now() - cached_at < timedelta(seconds=CACHE_TTL_SECONDS):
+            fresh = datetime.now() - cached_at < timedelta(seconds=CACHE_TTL_SECONDS)
+            if fresh and data.get("dirs") == dirs_key:
                 return data["skills"]
         except Exception:
             pass
 
-    skills = scan_skills(skill_dirs())
+    skills = scan_skills(dirs)
     try:
         CACHE_FILE.write_text(json.dumps({
             "timestamp": datetime.now().isoformat(),
+            "dirs": dirs_key,
             "skills": skills,
         }), encoding="utf-8")
     except Exception as e:
@@ -217,15 +226,16 @@ def _parse_skill_array(output: str) -> list[str]:
     except json.JSONDecodeError:
         pass
 
-    # Fallback: extract the first JSON array from surrounding text
-    match = re.search(r"\[.*?\]", output, re.DOTALL)
-    if match:
+    # Fallback: small local models often wrap the array in reasoning text and
+    # may include decoy brackets (e.g. `thinking [step 1] then ["skill"]`). Try
+    # every flat bracket span and return the first that parses to a list.
+    for candidate in re.findall(r"\[[^\[\]]*\]", output, re.DOTALL):
         try:
-            parsed = json.loads(match.group(0))
-            if isinstance(parsed, list):
-                return [s for s in parsed if isinstance(s, str)]
+            parsed = json.loads(candidate)
         except json.JSONDecodeError:
-            pass
+            continue
+        if isinstance(parsed, list):
+            return [s for s in parsed if isinstance(s, str)]
 
     return []
 
