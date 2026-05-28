@@ -8,6 +8,9 @@
 **Gate decision:** strict — only `doppler` is active and on the marketplace menu; every other
 reference/workflow skill is gated pending review.
 **Holding location:** `_incubator/` (in-repo, easy to promote back; not installable).
+**Linear:** planning now lives in Linear — parent [MOO-561](https://linear.app/moosegoose/issue/MOO-561)
+(*AI tools platform*), one triage sub-issue per gated skill (MOO-562 … MOO-570). This file stays the
+in-repo source of truth for required work; Linear tracks status. Keep the two in sync.
 
 ---
 
@@ -34,18 +37,18 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 
 ## Status board
 
-| Skill | Tier | Status | Location | Required work |
-|---|---|---|---|---|
-| `doppler` | A | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/doppler` | None — reference standard. |
-| `plugin-authoring-guide` ("skill guide") | A | 🛑 gated · **rework** | `_incubator/frozen-skills/skills/` | **Rework** (user directive). |
-| `mcp-deployment-guide` ("MCP guide") | A | 🛑 gated · **update** | `_incubator/frozen-skills/skills/` | **Update** (user directive). |
-| `agent-config-megaref` | A | 🛑 gated · **light update** | `_incubator/frozen-skills/skills/` | Light update **+ confer/cross-reference with the LLM archiver project** (user directive). |
-| `setup-rules` | B | 🛑 gated | `_incubator/frozen-rules/skills/` | Tiny fix + verify rule install flow. |
-| `gh-common-workflows` | B | 🛑 gated | `_incubator/frozen-skills/skills/` | De-opinionate (remove NORTH_STAR / Codex-specific assumptions); verify refs. |
-| `stacked-pr-workflow` | B | 🛑 gated | `_incubator/frozen-skills/skills/` | Run + verify the 7 PowerShell helpers; decide if niche is worth keeping. |
-| `skill-manager` | B | 🛑 gated | `_incubator/skill-manager/` | Verify scripts + registry assumptions (`skills.sh`, `~/.agents/skills`). |
-| `session-skill-inferencer` | C | 🛑 gated · **highest concern** | `_incubator/frozen-skills/skills/` | Fix generation quality before any promotion (see below). |
-| `skill-injector` (was skill-classifier) | C | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Test end-to-end before enabling; finish internal rename (scripts/module + ADR/doc prose still say "classifier"). |
+| Skill | Tier | Linear | Status | Location | Required work |
+|---|---|---|---|---|---|
+| `doppler` | A | — (done) | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/doppler` | None — reference standard. |
+| `plugin-authoring-guide` ("skill guide") | A | MOO-562 | 🛑 gated · **rework** | `_incubator/frozen-skills/skills/` | **Rework** (user directive). |
+| `mcp-deployment-guide` ("MCP guide") | A | MOO-563 | 🛑 gated · **update** | `_incubator/frozen-skills/skills/` | **Update** (user directive). |
+| `agent-config-megaref` | A | MOO-564 | 🛑 gated · **light update** | `_incubator/frozen-skills/skills/` | Light update **+ confer/cross-reference with the LLM archiver project** (user directive). |
+| `setup-rules` | B | MOO-568 | 🛑 gated | `_incubator/frozen-rules/skills/` | Tiny fix + verify rule install flow. |
+| `gh-common-workflows` | B | MOO-565 | 🛑 gated | `_incubator/frozen-skills/skills/` | De-opinionate (remove NORTH_STAR / Codex-specific assumptions); verify refs. |
+| `stacked-pr-workflow` | B | MOO-566 | 🛑 gated | `_incubator/frozen-skills/skills/` | Run + verify the 7 PowerShell helpers; decide if niche is worth keeping. |
+| `skill-manager` | B | MOO-567 | 🛑 gated | `_incubator/skill-manager/` | Verify scripts + registry assumptions (`skills.sh`, `~/.agents/skills`). |
+| `session-skill-inferencer` | C | MOO-569 | 🛑 gated · **highest concern** | `_incubator/frozen-skills/skills/` | Fix generation quality before any promotion (see below). |
+| `skill-injector` (was skill-classifier) | C | MOO-570 | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Test end-to-end before enabling; finish internal rename (scripts/module + ADR/doc prose still say "classifier"). |
 
 Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental · Tier A = strong reference, B = functional/narrow, C = rework.
 
