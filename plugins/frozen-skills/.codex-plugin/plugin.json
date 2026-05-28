@@ -1,37 +1,13 @@
 {
   "name": "frozen-skills",
-  "description": "Universal cross-project skills for agent configuration and MCP deployment. Reference guides that work across Claude Code, Gemini CLI, VS Code, and other AI tools.",
-  "version": "1.4.0",
+  "description": "Doppler secrets-management skill. Other reference skills are gated in _incubator/ pending review (see docs/skill-review).",
+  "version": "2.0.0",
   "author": {
     "name": "Coldaine",
     "url": "https://github.com/Coldaine"
   },
   "license": "MIT",
   "skills": [
-    {
-      "name": "agent-config-megaref",
-      "path": "skills/agent-config-megaref"
-    },
-    {
-      "name": "mcp-deployment-guide",
-      "path": "skills/mcp-deployment-guide"
-    },
-    {
-      "name": "plugin-authoring-guide",
-      "path": "skills/plugin-authoring-guide"
-    },
-    {
-      "name": "gh-common-workflows",
-      "path": "skills/gh-common-workflows"
-    },
-    {
-      "name": "session-skill-inferencer",
-      "path": "skills/session-skill-inferencer"
-    },
-    {
-      "name": "stacked-pr-workflow",
-      "path": "skills/stacked-pr-workflow"
-    },
     {
       "name": "doppler",
       "path": "skills/doppler"

@@ -1,46 +1,16 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "frozen-skills",
-  "description": "Universal cross-project skills for agent configuration and MCP deployment. Reference guides that work across Claude Code, Gemini CLI, VS Code, and other AI tools.",
-  "version": "1.4.0",
+  "description": "Doppler secrets-management skill. Additional reference skills (agent config, MCP deployment, plugin authoring, gh workflows, stacked PRs, session inference) are gated in _incubator/ pending a quality review pass — see docs/skill-review/.",
+  "version": "2.0.0",
   "category": "reference",
   "author": {
     "name": "Coldaine",
     "url": "https://github.com/Coldaine"
   },
   "license": "MIT",
-  "tags": ["configuration", "mcp", "reference", "multi-tool"],
+  "tags": ["secrets", "doppler", "reference"],
   "skills": [
-    {
-      "name": "agent-config-megaref",
-      "path": "skills/agent-config-megaref",
-      "description": "Definitive reference for configuring agents across all harnesses"
-    },
-    {
-      "name": "mcp-deployment-guide",
-      "path": "skills/mcp-deployment-guide",
-      "description": "MCP server deployment guide across all AI tools"
-    },
-    {
-      "name": "plugin-authoring-guide",
-      "path": "skills/plugin-authoring-guide",
-      "description": "Complete reference for creating Claude Code plugins, skills, agents, hooks, and marketplaces"
-    },
-    {
-      "name": "gh-common-workflows",
-      "path": "skills/gh-common-workflows",
-      "description": "Opinionated GitHub CLI workflows for PR triage, review, merge, and close decisions"
-    },
-    {
-      "name": "session-skill-inferencer",
-      "path": "skills/session-skill-inferencer",
-      "description": "Analyze agentic coding sessions to discover friction patterns and generate skills, rules, and hooks"
-    },
-    {
-      "name": "stacked-pr-workflow",
-      "path": "skills/stacked-pr-workflow",
-      "description": "Convert messy branch or PR state into reviewable stacked pull requests with git, gh, and optional Graphite compatibility"
-    },
     {
       "name": "doppler",
       "path": "skills/doppler",
