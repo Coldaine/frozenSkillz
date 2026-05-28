@@ -1,11 +1,13 @@
 ---
-name: skill-classifier
-description: LLM-powered skill discovery hook that suggests relevant skills based on your prompt and conversation history. Use this to automatically find the best skills for your current task.
+name: skill-injector
+description: LLM-powered hook that injects a relevant-skill suggestion based on your prompt and conversation history. Use this to automatically surface the best skills for your current task.
 ---
 
-# Skill Classifier
+# Skill Injector
 
-The `skill-classifier` is a `UserPromptSubmit` hook that uses a small, fast LLM to
+> NOTE: untested. Internal script/module names and some prose below still say "classifier" — to be cleaned up during the rework/test pass.
+
+The `skill-injector` is a `UserPromptSubmit` hook that uses a small, fast LLM to
 analyze your intent and suggest relevant skills from your installed catalog. The
 LLM backend is swappable — **Ollama** (local) by default, with the **Gemini CLI**
 as a fallback.

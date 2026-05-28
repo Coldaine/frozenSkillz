@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
-  "name": "skill-classifier",
-  "description": "WIP: two LLM-backed hooks (Ollama by default, Gemini CLI fallback) — a UserPromptSubmit classifier that suggests relevant skills, and a PreToolUse subagent-prompt quality gate that injects advisory feedback before agent dispatch. Two-layer architecture: local LLM for classification, skills for detailed guidance.",
+  "name": "skill-injector",
+  "description": "WIP, UNTESTED: two LLM-backed hooks (Ollama default, Gemini CLI fallback) — a UserPromptSubmit hook that injects a relevant-skill suggestion, and a PreToolUse subagent-prompt quality gate that injects advisory feedback before agent dispatch. Not yet tested end-to-end; review before installing/enabling.",
   "version": "0.3.0",
   "category": "development",
   "author": {
@@ -9,26 +9,26 @@
     "url": "https://github.com/Coldaine"
   },
   "license": "MIT",
-  "tags": ["hooks", "classification", "ollama", "gemini", "wip", "experimental"],
+  "tags": ["hooks", "skill-injection", "ollama", "gemini", "wip", "experimental", "untested"],
   "status": "experimental",
   "hooks": "./hooks/hooks.json",
   "skills": [
     {
-      "name": "skill-classifier",
-      "path": "skills/skill-classifier",
-      "description": "LLM-powered skill discovery hook that suggests relevant skills."
+      "name": "skill-injector",
+      "path": "skills/skill-injector",
+      "description": "Docs for the skill-injection hook: injects a relevant-skill suggestion on prompt submit."
     }
   ],
   "scripts": [
     {
       "name": "skill_classifier",
       "path": "scripts/skill_classifier.py",
-      "description": "Skill classifier hook (Ollama default, Gemini CLI fallback)"
+      "description": "Skill-injection hook (Ollama default, Gemini CLI fallback). NOTE: file/module still named skill_classifier — rename pending during the test pass."
     },
     {
       "name": "llm_backend",
       "path": "scripts/llm_backend.py",
-      "description": "Swappable LLM backend shared by classifier hooks"
+      "description": "Swappable LLM backend shared by the hooks"
     },
     {
       "name": "prompt_quality_gate",
