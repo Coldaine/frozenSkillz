@@ -1,0 +1,4 @@
+{"type":"user","message":{"role":"user","content":"Let's work on the auth module today."},"uuid":"aaa","timestamp":"2026-02-08T10:00:00.000Z"}
+{"type":"assistant","message":{"role":"assistant","content":"Sure, I'll take a look at the auth module. What would you like to focus on?"},"uuid":"bbb","timestamp":"2026-02-08T10:00:05.000Z"}
+{"type":"user","message":{"role":"user","content":"I just refactored the login endpoint to use JWT tokens instead of sessions. Can you review the changes?"},"uuid":"ccc","timestamp":"2026-02-08T10:01:00.000Z"}
+{"type":"assistant","message":{"role":"assistant","content":"I've reviewed the changes. The JWT implementation looks good overall. I noticed the token expiry is set to 24h which is reasonable. The refresh token logic in auth/refresh.py correctly invalidates old tokens."},"uuid":"ddd","timestamp":"2026-02-08T10:01:30.000Z"}
