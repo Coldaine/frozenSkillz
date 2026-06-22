@@ -24,6 +24,7 @@ This file stays the in-repo source of truth for required work; Linear tracks sta
    (the three root marketplace catalogs + the plugin's own `plugin.json` / `gemini-extension.json` `skills[]` array),
    and bump the plugin version.
 4. Update this tracker when status changes.
+5. Scout snapshots live under `_incubator/scout/` until they are reconciled into the skill rows below or deleted.
 
 ### Promotion bar ("ready")
 A skill may be promoted when it meets the bar set by `doppler` (the reference standard):
@@ -53,6 +54,14 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `skill-injector` (was skill-classifier) | C | MOO-570 | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Test end-to-end before enabling; finish internal rename (scripts/module + ADR/doc prose still say "classifier"). |
 
 Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental · Tier A = strong reference, B = functional/narrow, C = rework.
+
+---
+
+## Scout intake
+
+| Intake | Status | Location | Required work |
+|---|---|---|---|
+| `coldaine-infra/skills/frozen` submodule snapshot (`c2868ee2c0b49eaecdbd365bc00ffec0685487fe`) | scout · incubated | `_incubator/scout/2026-06-16-coldaine-infra-skills-frozen-submodule/` | Compare against current `_incubator/` and `plugins/skill-injector/`; frozen-rules + `gh-common-workflows` matched current incubator files in the 2026-06-16 audit, but `agent-config-megaref`, `mcp-deployment-guide`, `plugin-authoring-guide`, and old `skill-classifier` hook/script/test files have deltas that need review before promotion or deletion. |
 
 ---
 

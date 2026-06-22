@@ -1,0 +1,32 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "skill-classifier",
+  "description": "WIP: UserPromptSubmit hook that uses Gemini Flash to classify user prompts and suggest relevant skills. Two-layer architecture: local LLM for classification, skills for detailed guidance.",
+  "version": "0.1.0",
+  "category": "development",
+  "author": {
+    "name": "Coldaine",
+    "url": "https://github.com/Coldaine"
+  },
+  "license": "MIT",
+  "tags": ["hooks", "classification", "gemini", "wip", "experimental"],
+  "status": "experimental",
+  "hooks": [
+    {
+      "type": "UserPromptSubmit",
+      "path": "hooks/hooks.json"
+    }
+  ],
+  "scripts": [
+    {
+      "name": "skill_classifier",
+      "path": "scripts/skill_classifier.py",
+      "description": "Gemini-powered skill classifier"
+    }
+  ],
+  "requirements": {
+    "python": ">=3.9",
+    "packages": ["google-generativeai"],
+    "env": ["GEMINI_API_KEY"]
+  }
+}
