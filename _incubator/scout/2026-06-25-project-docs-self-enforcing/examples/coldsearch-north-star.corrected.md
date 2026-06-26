@@ -15,7 +15,7 @@ ColdSearch exists so a user or agent can ask for web/search/extract/crawl-style 
 
 ## In / Out
 
-> Goals are a guiding light, not a checklist. These are aspirations, not a reflection of the current codebase.
+> In/Out appear here because ColdSearch has a concrete caller (a user or agent asking for search/extract work) and a contract-shaped Out. For projects without a clear caller or Out, omit this section rather than force filler — see session/02.
 
 **In:** A query, URL, provider-tool request, or batch of requests.
 
@@ -32,15 +32,21 @@ ColdSearch exists so a user or agent can ask for web/search/extract/crawl-style 
 
 ## Goals
 
+> Goals are a guiding light, not a checklist. These are aspirations, not a reflection of the current codebase. Goal numbers are kept stable from the original — G5 and G7 are marked moved, not renumbered, so downstream cross-references in `docs/architecture.md` stay resolvable.
+
 **G1: Unified Access To Provider Tools.** One ColdSearch surface should reach the useful tools from Tavily, Brave, Exa, Serper, Jina, Firecrawl, SearXNG, and future providers.
 
 **G2: Compare Provider Effectiveness.** ColdSearch should make it practical to run comparable work across providers, inspect the results, and learn which tools work best for which jobs.
 
-**G3: Use Keys And Quotas Efficiently.** Key pools, provider pools, cache hits, and batch execution should spread usage across available keys and reduce avoidable paid calls — including alternating between keys to double free-tier usage.
+**G3: Use Keys And Quotas Efficiently.** Key pools, provider pools, cache hits, and batch execution should spread usage across available keys and reduce avoidable paid calls.
 
 **G4: Search And Reuse Prior Work.** ColdSearch should build a searchable local memory of recent search/extract/tool results so later calls can surface relevant prior items before paying providers again. Reuse should prefer retrieval over blind replay; exact response replay is only acceptable when it is painless, explicit, and freshness policy allows it.
 
-**G5: Preserve Useful Provider Detail.** Common outputs should be easy to consume, but raw provider details should remain accessible when they matter.
+**G5: (moved to the Audit First pillar).** The original "Log And Audit Everything Important" goal was a feature spec (it listed exactly what to log) and a tradeoff in disguise. It lives now as the Audit First pillar below, which carries the cost/benefit frame it always was.
+
+**G6: Preserve Useful Provider Detail.** Common outputs should be easy to consume, but raw provider details should remain accessible when they matter.
+
+**G7: (moved to architecture.md).** "Stable surface, flexible execution" is a best practice (one core, many entrypoints, no duplicated logic), not a guiding light specific to this product. It belongs in the architecture approach statement as the why for the CLI-first core.
 
 ## Pillars
 
@@ -52,6 +58,6 @@ ColdSearch exists so a user or agent can ask for web/search/extract/crawl-style 
 
 **Searchable Cache, Not Blind Replay.** Cached work should become a searchable recent-results corpus that can be inspected and reused. We accept a lighter cache (prefer surfacing relevant prior items over silently replaying old responses; avoid a heavy bespoke cache layer unless a package or simple local store makes it painless) in exchange for reuse that the caller can trust and inspect.
 
-**Config Over Code.** We accept a bit more config complexity in exchange for defaults that are over-writable: routing, provider pools, keys, and endpoint choices should be configurable rather than hardcoded, with sensible defaults.
-
 **Fail Visible.** When something breaks, the error should make it obvious whether the issue is config, credentials, provider reachability, quota/rate limits, unsupported capability, or provider-specific behavior. We accept the effort of structured error classification in exchange for failures that diagnose themselves.
+
+> Note: the original "Config Over Code" pillar was removed. It failed the reasonable-opposite test — no one on this project would argue *for* hardcoded routing, so "configurable over hardcoded" is a default everyone agrees on, not a real tradeoff. If a genuine tradeoff emerges (e.g. "we accept config-file reading friction for operator-overridable behavior at runtime without redeploy"), it can be added back as a real pillar. Until then it's a convention, not a pillar.

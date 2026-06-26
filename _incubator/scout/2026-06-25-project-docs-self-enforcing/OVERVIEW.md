@@ -193,5 +193,77 @@ conditional rule."
 ## The PR
 
 https://github.com/Coldaine/frozenSkillz/pull/32 — branch
-`claude/project-docs-self-enforcing-design`. A review subagent was launched against it
-before this overview; fold its findings in when it lands.
+`claude/project-docs-self-enforcing-design`.
+
+## The review pass (after persistence)
+
+A review subagent read all the writeups plus the original skill, the original ColdSearch
+NORTH_STAR, and the real `architecture.md` files in ColdSearch and coldaine-k8cluster.
+It found real defects. The most important:
+
+1. **The "self-enforcing" overclaim (biggest).** The settled output (sessions 02–03 +
+   the corrected example) is self-*persuading*, not self-enforcing. Content discipline
+   produces a better doc, not a converging one. The only mechanism that would actually
+   produce convergence is the exploratory `scripts:` gate + hook + validator in
+   session/06. The adjective was smeared across both halves. **Fix applied:** README and
+   this overview now state plainly that settled = self-persuading, enforcement = unbuilt
+   exploratory.
+
+2. **The architecture principle was never tested against a real architecture.md.** When
+   run against ColdSearch's real `docs/architecture.md`, session/03's "no component
+   without a because" rule would reject the Major Components index — the most useful
+   navigation surface in the doc. When run against coldaine-k8cluster, it passes — but
+   that's the platform/DEGRADES case, so the principle is implicitly platform-flavored
+   and over-rejects on products. **Fix applied:** README records this as a known
+   limitation; session/03 needs a carve-out for status-labeled orientation indexes before
+   it's treated as final.
+
+3. **The aspirations line was in the wrong section** in the corrected example (under
+   In/Out, not Goals). **Fixed** in the example.
+
+4. **G3 smuggled implementation into a goal** ("including alternating between keys to
+   double free-tier usage" — a mechanism, not a compass bearing, violating session/02's
+   own "Not implementation" rule). **Fixed:** the clause is removed; the key-pool
+   tradeoff can become a real pillar if a genuine opposing position emerges.
+
+5. **"Config Over Code" still failed the reasonable-opposite test** (no one would argue
+   for hardcoded routing; it's a default dressed as a tradeoff). **Fixed:** removed from
+   the example, with a note explaining why and how it could return as a real tradeoff.
+
+6. **Goal renumbering broke downstream architecture.md cross-references.** The original
+   correction renumbered G1–G7 to G1–G5, which silently invalidated four citations in
+   ColdSearch's real `docs/architecture.md` (lines 13, 62, 63, 64). **Fixed:** goals keep
+   their original numbers; G5 and G7 are marked "(moved)" rather than renumbered, so the
+   architecture cross-references stay resolvable. This is itself a small instantiation of
+   the self-enforcement problem — the doc edit created downstream drift that nothing
+   forced to be reconciled.
+
+The review's overall verdict was "needs fixes first" — the eight concrete fixes it
+listed. The four applied here (1–6 above; some bundle multiple review items) are the
+ones that could be fixed in the artifacts without re-opening design questions. The
+remaining two (reconcile session/02 and session/04 on the platform case; resolve the
+fixed-commentary-line leak between the exploratory scaffold and the settled example) are
+recorded as open and are the natural first items when resuming.
+
+## Where to resume
+
+1. **`examples/coldsearch-north-star.corrected.md`** — the worked example, now with the
+   review's concrete defects fixed (aspirations line moved to Goals, G3 implementation
+   clause removed, Config Over Code removed, goal numbers kept stable so architecture
+   cross-refs survive). Read against the original `d:\_projects\ColdSearch\docs\NORTH_STAR.md`.
+2. **`session/02`** for the NORTH_STAR rules and **`session/03`** for the architecture
+   principle — with the known limitation on session/03 noted in the README. The next
+   concrete moves, in priority order:
+   - revise session/03's "no component without a because" rule with a carve-out for
+     status-labeled orientation indexes, then re-test against ColdSearch's real
+     `docs/architecture.md`;
+   - reconcile session/02 and session/04 on the platform case (add a third identity
+     shape — "source-of-truth framing" — to session/02's Resulting shape);
+   - resolve the fixed-commentary-line leak (the blockquote preambles in the corrected
+     example are an unflagged instance of the exploratory hybrid scaffold);
+   - then either rewrite the real `north-star-guide.md` to this shape, or decide
+     whether to build the enforcement mechanism (session/06) that would move the
+     output from self-persuading to actually self-enforcing.
+3. **`session/06`** for the exploratory skill+CLI material — revisit only when deciding
+   whether to build enforcement machinery. Until then, the settled output is
+   self-persuading, and that's the honest framing.
