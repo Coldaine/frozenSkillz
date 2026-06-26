@@ -16,6 +16,7 @@ not settled. The NORTH_STAR and architecture.md principles are the load-bearing 
 ## Contents
 
 - `README.md` — this file
+- `OVERVIEW.md` — conversation overview + reflection + persistence checklist (read this first to orient)
 - `session/` — the full session writeup, split by topic
   - `01-the-bar.md` — the self-enforcing principle and what the current skill gets wrong
   - `02-north-star-redesign.md` — opener, goals, conditional In/Out, inverted anti-goals, pillars, deletions

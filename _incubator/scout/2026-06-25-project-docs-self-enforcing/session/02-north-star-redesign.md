@@ -79,6 +79,38 @@ The distinction is sharper than count.
 
 The skill bundles four one-liners. Split them.
 
+### The abstract test that motivated the conditional rule (before the empirical data)
+
+Before running the 12-project stress test, the framework was tested against five
+well-known pieces of software to see where In/Out/Shape holds and where it collapses.
+This is the argument that established "conditional, not universal" — the 12-project test
+then confirmed it empirically.
+
+| Software | In | Out | Shape | Verdict |
+|---|---|---|---|---|
+| Git | Snapshots of a directory tree | A content-addressed object store + commit DAG + mutable refs | CLI tool, local object DB, distributed sync | HOLDS — clear user, crisp In/Out, concrete Shape |
+| Postgres | SQL statements + data | Durable, queryable, transactional results | One-process-per-connection, WAL, MVCC relational store | HOLDS — textbook case |
+| VS Code | Text files, code, extensions | An editing/debugging environment | Electron desktop app + extension host + LSP | THIN — In/Out generic; Shape carries the entire identity |
+| Linux kernel | Hardware resources + program instructions | Processes, file abstraction, memory protection, device access | Monolithic kernel + loadable modules, syscall boundary | DEGRADES — In is so abstract it's barely a filter; no single caller |
+| Python (the language) | Source code | Executed programs | *—nothing—* the spec is silent; CPython is bytecode-interpreted, PyPy is JIT | COLLAPSES — the language has no Shape; Shape belongs to implementations, not the spec |
+
+**Where it works:** Git and Postgres — clear caller, crisp data-model In and Out, concrete Shape.
+**Where it thins:** VS Code — In/Out add almost nothing; Shape is the whole doc.
+**Where it degrades:** Linux — In is abstract, caller is "every process" (meaningless as a filter).
+**Where it collapses:** Python — the framework forces a prescription the spec deliberately refuses.
+
+In/Out/Shape is **not a universal identity framework.** It's a product-scoping instrument
+that works when three conditions hold: (1) a clear *caller*, (2) a clear *Out* the caller
+receives, (3) *Shape* concrete enough to be a real filter, not a tautology. When those
+hold, it's excellent. When they don't, it degrades into vagueness or a Shape-only doc or
+outright prescription-forcing.
+
+The rule of thumb that falls out: **if you can't fill out In/Out/Shape concretely, that's
+a signal the thing you're describing isn't a product with a caller — it's a platform, a
+spec, or a layer, and it needs a different identity shape, not a forced one.** This is
+what motivated launching the 12-project empirical test (see
+`04-in-out-shape-stress-test.md`), which confirmed the conditional rule.
+
 ### In / Out — keep in NORTH_STAR, conditional
 
 - **What:** Scope filters. "In: owner's work + tools. Out: a thin public portfolio, nothing else."
