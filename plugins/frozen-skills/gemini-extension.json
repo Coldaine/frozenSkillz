@@ -1,7 +1,7 @@
 {
   "name": "frozen-skills",
-  "description": "Doppler secrets-management skill. Other reference skills are gated in _incubator/ pending review (see docs/skill-review).",
-  "version": "2.0.0",
+  "description": "Reviewed active skills: Doppler secrets management and external skill intake. Other reference skills are gated in _incubator/ pending review (see docs/skill-review).",
+  "version": "2.1.0",
   "author": {
     "name": "Coldaine",
     "url": "https://github.com/Coldaine"
@@ -11,6 +11,10 @@
     {
       "name": "doppler",
       "path": "skills/doppler"
+    },
+    {
+      "name": "external-skill-intake",
+      "path": "skills/external-skill-intake"
     }
   ]
 }
