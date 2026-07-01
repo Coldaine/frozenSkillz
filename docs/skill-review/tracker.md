@@ -52,6 +52,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `skill-manager` | B | MOO-567 | 🛑 gated | `_incubator/skill-manager/` | Verify scripts + registry assumptions (`skills.sh`, `~/.agents/skills`). |
 | `session-skill-inferencer` | C | MOO-569 | 🛑 gated · **highest concern** | `_incubator/frozen-skills/skills/` | Fix generation quality before any promotion (see below). |
 | `skill-injector` (was skill-classifier) | C | MOO-570 | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Test end-to-end before enabling; finish internal rename (scripts/module + ADR/doc prose still say "classifier"). |
+| `icepanel-api` | A | — | 🛑 gated · **incubating** | `_incubator/frozen-skills/skills/icepanel-api/` | Live-validate diagram push; de-projectify done; promotion after portfolio Phase 2 proof. |
 
 Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental · Tier A = strong reference, B = functional/narrow, C = rework.
 
@@ -123,6 +124,11 @@ Use it as the quality bar for everything else.
 - **TODO before relying on it:** test end-to-end; then finish the rename internally — the Python scripts/module
   (`skill_classifier.py`), the env vars (`SKILL_CLASSIFIER_*`), the ADRs, and the SKILL.md/README prose still say
   "classifier". Left as-is for now to avoid breaking the untested hook wiring.
+
+### `icepanel-api` — incubating
+- Ported from Scratch v2 (~1,400 lines). Universal canon in `_incubator/frozen-skills/skills/icepanel-api/`.
+- De-projectified SKILL.md; agent briefs in `agents/`; optional scripts documented in `scripts/README.md`.
+- **Before promotion:** live-validate diagram push on portfolio landscapes; attach PNG/share proof to examples; run layout/push scripts.
 
 ---
 

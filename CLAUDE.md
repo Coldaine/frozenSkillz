@@ -1,200 +1,79 @@
 # frozenSkillz — Cross-Platform Agent Plugin Marketplace
 
-Universal skills, rules, and tools for cross-project agent workflows. Works across Claude Code, Codex, Cursor, and Gemini.
+Universal skills, rules, and tools for cross-project agent workflows. Works across Claude Code, Codex, Cursor, Gemini, and Kilo.
 
-## What This Is
+> **Agents:** Read `AGENTS.md` for the full skill intake workflow, quality gate, and evaluation rubric.
 
-A **cross-platform plugin marketplace** containing four plugins:
+## Quickstart
 
-1. **frozen-skills** — Universal cross-project skills (agent config reference, MCP deployment guide)
-2. **frozen-rules** — Universal rule templates (Ansible, documentation, submodules)
-3. **skill-classifier** — WIP local-LLM skill discovery hook + subagent prompt quality gate
-4. **skill-manager** — Skill portfolio management and auditing tool
-
-## Installation
-
-### Add the marketplace:
 ```bash
 /plugin marketplace add Coldaine/frozenSkillz
+/plugin install frozen-skills@coldaine-skills
 ```
 
-### Install individual plugins:
+## Plugins
+
+| Plugin | Status | Purpose |
+|---|---|---|
+| `frozen-skills` | active | Shared skills (doppler, stacked-pr, etc.) |
+| `frozen-rules` | active | Rule templates (Ansible, docs, submodules) |
+| `skill-injector` | experimental | LLM skill-suggestion hook + subagent prompt quality gate |
+| `skill-manager` | gated | Skill inventory, audit, and reconciliation |
+
+## Install
+
 ```bash
 /plugin install frozen-skills@coldaine-skills
 /plugin install frozen-rules@coldaine-skills
-/plugin install skill-classifier@coldaine-skills  # Experimental
+/plugin install skill-injector@coldaine-skills
+/plugin install skill-manager@coldaine-skills
 ```
 
-## Marketplace Structure
+## Key Skills
+
+- `doppler` — Doppler CLI and secret-injection workflows (security-first, cross-platform)
+- `stacked-pr-workflow` — Convert messy branches into reviewable stacked PRs
+- `agent-config-megaref` — Reference for configuring agent clients
+- `mcp-deployment-guide` — MCP server deployment across AI tools
+- `plugin-authoring-guide` — Plugin, skill, agent, hook, and marketplace authoring
+- `gh-common-workflows` — GitHub CLI workflows for PR triage, review, merge
+- `session-skill-inferencer` — Analyze coding sessions, generate skills/rules/hooks
+
+> Most non-Doppler skills are **gated** in `_incubator/` pending review. See `AGENTS.md` for the promotion bar.
+
+## Repository Layout
 
 ```
 frozenSkillz/
-├── .claude-plugin/
-│   └── marketplace.json       # Marketplace catalog
-├── .codex-plugin/             # Codex manifests
-├── .cursor-plugin/            # Cursor manifests
-├── gemini-extension.json      # Gemini manifests
-├── plugins/
-│   ├── frozen-skills/         # Universal skills
-│   │   ├── .claude-plugin/plugin.json
-│   │   ├── .codex-plugin/plugin.json
-│   │   ├── .cursor-plugin/plugin.json
-│   │   ├── gemini-extension.json
-│   │   └── skills/
-│   │       ├── agent-config-megaref/SKILL.md
-│   │       ├── mcp-deployment-guide/SKILL.md
-│   │       └── plugin-authoring-guide/SKILL.md
-│   ├── frozen-rules/          # Universal rules
-│   │   ├── .claude-plugin/plugin.json
-│   │   ├── rules/             # Raw rule templates
-│   │   │   ├── ansible-playbooks.md
-│   │   │   ├── documentation-frontmatter.md
-│   │   │   └── submodule-workflow.md
-│   │   └── skills/
-│   │       └── setup-rules/SKILL.md
-│   └── skill-classifier/      # WIP discovery hook
-│       ├── .claude-plugin/plugin.json
-│       ├── hooks/hooks.json
-│       ├── scripts/skill_classifier.py
-│       ├── skills/
-│       │   └── skill-classifier/SKILL.md
-│       ├── test_classifier.py
-│       ├── mock_input.json
-│       ├── mock_transcript.jsonl
-│       └── docs/decisions/    # 8 ADRs
-└── CLAUDE.md (this file)
+├── plugins/                  Active marketplace content
+│   ├── frozen-skills/skills/ Active skills
+│   ├── frozen-rules/         Rule templates
+│   └── skill-injector/       Experimental hooks
+├── _incubator/               Gated content (not in marketplace)
+├── docs/                     Workflow docs, rubric, tracker
+├── .claude-plugin/           Claude Code marketplace catalog
+├── .codex-plugin/            Codex marketplace catalog
+├── .cursor-plugin/           Cursor marketplace catalog
+├── gemini-marketplace.json   Gemini marketplace catalog
+├── mcp/                      MCP server config templates
+├── CLAUDE.md (this file)
+└── AGENTS.md                 Agent-facing workflow docs
 ```
 
-## Plugin Descriptions
+## Validation
 
-### frozen-skills (reference)
-
-**Category**: reference  
-**Version**: 1.2.0  
-**Skills**:
-- `agent-config-megaref` — Definitive reference for configuring agents across Claude Code, Gemini CLI, VS Code, OpenCode, etc.
-- `mcp-deployment-guide` — MCP server deployment guide across all AI tools
-- `plugin-authoring-guide` — Complete reference for creating Claude Code plugins, skills, agents, hooks, and marketplaces
-- `gh-common-workflows` — Opinionated GitHub CLI workflows for PR triage, review, merge, and close decisions
-- `session-skill-inferencer` — Analyze agentic coding sessions to discover friction patterns and generate skills, rules, and hooks
-
-**Use when**: Answering "how do I configure X?", "where do I deploy MCP servers?", "how do I write a plugin?", or analyzing session patterns to generate skills
-
-### frozen-rules (standards)
-
-**Category**: standards  
-**Version**: 1.0.0  
-**Skills**:
-- `setup-rules` — Helps install and customize rule templates
-
-**Rule Templates**:
-- `ansible-playbooks.md` — Ansible playbook header format, secrets, manual execution
-- `documentation-frontmatter.md` — Documentation frontmatter requirements
-- `submodule-workflow.md` — Git submodule workflow rules
-
-**Use when**: Establishing project standards for Ansible, docs, or submodules
-
-**Note**: Rules must be copied to `.claude/rules/` in each project. The `setup-rules` skill guides you through this.
-
-### skill-classifier (development, experimental)
-
-**Category**: development  
-**Version**: 0.3.0  
-**Status**: WIP  
-**Skills**:
-- `skill-classifier` — LLM-powered skill discovery hook documentation
-
-**What it does**: Two small-LLM-backed hooks sharing one swappable backend (Ollama local default, Gemini CLI fallback):
-1. **Skill classifier** (`UserPromptSubmit`) — classifies user prompts and suggests relevant skills.
-2. **Subagent prompt quality gate** (`PreToolUse` on `Agent`/`Task`) — reviews the subagent prompt against a quality checklist and injects advisory, non-blocking feedback before dispatch.
-
-**Architecture**: Two-layer skill activation:
-1. **Layer 1 (hook)**: Fast LLM classification (Ollama by default) — "what category of task?"
-2. **Layer 2 (skills)**: Detailed guidance from loaded skills — "here's how to do it"
-
-**Requirements**:
-- Python >=3.9 (standard library only — no extra packages for the default backend)
-- **Ollama backend (default)**: a running [Ollama](https://ollama.com) server with a small model pulled (`SKILL_CLASSIFIER_MODEL`, default `llama3.2:3b`)
-- **Gemini backend (fallback)**: the `gemini` CLI on `PATH` plus `GEMINI_API_KEY`
-
-See `plugins/skill-classifier/README.md` for the full backend configuration.
-
-**ADRs**:
-- 001: LLM-only classification (no keyword matching)
-- 002: Gemini Flash CLI as MVP
-- 003: Hook output format (JSON with suggestions)
-- 004: Silent passthrough on failure
-- 005: Two-layer skill activation
-- 006: Transcript parsing strategy
-- 007: Swappable LLM backend with Ollama as default (supersedes 002)
-- 008: Subagent prompt quality gate (PreToolUse advisory hook)
-
-## Development
-
-This repo is on branch `feature/cross-project-skills-and-rules`.
-
-### Design Principles
-
-1. **Universal skills** — Work across Claude Code, Gemini CLI, VS Code, and other AI tools
-2. **Reference, not execution** — Skills explain *how to configure*, not *implement new harnesses*
-3. **Database of decisions** — ADRs document architecture choices for the classifier
-4. **Plugin-first** — All capability packaged as installable plugins, not monolithic repo
-
-### Why a Marketplace?
-
-Skills and rules need to:
-- **Be versioned** — Track what's deployed across projects
-- **Be discoverable** — Users install what they need, not everything
-- **Be portable** — Work in any Claude Code project
-- **Be maintainable** — Update once, deploy everywhere
-
-A marketplace solves all of these.
-
-## Usage Examples
-
-### Installing frozen-skills
-
-```bash
-/plugin marketplace add Coldaine/frozenSkillz
-/plugin install frozen-skills@coldaine-skills
-```
-
-Then invoke skills:
-```
-/skill agent-config-megaref
-"How do I configure MCP servers in VS Code?"
-```
-
-### Installing frozen-rules
-
-```bash
-/plugin install frozen-rules@coldaine-skills
-/skill setup-rules
-"Install the ansible-playbooks rule"
-```
-
-The agent will guide you through copying templates to `.claude/rules/`.
-
-### Testing skill-classifier (experimental)
-
-```bash
-/plugin install skill-classifier@coldaine-skills
-```
-
-By default the hook uses a local Ollama model (no API key). To use the Gemini fallback instead, set `GEMINI_API_KEY`. The hook runs on every prompt, classifies it, and suggests skills. See `plugins/skill-classifier/README.md` for backend configuration.
-
-Test it:
-```bash
-cd plugins/skill-classifier
-python test_classifier.py
+```powershell
+Get-Content .claude-plugin/marketplace.json -Raw | ConvertFrom-Json | Out-Null
+Get-Content plugins/frozen-skills/.claude-plugin/plugin.json -Raw | ConvertFrom-Json | Out-Null
+python scripts/validate_manifests.py
 ```
 
 ## Contributing
 
-1. Skills go in `plugins/frozen-skills/skills/<name>/SKILL.md`
-2. Rules go in `plugins/frozen-rules/rules/<name>.md`
-3. Classifier improvements go in `plugins/skill-classifier/`
-4. Update plugin versions and marketplace.json when adding/changing plugins
+1. Add skills to `plugins/frozen-skills/skills/<name>/SKILL.md`
+2. Add rules to `plugins/frozen-rules/rules/<name>.md`
+3. Update manifests and versions when adding/changing skills
+4. Run `python scripts/validate_manifests.py` before publishing
 
 ## License
 
