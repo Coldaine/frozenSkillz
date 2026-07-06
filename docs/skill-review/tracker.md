@@ -139,3 +139,57 @@ candidate idea moves into active marketplace content.
 - **`docs/stacked-pr-workflow/`** supplementary docs left in place for the gated `stacked-pr-workflow` skill.
 - **Root `README.md`** and **`CLAUDE.md`** still describe the pre-gate lineup and the old `skill-classifier` name —
   update them (and the plugin's own README + ADRs) to `skill-injector`, and point them here, once the gate is settled.
+
+---
+
+## Personal skills intake (2026-07-06)
+
+Reference copies of the user's own `~/.agents/skills` personal skills, brought in so frozenSkillz owns a copy for
+evaluation (the "own a reference copy of all my skills" directive). **Held in `_incubator/personal-skills/` — gated,
+not installable, in no manifest.** Deliberately separate from the marketplace-candidate gated skills above.
+
+**Excluded on purpose:**
+- `deepinit` — ships in the OMC package (`oh-my-claude-sisyphus/skills`); an *installed plugin* skill, not authored here. Not intake material.
+- `doppler` — already **ACTIVE** in `plugins/frozen-skills/skills/`.
+
+**Drift found during intake (fix separately):**
+- `edit-opencode-config` lived only in `~/.claude/skills/` (real dir, not a `.agents` junction) — missing from the canonical `~/.agents/skills` root. Copied here from `.claude`.
+- `~/.claude/skills/omc-learned/` holds learner notes (`edit-opencode-config.md`, `phantom-substrate-inheritance.md`) — a half-promoted staging area to reconcile.
+
+| Skill | Provenance | Status | Work before promotion |
+|---|---|---|---|
+| `chat-history` | authored (hardened 2026-07-06) | 🛑 gated | De-personalize (paths, Pieces, UTC-5); run `artifact_hunt.py` / `extract_chat_history.py`. |
+| `retrospective` | authored (`author: pmacl`) | 🛑 gated | De-personalize (agent-control-plane paths); run `session_timeline.py`. |
+| `project-docs` | authored | 🛑 gated | Review; de-opinionate if promoting. |
+| `skill-install` | authored | 🛑 gated | Verify recipes/paths. |
+| `run-opencode` | authored | 🛑 gated | Verify commands. |
+| `edit-opencode-config` | authored (was `.claude`-only) | 🛑 gated | Fix canonical-root drift; verify. |
+| `phantom-substrate-inheritance` | authored | 🛑 gated | Review. |
+| `review-claudemd` | authored | 🛑 gated | Review; overlap-check vs `claude-md-enhancer`. |
+| `rich-visual-responses` | authored | 🛑 gated | Review. |
+| `insight-extractor` | authored | 🛑 gated · **needs fix** | **No YAML frontmatter** (add `name`/`description`); **self-contradictory paths** — `skill.md` uses `~/.Codex/…`, `skill.yaml` uses `~/.claude/…` (pick one canonical). |
+| `claude-md-enhancer` | **provenance unconfirmed** | 🛑 gated · confirm origin | Confirm authored vs downloaded; overlap-check vs `review-claudemd`. |
+| `nlm-skill` | **provenance unconfirmed** | 🛑 gated · confirm origin | Confirm authored vs downloaded. |
+| `skill-finder` | **provenance unconfirmed** | 🛑 gated · confirm origin | Confirm authored vs downloaded. |
+| `context7-mcp` | **provenance unconfirmed** | 🛑 gated · thin/redundant? | Likely overlaps global `~/.claude/rules/context7.md` — decide keep/drop. |
+| `google-stitch-ui-designer` | **provenance unconfirmed** | 🛑 gated · confirm origin | External-tool guide; confirm authored vs downloaded. |
+
+Next pass: confirm provenance on the 5 unconfirmed, fix `insight-extractor` frontmatter, then decide which earn promotion toward active (each needs de-personalization + manifest entries + version bump per the promotion bar).
+
+### PR #35 review findings (routed 2026-07-06)
+
+Automated review of the intake PR — **Kilo 13 + Copilot 7, all WARNING (0 critical)**. These are gated reference copies = faithful snapshots of the live `~/.agents/skills` source, so fixes land in the **live source and re-sync at promotion**, not in the frozen snapshot. Routed here as promotion-work:
+
+**Expected — de-personalization (the headline promotion gate):**
+- `chat-history/SKILL.md` L43/L61/L214 (`D:\_projects`), L68 (`C:\Users\pmacl`).
+- `retrospective/SKILL.md` L81 (`pmacl`), L132/L278 (`D:\_projects`).
+- `edit-opencode-config/SKILL.md` L31 (`pmacl`).
+
+**Genuine bugs to fix in the LIVE source, then re-sync:**
+- `chat-history/extract-chats.sh` L59 — `while read` missing `-r` (backslash corruption). *Real bug.*
+- `chat-history/extract_chat_history.py` L15 — docstring lists a `gemini` extractor that isn't implemented; implement or drop.
+- `insight-extractor` — no YAML frontmatter; self-contradictory paths (`~/.Codex` vs `~/.claude`) at L7/L43/L55.
+- `review-claudemd/SKILL.md` L4 — frontmatter `name` ≠ dir name (breaks discovery/dedupe); L15 — duplicate `-name "AGENTS.md"` in the `find` example.
+- `run-opencode/driver.mjs` L8 — header says all-but-`backup` is read-only, but `profile` also writes `oh-my-openagent.json[c]`; fix the comment.
+
+These do not block the *intake* (faithful capture); they are the evaluation TODO that must clear before any skill here is promoted to active.

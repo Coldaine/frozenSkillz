@@ -1,0 +1,25 @@
+{
+  "project_name": "LaunchPad",
+  "description": "a SaaS product that helps space-tech startups manage launch readiness, milestones, vendors, and investor updates",
+  "target_users": "technical founders, operations leads, and startup investors",
+  "primary_goal": "help teams understand launch readiness and resolve blockers quickly",
+  "business_goal": "increase activation by making the first readiness report feel valuable within five minutes",
+  "platform": "responsive web",
+  "screens": [
+    "marketing landing page",
+    "signup and onboarding",
+    "readiness dashboard",
+    "milestone detail",
+    "vendor risk table",
+    "investor update generator",
+    "settings and team access"
+  ],
+  "brand_tone": "confident, technical, premium, precise",
+  "color_direction": "midnight blue base with electric violet accents and high-contrast white surfaces",
+  "style_preferences": [
+    "clean SaaS",
+    "data-rich",
+    "premium technical",
+    "strong visual hierarchy"
+  ]
+}
