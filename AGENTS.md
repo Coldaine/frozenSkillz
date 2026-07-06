@@ -19,6 +19,7 @@ If documents disagree, follow the highest applicable source above and fix the st
 | Check whether a skill is active or gated | `docs/skill-review/tracker.md` |
 | Promote a gated skill | `docs/skill-review/tracker.md` and the relevant plugin manifests |
 | Update installable frozen-skills content | `plugins/frozen-skills/.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, `.cursor-plugin/plugin.json`, `gemini-extension.json` |
+| Compare live skill roots to frozenSkillz | `docs/workflows/skill-authority-and-frozen-sync.md`, then `docs/skill-review/tracker.md` if promotion is needed |
 | Update marketplace catalog metadata | `.claude-plugin/marketplace.json`, `.codex-plugin/marketplace.json`, `.cursor-plugin/marketplace.json`, `gemini-marketplace.json` |
 
 ## Operating Contract
@@ -27,6 +28,7 @@ If documents disagree, follow the highest applicable source above and fix the st
 - Do not import external repositories directly into `plugins/`.
 - Keep scout `source/` directories read-only.
 - Keep active `SKILL.md` files lean and route heavy detail to `references/` or `templates/`.
+- Treat `C:\Users\pmacl\.agents\skills` as the live personal skill source and this repo as the reviewed frozen publication boundary.
 - Update all four plugin manifests when adding or removing active frozen-skills skills.
 - Bump aligned plugin and marketplace versions when public plugin metadata changes.
 - Validate changed JSON and every manifest `skills[].path` before publishing.

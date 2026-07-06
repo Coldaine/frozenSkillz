@@ -70,7 +70,8 @@ Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental �
 
 ### `doppler` — ACTIVE
 Best skill in the repo: security-first, cross-platform, names-only diagnostics, complete `references/` + `agents/`.
-Use it as the quality bar for everything else.
+Use it as the quality bar for everything else. Synced from `C:\Users\pmacl\.agents\skills\doppler`
+on 2026-07-06 to preserve the live 2026-06-29 operational learnings in the reviewed frozen copy.
 
 ### `external-skill-intake` — ACTIVE
 Required workflow for evaluating external skill/plugin/agent repos. It keeps source snapshots read-only under

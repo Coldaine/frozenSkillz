@@ -57,6 +57,9 @@ docs/
   workflows/                     Long-form workflows
 ```
 
+For the live workstation skill-root model and the frozen sync process, see
+`docs/workflows/skill-authority-and-frozen-sync.md`.
+
 ## Validation
 
 This repo does not use a single package manager. Validate the touched surface directly:
@@ -82,6 +85,7 @@ For skill additions, verify every manifest `skills[].path` exists under the plug
 ## Contribution Rules
 
 - Add shared active skills under `plugins/frozen-skills/skills/<name>/SKILL.md` only after passing the review gate.
+- Keep active frozen skills synced with reviewed live practice in `C:\Users\pmacl\.agents\skills` when a same-name live skill exists.
 - Keep external scout snapshots under `_incubator/scout/` and never edit scout `source/` after import.
 - Keep plugin manifests and marketplace versions aligned when adding public skills.
 - Do not commit secret values, client runtime caches, or local installed-skill copies.
