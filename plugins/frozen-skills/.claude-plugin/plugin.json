@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "frozen-skills",
-  "description": "Reviewed active skills: Doppler secrets management and external skill intake. Additional reference skills are gated in _incubator/ pending a quality review pass; see docs/skill-review/.",
+  "description": "Reviewed active skills: Doppler secrets management and external skill intake. Other reference skills are gated in _incubator/ pending review (see docs/skill-review).",
   "version": "2.1.0",
   "category": "reference",
   "author": {

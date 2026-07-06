@@ -23,7 +23,7 @@ _incubator/scout/<YYYY-MM-DD>-<repo>/
 - `README.md` records provenance, source URL, commit, license, import date, and warnings.
 - `inventory.md` lists artifacts and initial scope recommendations.
 - `analysis.md` holds rubric scores and evaluator notes.
-- `decisions.md` records packaging decisions and affected frozenSkillz paths.
+- `decisions.md` records packaging decisions and affected frozenSkillz paths; create it from `templates/decision-log.md` when starting a new scout.
 - `evals/cases/` holds reusable eval case definitions.
 - `evals/runs/` holds prompts, inputs, outputs, and scorer notes from executed evals.
 - `extracted-patterns/` holds small adapted ideas, never raw wholesale source dumps.

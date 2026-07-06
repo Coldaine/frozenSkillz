@@ -31,6 +31,7 @@ Persist each run under `evals/runs/<YYYY-MM-DD>-<case-slug>/` with:
 - `candidate-output.md`.
 - `adapted-output.md`.
 - `scorer-notes.md`.
+- Environment notes and tool restrictions in either `prompt.md` or `inputs.md`.
 
 ## Scoring Criteria
 

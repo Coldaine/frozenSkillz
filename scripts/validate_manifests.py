@@ -26,13 +26,27 @@ def validate_manifest(filepath):
             return False
 
         plugin_root = filepath.parent.parent if filepath.name == "plugin.json" else filepath.parent
+        resolved_plugin_root = plugin_root.resolve()
         for skill in data.get("skills", []):
             skill_path = skill.get("path")
             if not skill_path:
                 print("  FAILED: Skill entry missing path")
                 return False
-            if not (plugin_root / skill_path).exists():
-                print(f"  FAILED: Missing skill path {plugin_root / skill_path}")
+
+            candidate_path = Path(skill_path)
+            if candidate_path.is_absolute():
+                print(f"  FAILED: Skill path must be relative: {skill_path}")
+                return False
+
+            resolved_skill_path = (plugin_root / candidate_path).resolve()
+            try:
+                resolved_skill_path.relative_to(resolved_plugin_root)
+            except ValueError:
+                print(f"  FAILED: Skill path escapes plugin root: {skill_path}")
+                return False
+
+            if not resolved_skill_path.exists():
+                print(f"  FAILED: Missing skill path {resolved_skill_path}")
                 return False
 
         print("  PASSED")

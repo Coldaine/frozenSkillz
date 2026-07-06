@@ -28,6 +28,12 @@
 | Testability/evaluability |  |  |
 | Maintenance burden |  |  |
 | Fit with frozenSkillz scope |  |  |
+| Artifact-specific: <dimension> |  |  |
+| Artifact-specific: <dimension> |  |  |
+| Artifact-specific: <dimension> |  |  |
+| Artifact-specific: <dimension> |  |  |
+
+Use the artifact-specific dimensions from `references/artifact-rubrics.md` for the artifact type under review. Replace the placeholder rows with the relevant dimensions, such as `Trigger clarity` for a skill, `Lifecycle event clarity` for a hook, or `Authority flow` for a documentation pattern.
 
 ## Summary Recommendation
 

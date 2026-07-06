@@ -5,6 +5,7 @@
 - User task prompt:
 - Target artifact paths:
 - Expected output contract:
+- Environment notes and tool restrictions:
 
 ## Variants
 

@@ -16,7 +16,7 @@ Do not use this for ordinary local skill authoring, direct promotion of already-
 ## Workflow
 
 1. Create or inspect the scout sandbox described in `references/scout-sandbox-layout.md`.
-2. Fill `templates/inventory.md` for the candidate snapshot.
+2. Create or update scout metadata outside `source/`: `README.md`, `inventory.md`, `analysis.md`, and `decisions.md` from `templates/decision-log.md` when needed.
 3. Select a narrow evaluation scope.
 4. Score artifacts with `references/artifact-rubrics.md` and record results in `templates/analysis.md`.
 5. Run evals with `references/live-eval-protocol.md` and `templates/eval-case.md`.
