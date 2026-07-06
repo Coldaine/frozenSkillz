@@ -5,8 +5,8 @@
     "url": "https://github.com/Coldaine"
   },
   "metadata": {
-    "description": "Universal skills for cross-project agent workflows. Most reference skills are gated in _incubator/ pending a quality review pass (see docs/skill-review/). Active: the Doppler secrets skill. Experimental/untested: skill-injector.",
-    "version": "2.1.0",
+    "description": "Universal skills for cross-project agent workflows. Most reference skills are gated in _incubator/ pending a quality review pass (see docs/skill-review/). Active: Doppler secrets and external skill intake. Experimental/untested: skill-injector.",
+    "version": "2.2.0",
     "repository": "https://github.com/Coldaine/frozenSkillz",
     "license": "MIT"
   },
@@ -14,8 +14,8 @@
     {
       "name": "frozen-skills",
       "source": "./plugins/frozen-skills",
-      "description": "Doppler secrets-management skill. Other reference skills are gated in _incubator/ pending review (see docs/skill-review/).",
-      "version": "2.0.0",
+      "description": "Reviewed active skills: Doppler secrets management and external skill intake. Other reference skills are gated in _incubator/ pending review (see docs/skill-review/).",
+      "version": "2.1.0",
       "category": "reference"
     },
     {
