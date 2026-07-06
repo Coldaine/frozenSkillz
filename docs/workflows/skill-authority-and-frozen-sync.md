@@ -59,6 +59,8 @@ The active frozen-skills plugin registers two skills:
 
 The broader machine still has tool-local skill surfaces and some stale junctions. Treat those as runtime/config hygiene, not as authoritative source unless a tool-specific skill is intentionally maintained outside `.agents`.
 
+On 2026-07-06 the user's personal `~/.agents/skills` set was reference-copied into `_incubator/personal-skills/` (gated, not installable) so the repo owns a copy of each for evaluation. `deepinit` was excluded (installed OMC package skill) and `doppler` was already active. See `docs/skill-review/tracker.md` → "Personal skills intake" for per-skill provenance/status. The live `.agents` copies remain the source of truth; these frozen copies are evaluation reference, not runtime.
+
 ## Required Checks
 
 Before publishing a sync:
