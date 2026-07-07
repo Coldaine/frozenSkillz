@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Atlas"
+  short_description: "Reference atlas for local coding-agent tools"
+  default_prompt: "Use $agent-atlas to look up how a coding-agent tool works on this workstation and route configuration changes."

@@ -38,11 +38,11 @@ omcProfile --version
 
 ## Other Agent Tools
 
-Per-tool detail lives in sibling files: `codex.md`, `cursor.md`, `gemini-antigravity.md`, `opencode.md`, `kilo.md`, `copilot-cli.md`, `goose.md`, `openrouter.md`.
+Per-tool detail lives in sibling files: `codex.md`, `cursor.md`, `gemini-antigravity.md`, `opencode.md`, `kilo.md`, `copilot-cli.md`, `goose.md`, `qwen.md`, `openrouter.md`.
 
-Installed as of 2026-07-07: Codex 0.142.5, Cursor (+cursor-agent), Gemini CLI + Antigravity, OpenCode 1.17.12 (+oh-my-openagent), Kilo 7.3.54, Copilot CLI 1.0.50, Goose 1.38.0. Also present: `C:\Users\pmacl\.continue\skills` (vestigial Continue surface holding gws-* skills — confirm whether Continue is still in use before touching).
+Installed as of 2026-07-07: Codex 0.142.5, Cursor (+cursor-agent), Gemini CLI + Antigravity, OpenCode 1.17.12 (+oh-my-openagent), Kilo 7.3.54, Copilot CLI 1.0.50, Goose 1.38.0. Also present: `C:\Users\pmacl\.qwen` (no chat history) and `C:\Users\pmacl\.continue\skills` (vestigial Continue surface holding gws-* skills — confirm whether Continue is still in use before touching).
 
-Session-learnings store: `D:\_projects\agent-control-plane` — Accounts/Learnings/Meta per project, markdown only (no database). The one real session database on this machine is OpenCode's `opencode.db`; see `opencode.md`.
+Session-learnings store: `D:\_projects\agent-control-plane` — Accounts/Learnings/Meta per project, markdown only (no database). The one real session database on this machine is OpenCode's `opencode.db`; see `opencode.md`. Transcript-format parser definitions for nine tools live in `D:\_projects\llm-archiver\tools\*.yaml`.
 
 ## Skill Surfaces
 

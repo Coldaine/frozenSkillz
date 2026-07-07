@@ -1,13 +1,13 @@
 ---
-name: agent-tool-config-router
-description: Use when setting up, configuring, or troubleshooting any coding-agent tool on Patrick's workstation - Claude Code, OMC, Codex, Cursor, Copilot, Gemini, Antigravity, OpenCode, Kilo, Goose - or provider routing such as OpenRouter API keys. Covers config roots, launchers, skill surfaces, session data stores, and where durable policy belongs versus live runtime files versus frozenSkillz evaluation copies.
+name: agent-atlas
+description: Router to per-tool reference docs for coding-agent tooling on Patrick's workstation. Fire whenever the task is about an agent tool itself - installing, configuring, launching, troubleshooting, or asking how it works or where it stores config, skills, sessions, or keys - for Claude Code, OMC, Codex, Cursor, Copilot, Gemini, Antigravity, OpenCode, Kilo, Goose, Qwen, or provider/key routing such as OpenRouter. Do not fire for ordinary coding tasks that merely run inside one of these tools.
 ---
 
-# Agent Tool Config Router
+# Agent Atlas
 
 ## Overview
 
-Route agent-tool configuration work to the right authority surface before editing files. Live runtime files prove current state; `D:\_projects\coldaine-configurations` records durable workstation policy; `D:\_projects\frozenSkillz` holds reviewed or gated skill artifacts.
+This skill is a router: identify which agent tool the task concerns, open that tool's reference file under `references/`, and route the change to the right authority surface before editing anything. Live runtime files prove current state; `D:\_projects\coldaine-configurations` records durable workstation policy; `D:\_projects\frozenSkillz` holds reviewed or gated skill artifacts.
 
 ## Authority Order
 
@@ -52,9 +52,14 @@ Read `references/workstation-agent-config-map.md` for the overall path map, then
 - `references/kilo.md` — Kilo: duplicated `.kilo`/`.kilocode` roots (canonical root unverified)
 - `references/copilot-cli.md` — GitHub Copilot CLI
 - `references/goose.md` — Goose (lightly used)
+- `references/qwen.md` — Qwen CLI (root exists; no chat history found on this machine)
 - `references/openrouter.md` — OpenRouter provider/key routing (not an app; keys via Doppler)
 
 Claude Code and OMC are covered in this file and the map.
+
+Every reference file is an incomplete draft against a canonical checklist. `references/research-todo.md` defines what we must eventually know about every agent and tracks per-tool gaps; a dedicated research agent will fill it in. When you learn a missing fact while working, update the tool's reference file and tick it off there.
+
+For session/transcript file formats across all tools, `D:\_projects\llm-archiver\tools\*.yaml` holds parser definitions (claude_export, codex, copilot_cli, gemini, goose, kilo, kimi, opencode, qwen), and `D:\_projects\agent-control-plane\capture\scratch\` holds reverse-engineering notes.
 
 Common anchors:
 
