@@ -1,6 +1,6 @@
 ---
 name: agent-tool-config-router
-description: Use when working on Claude Code, OMC, Codex, Cursor, Copilot, Gemini, OpenCode, Kilo, or other coding-agent configuration on Patrick's workstation, especially when locating config roots, deciding where durable policy belongs, or separating live runtime files from frozenSkillz evaluation copies.
+description: Use when setting up, configuring, or troubleshooting any coding-agent tool on Patrick's workstation - Claude Code, OMC, Codex, Cursor, Copilot, Gemini, Antigravity, OpenCode, Kilo, Goose - or provider routing such as OpenRouter API keys. Covers config roots, launchers, skill surfaces, session data stores, and where durable policy belongs versus live runtime files versus frozenSkillz evaluation copies.
 ---
 
 # Agent Tool Config Router
@@ -14,7 +14,8 @@ Route agent-tool configuration work to the right authority surface before editin
 1. For current runtime facts, inspect the live file, command, profile, registry key, extension setting, or tool diagnostic first.
 2. For durable workstation policy, read or update `D:\_projects\coldaine-configurations\configurations\2026-07-07-agent-tool-configuration-policy.md`.
 3. For reusable skill lifecycle, read `D:\_projects\frozenSkillz\docs\skill-review\tracker.md` and keep unreviewed skills in `_incubator/`.
-4. For secrets or credentials, load the `doppler` skill before touching values; record names and owners only.
+4. For cross-project agent session learnings and retrospectives, read `D:\_projects\agent-control-plane` (despite the name, it is a learnings/reference store, not a runtime control plane; transcripts on disk remain ground truth).
+5. For secrets or credentials, load the `doppler` skill before touching values; record names and owners only.
 
 ## Workflow
 
@@ -40,9 +41,20 @@ As of the 2026-07-07 policy record, this workstation intentionally separates:
 
 Before changing those assumptions, re-check the PowerShell profile and the two config roots.
 
-## Quick Path Map
+## Per-Tool References
 
-Read `references/workstation-agent-config-map.md` for the local path map and verification commands.
+Read `references/workstation-agent-config-map.md` for the overall path map, then the file for the tool at hand:
+
+- `references/codex.md` — Codex CLI: config.toml, plugins, sessions, secrets boundary
+- `references/cursor.md` — Cursor IDE + cursor-agent: mcp.json, global-first config pattern, setup audit report
+- `references/gemini-antigravity.md` — Gemini CLI and Antigravity (shared `.gemini` root)
+- `references/opencode.md` — OpenCode + oh-my-openagent: profiles, providers, `opencode.db` session database
+- `references/kilo.md` — Kilo: duplicated `.kilo`/`.kilocode` roots (canonical root unverified)
+- `references/copilot-cli.md` — GitHub Copilot CLI
+- `references/goose.md` — Goose (lightly used)
+- `references/openrouter.md` — OpenRouter provider/key routing (not an app; keys via Doppler)
+
+Claude Code and OMC are covered in this file and the map.
 
 Common anchors:
 
