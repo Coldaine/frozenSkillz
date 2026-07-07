@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Tool Config Router"
+  short_description: "Routes local agent config work"
+  default_prompt: "Use $agent-tool-config-router to locate and update this workstation agent-tool configuration."

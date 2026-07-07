@@ -167,6 +167,7 @@ not installable, in no manifest.** Deliberately separate from the marketplace-ca
 | `phantom-substrate-inheritance` | authored | 🛑 gated | Review. |
 | `review-claudemd` | authored | 🛑 gated | Review; overlap-check vs `claude-md-enhancer`. |
 | `rich-visual-responses` | authored | 🛑 gated | Review. |
+| `agent-tool-config-router` | authored 2026-07-07 | 🛑 gated · evaluate | Verify against `D:\_projects\coldaine-configurations\configurations\2026-07-07-agent-tool-configuration-policy.md`; decide whether it stays local-only or can be de-personalized for active promotion. |
 | `insight-extractor` | authored | 🛑 gated · **needs fix** | **No YAML frontmatter** (add `name`/`description`); **self-contradictory paths** — `skill.md` uses `~/.Codex/…`, `skill.yaml` uses `~/.claude/…` (pick one canonical). |
 | `claude-md-enhancer` | **provenance unconfirmed** | 🛑 gated · confirm origin | Confirm authored vs downloaded; overlap-check vs `review-claudemd`. |
 | `nlm-skill` | **provenance unconfirmed** | 🛑 gated · confirm origin | Confirm authored vs downloaded. |
