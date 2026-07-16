@@ -1,2 +1,1 @@
 @AGENTS.md
-@NORTH_STAR.md
