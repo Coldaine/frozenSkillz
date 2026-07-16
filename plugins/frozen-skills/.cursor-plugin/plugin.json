@@ -1,13 +1,17 @@
 {
   "name": "frozen-skills",
-  "description": "Reviewed active skills: Doppler secrets management and external skill intake. Other reference skills are gated in _incubator/ pending review (see docs/skill-review).",
-  "version": "2.1.0",
+  "description": "Reviewed active skills: deterministic chat-history recovery, Doppler secrets management, and external skill intake.",
+  "version": "2.2.0",
   "author": {
     "name": "Coldaine",
     "url": "https://github.com/Coldaine"
   },
   "license": "MIT",
   "skills": [
+    {
+      "name": "chat-history",
+      "path": "skills/chat-history"
+    },
     {
       "name": "doppler",
       "path": "skills/doppler"

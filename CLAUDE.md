@@ -20,10 +20,13 @@ Agents should read `AGENTS.md` first. Humans can use this file as the quickstart
 
 ## Active Skills
 
+- `chat-history`: Deterministic transcript inventory and interrupted-work recovery with parent/child stitching.
 - `doppler`: Doppler CLI and secret-injection workflows with strict secret hygiene.
 - `external-skill-intake`: Sandbox, evaluate, and package external skill/plugin/agent repos.
 
 Most historical reference skills are gated in `_incubator/` until they pass the review bar in `docs/skill-review/tracker.md`.
+
+Published skills are authored and reviewed in this repository. Copies under local client skill roots are downstream installations; never reverse-sync them into `plugins/frozen-skills/skills/`.
 
 ## External Skill Intake
 
