@@ -1,161 +1,156 @@
 # How to Write a North Star
 
-A North Star is the most authoritative document in a project. It defines what the project is, where it is going, and what it refuses to be. Agents and contributors read it first and weigh everything else against it. The Guardian enforces it.
+A North Star is the most authoritative document in a project. It states what the project is, where it is going, and what it refuses to be. Agents and contributors read it first and weigh everything else against it.
 
-Because of that authority, every word matters. A wrong sentence in a North Star will be enforced as if the owner chose it. This guide exists to prevent that.
+Because of that authority, every word matters. A wrong sentence in a North Star is enforced as if the owner chose it. This guide exists to prevent that — and to keep the document small enough that every agent actually reads it every session.
+
+> This guide reflects the settled 2026-06-25 redesign. The North Star has at most five sections — **Opener, Goals, In/Out (conditional), Anti-Goals (default zero), Pillars (conditional)**. There is **no Requirements section**, and **Shape/Caller live in `architecture.md`**, not here.
 
 ---
 
-## What Goes In, What's Optional, What Accretes
+## Resulting Shape
 
-A North Star is not a form to fill out. Not every section belongs in every project, and not every section belongs on day one.
-
-| Section | When to include | When to skip or defer |
+| Section | Include when | Default |
 |---|---|---|
-| Opener | Always. No exceptions. | Never skip. |
-| In/Out/Shape | When the project has clear boundaries: something goes in, something comes out, there is a delivery mechanism. | Research projects, exploratory tools, creative works, or any project where the architectural shape has not been earned yet. A premature In/Out/Shape locks in design decisions that agents will treat as requirements. Better to omit than to guess. |
-| Goals | Always. No exceptions. | Never skip. |
-| Requirements | When you know how you will recognize progress toward a goal. | A new project may have goals with no requirements yet. Empty requirements under a goal is a valid signal: "I know where I'm going but haven't decided how I'll know I'm getting there." Flag for revisit; do not leave empty for months. |
-| Anti-Goals | Include at least one from day one. Every project has at least one thing it will be mistaken for. More will accrete as agents and contributors misunderstand the project. | Do not force a long list upfront. One or two real ones are worth more than five hypothetical ones. |
-| Pillars | Only when the owner has hit a real tradeoff and made a real choice. | If the owner has no strong tradeoff preferences yet, the section should not exist. Zero pillars is better than three plausible-sounding ones the owner didn't actually choose. |
+| Opener | Always. | Required — one or two lines. |
+| Goals | Always. | Required — one or two guiding-light lines. |
+| In / Out | The project has a clear *caller* and a clear delivered *Out*. | Omit unless both are concrete. |
+| Anti-Goals | You can point to a real, observed, recurring "mistaken-for X" case. | **Zero.** Absence is healthy. |
+| Pillars | The owner has made a real tradeoff ("accept cost X for benefit Y"). | Omit. |
 
-**Minimum viable North Star: Opener + Goals + at least one Anti-Goal.**
+Deleted from the old pattern: **Requirements** (goals-as-validation) and **Shape/Caller** as North Star sections (they belong to architecture). No goal backlog. No fabricated anti-goals.
 
-Everything else accretes as the project matures.
+**Minimum viable North Star: Opener + Goals.** Everything else is earned, not filled in. The document stays small enough to read every session through content discipline, not a line count.
+
+Open or unresolved questions are **current work**, not a North Star section — route them to Issues or `docs/plans/` (see `current-work-and-lifecycle.md`). A sixth "Open Questions" section is exactly the drift this pattern removes.
 
 ---
 
 ## The Opener
 
-Pick exactly one. Delete the other two.
+At most two lines: state the problem, name the thing. Pick one shape; the default is Problem → Solution.
 
-**"The Bet"** — The project rests on an unproven assumption. If the bet is wrong, the project was a mistake. Use this when you are building something speculative.
-
-**"Why This Exists"** — The problem is known and understood. No hypothesis; just a gap to close. Use this when the situation is clear and the goal is to fix it.
-
-**"The Goal"** — The mission is self-evidently worth pursuing. Rare. Most projects are bets or gap-closers, not missions.
-
-### Rules
-
-- One sentence. If you cannot say it in one sentence, you do not know your bet yet.
-- No hedging. "We believe that maybe..." is not an opener; it is a committee trying not to commit.
-- The opener type sets the tone for the entire document. A "Bet" North Star expects to be invalidated. A "Why This Exists" North Star expects to be completed. A "The Goal" North Star expects to be pursued indefinitely. The guardian reasons differently against each.
-
----
-
-## In / Out / Shape
-
-Four one-liners:
-
-- **In:** What goes into the system.
-- **Out:** What comes out.
-- **Shape:** How it is delivered.
-- **Caller:** Who or what initiates interaction.
+| Shape | Rank | Form |
+|---|---|---|
+| **Problem → Solution** | default | "I have problem Y. This is X to solve Y." |
+| **Why This Exists** | gap-closer | "No good X exists for Y. This fills that gap." Use when the pain is an absence in the world, not personal. |
+| **The Hypothesis** (was "The Bet") | spike-only | "We suspect X produces Y without Z. This tests that." Renamed to drop the commercial-wager reading; restricted to speculative/experimental repos, never the default. |
 
 ### Rules
 
-- An agent that reads only these four lines should be able to answer "does feature X belong here?" about 70% of the time. That is the bar.
-- Prose invites softening. "The system primarily ingests X, though it may also accept..." is how scope creep starts. Constrained one-liners force blunt answers.
-- If you cannot fill one out, leave it blank and mark it open. A blank line is better than a vague one. A vague line is better than a fabricated one.
-- If filling out this section feels forced or produces misleading constraints, omit the entire section. It is better to have no In/Out/Shape than a wrong one, because agents will enforce what you write here.
+- **State the problem explicitly.** The problem is the most load-bearing piece of identity — it makes the side-quest gate answerable ("does this serve solving problem Y?"). If the problem is only implied, the gate gets answered by inference.
+- **Name the thing.** Two lines, both earning their place. No hedging — "We believe that maybe…" is a committee trying not to commit.
+- **Do not reach for "The Bet" by default.** Agents glom onto it because it sounds dramatic and misread it as get-rich-quick framing. That is why it is renamed and restricted to spikes.
 
-### The Caller Trap
+### Example (MooseGoose)
 
-"Caller" is the most commonly fabricated field. An agent filling out this template will confidently write something like "The project owner, directly. No API consumers, no integrations, no plugins" because it sounds like a reasonable scope limiter. If the owner never said that, the agent just created a constraint that will be enforced as if the owner chose it. Reviewers will praise it because it sounds crisp and decisive.
-
-If you do not know who or what calls this system yet, write "Open" and move on. Do not let an agent decide for you.
+"Patrick's technical life is scattered across home-app, refs, and half-finished tools, none reachable in one place. MooseGoose Studio is a single-owner private console that consolidates it behind one gate."
 
 ---
 
 ## Goals
 
-Goals describe where you are going. They do not describe how you measure arrival. That is what requirements are for.
+Goals are a compass bearing, not a destination. They shape every decision an agent makes; they are never a test suite.
+
+### What goals are NOT
+
+- **Not requirements.** No "how you'll recognize progress." That is validation — deleted from the pattern.
+- **Not a backlog.** A goal that needs more than a sentence is a plan; plans live in `docs/plans/`.
+- **Not implementation.** "Use Postgres" is architecture, not a goal.
+- **Not a checklist item.** If you can tick it off, it was a task.
+
+### Goal shapes
+
+| Shape | Example |
+|---|---|
+| Direction | "Make MooseGoose the one place Patrick's technical life lives." A compass bearing, never done. Most common. |
+| Problem-echo | "Consolidate scattered tools behind one owner gate." Restates the opener's problem as the standing thing to solve. |
+| Quality-bar | "Every owner-only route is reachable, or has a documented reason it's hidden." A bar to clear on every piece of work. |
+| User-outcome | "Patrick can run his day from one authenticated surface." Names the caller and what they get. |
 
 ### Rules
 
-- **Directional, not testable.** "Surface ideas the owner didn't know they had" is a goal. "Cluster 90% of entries within 30 seconds" is a requirement. Goals survive pivots; if you change your algorithm, the goal is still the goal. If your goal WAS your test, changing the test destabilizes the entire document.
-- **Numbered: G1, G2, G3.** So agents and humans can cite them precisely. "This PR conflicts with G2" is actionable. "This PR conflicts with the goal about evolution" forces the reader to go find which goal you mean.
-- **Three to five.** Fewer than three usually means you have not separated concerns. More than five usually means you have not prioritized. If you have eight goals, some of them are requirements wearing a goal's clothing. Push them down.
-- **Start with a verb that implies direction, not completion.** "Surface," "show," "separate," "enable," "reduce." Avoid verbs that imply a finish line: "implement," "build," "deliver," "complete." A goal you can finish is a task, not a goal.
+- **How many? The test is not a count.** Does each goal shape a real decision an agent would otherwise get wrong? Five can be fine if each earns its place and none duplicate without intent. Seven is usually a backlog wearing a goal suit.
+- **Start with a verb that implies direction, not completion.** "Surface," "separate," "reduce," "consolidate" — not "implement," "build," "deliver."
+- **Refusal goals live in Anti-Goals.** "Not X" is an anti-goal shape; do not duplicate it as both a goal and an anti-goal.
+- Number them (G1, G2) if the project cites them, but keep the list short enough to read at a glance.
 
 ---
 
-## Requirements
+## In / Out — conditional; Shape and Caller live in architecture
 
-Requirements live under goals, not in a separate section. A requirement without a parent goal is an orphan: it may be valid, but no one can reason about why it exists.
+In/Out are scope filters — "In: the owner's work + tools. Out: a thin public portfolio, nothing else." They answer one question: *does this belong here?*
+
+### Include In/Out only when the shape is earned
+
+Include In/Out **only** when the project has a clear *caller* and a clear delivered *Out*. For platforms, infrastructure, languages, umbrella repos, or abstract-caller systems, In/Out degrade into tautology — omit rather than force filler.
+
+The pattern was stress-tested against real software to find where it holds:
+
+| Software | Verdict |
+|---|---|
+| Git, Postgres | **HOLDS** — clear caller, crisp data-model In/Out, concrete delivered Out. |
+| VS Code | **THINS** — In/Out add little; Shape carries the identity. |
+| Linux kernel | **DEGRADES** — caller is "every process," so In is barely a filter. |
+| Python (the language) | **COLLAPSES** — the spec deliberately refuses to prescribe delivery. |
+
+If you cannot fill In/Out concretely, that is the signal: the thing isn't a product with a caller — it's a platform/spec/layer that needs a different identity shape, not a forced one.
+
+### Shape and Caller belong in `architecture.md`
+
+Shape ("Next.js pod on K8s behind Cloudflare Tunnel") and Caller are **delivery mechanism**, not identity. If delivery changes, only architecture should change — the North Star is the slowest-moving doc. Keeping Shape here also invites the agent to infer implementation ("K8s → reach for Helm"): the prescription-creep failure. Demote both to architecture.
+
+> As a full four-liner (In/Out/Shape/Caller), this is a **plan/epic-scoping tool**, not a universal identity section: being unable to fill it out concretely tells you an epic isn't well-defined. That is where the four-liner earns its keep — in `docs/plans/`, not the North Star.
+
+---
+
+## Anti-Goals — default is ZERO
+
+Anti-goals define identity through exclusion: "What will agents assume we are building, because it looks similar, that we are NOT building?"
+
+### The inverted rule
+
+- **Default is zero.** Absence is the healthy state, not a gap to fill.
+- **An anti-goal is earned, not invented.** Write one only when you can point to a specific, observed, recurring case of the project being mistaken for X. No evidence, no anti-goal.
+- **The guard is against fabrication, not absence.** Agents fabricate anti-goals to feel thorough ("must not become a framework," "must not depend on cloud") — constraints the owner never chose. If you cannot point to a real time this project was actually mistaken for X, do not write one.
+
+### Identity-level only — the minor-rule-explosion guard
+
+"Not a marketing site. Not a multi-user SaaS." — identity drift, good. "Must not use Redis" is a prescription hiding in an anti-goal; it belongs in conventions, where it can change without touching identity.
+
+Fabricated anti-goals are the **primary way a minor rule becomes a major one** — it gets written into the highest-authority doc on a hunch and then enforced everywhere. Keep every anti-goal identity-level ("not a SaaS"), never implementation-level ("must not use Redis"), and keep the default at zero.
+
+### When you do write one
+
+Name the attractor. "This is not a note-taking app" names the specific thing agents drift toward — LLMs are especially susceptible: put "text," "corpus," and "user" in a description and every model tries to add a text editor. Ban the *intent*, not the mechanism: "the user does not compose ideas into this system," not "no text input fields."
+
+---
+
+## Pillars — keep, conditional
+
+Pillars are how the project prefers to make tradeoff decisions. Each has a name, a statement, and a "Why" that names the cost. This is the **one place prescription-adjacent content is allowed**, and only as a tradeoff.
 
 ### Rules
 
-- **Testable: yes or no.** Can someone look at the system and say whether this requirement is satisfied? If the answer requires judgment or interpretation, it is still a goal. Push it up or sharpen it.
-- **Numbered with parent: G1-R1, G1-R2, G2-R1.** The prefix ties the requirement to its goal mechanically. An agent does not need to read surrounding prose to know which goal a requirement serves. Orphaned requirements (any R without a corresponding G) are suspect.
-- **Requirements are the guardian's actual reasoning anchor.** Goals give direction. Anti-goals define identity. Pillars inform judgment. But requirements are what the guardian checks PRs against. A PR that moves away from a requirement gets cited with the specific requirement number. Everything else in the document gives that citation context.
-- **No algorithmic prescription unless it is genuinely part of the goal.** "Semantic clustering produces named idea groups" is a valid requirement. "Uses HDBSCAN for clustering" is an implementation choice that does not belong here unless the owner has a specific reason to mandate it.
-- **Beware underspecified verbs.** Words like "learns," "adapts," "understands," and "intelligently" are dangerous in requirements. An agent will interpret them as requiring sophisticated mechanisms (training loops, fine-tuning, model updates) when the owner may mean something simple (persisted labels, a lookup table, a bias term). Say what you mean mechanically.
-
----
-
-## Anti-Goals
-
-Anti-goals define identity through exclusion. They answer: "What will agents and contributors assume we are building, because it looks similar, that we are NOT building?"
-
-### How Anti-Goals Differ from Anti-Patterns
-
-Anti-patterns are retrospective: "we tried X, it failed." They require experience.
-
-Anti-goals are definitional: "you will assume we are building X because it looks like X; we are not building X." They require self-awareness about what the project resembles from the outside.
-
-A project with no anti-patterns is young. A project with no anti-goals has not defined itself.
-
-### Rules
-
-- **At least one from day one.** Every project looks like something it is not. If you cannot name one thing your project will be mistaken for, you have not thought about it enough.
-- **Name the attractor.** "This is not a note-taking app" is not just a boundary; it names the specific thing agents will drift toward. LLMs are especially susceptible to attractor drift: if your project description contains "text," "corpus," and "user," every LLM will try to add a text editor.
-- **Ban the intent, not the mechanism.** "No text input fields" bans search boxes and date pickers along with editors. "The user does not compose ideas into this system" bans the intent while leaving the mechanism open. An agent enforcing the first version will flag legitimate UI. An agent enforcing the second version will flag actual scope violations.
-- **More will accrete.** If you have corrected an agent or contributor more than once on the same misunderstanding, that misunderstanding is an anti-goal. Write it down. The list grows through lived experience.
-- **The guardian treats anti-goal violations like requirement violations.** A PR that crosses an anti-goal is not a judgment call; it is a boundary violation. The guardian soft-blocks with a citation to the specific anti-goal.
-
----
-
-## Pillars
-
-Pillars are how the project prefers to make tradeoff decisions. Each pillar has a name, a statement, and a "Why" that names the cost.
-
-### Rules
-
-- **Every pillar names its tradeoff.** A pillar without a cost is a platitude. "We value quality" is not a pillar. "We accept slower velocity in exchange for never shipping demo-only features" is a pillar, because it names what you are giving up. If there is no cost, it is not a tradeoff, and if it is not a tradeoff, it is not a pillar.
-- **The "reasonable opposite" test.** Would someone on this project reasonably argue for the opposite? If yes, it is a real pillar. "Corpus-first vs. synthetic-first" is a real tradeoff. "Don't ship broken software" is not a tradeoff. If no one would disagree, it is not a pillar.
-- **Pillars are defaults, not mandates.** The guardian's job with pillars is to notice when a PR departs from one and ask whether the departure is intentional and justified. Not to block it. A PR that violates a pillar is not wrong; it is a signal that a tradeoff is being made. The guardian makes sure that tradeoff is conscious, not accidental.
-- **Every pillar must come from the owner's mouth.** This is the section most likely to be contaminated by agent assumptions. An agent filling out this template will invent pillars that sound reasonable but were never chosen by the owner. "Local and self-contained" sounds like a reasonable pillar for any desktop app. But if the owner never said it, the agent just created a constraint that will be enforced as if the owner chose it. Two real pillars from the interview are worth more than four plausible ones from the agent.
-- **Zero pillars is a valid state.** If the owner has not hit a real tradeoff yet, this section should not exist. Do not fill it in to make the document look complete. The section appears when the owner makes a real choice about what to sacrifice for what. Not before.
-- **Temporal scope matters.** If a pillar applies at runtime but not at build-time, say so in the pillar statement, not just in the rationale. An agent reading the statement will enforce it everywhere; an agent reading the rationale might interpret it differently. The statement and the rationale must agree on scope.
-
----
-
-## What the Guardian Does with Each Section
-
-| Section | Guardian asks | On violation |
-|---|---|---|
-| Opener | "Does this PR serve the project's reason for existing?" | Rarely invoked directly; provides context for all other checks. |
-| In/Out/Shape | "Does this PR introduce something outside the declared boundaries?" | Soft-block with citation. |
-| Goals | "Does this PR move toward or away from a goal?" | Provides direction; the guardian reasons about goals but cites requirements. |
-| Requirements | "Does this PR satisfy, advance, or contradict a specific requirement?" | Soft-block with requirement number citation. |
-| Anti-Goals | "Does this PR cross a declared identity boundary?" | Soft-block with anti-goal citation. Treated same as requirement violation. |
-| Pillars | "Does this PR depart from a stated preference? Is the departure acknowledged?" | Surface the tension. Ask the question. Never block. |
+- **Every pillar names its tradeoff.** "We accept slower velocity in exchange for never shipping demo-only features" is a pillar. "We value quality" is a platitude. No cost, no pillar.
+- **The "reasonable opposite" test.** Would someone reasonably argue the opposite? "Corpus-first vs. synthetic-first" is a real tradeoff. "Don't ship broken software" is not.
+- **Pillars are defaults, not mandates.** A PR that departs from one is a signal that a tradeoff is being made, to be made conscious — not blocked.
+- **Every pillar comes from the owner's mouth.** This is the section most contaminated by agent assumptions ("local and self-contained" sounds reasonable for any desktop app). Two real pillars from the owner beat four plausible ones from the agent.
+- **Zero pillars is a valid state.** The section appears when the owner makes a real choice about what to sacrifice for what — not before.
 
 ---
 
 ## Common Failure Modes
 
-**Agent fabrication.** An agent filling out this template will confidently invent constraints the owner never chose. The constraint will sound reasonable. Reviewers will praise it. The guardian will enforce it. The owner will not notice until the constraint blocks something they wanted. Every field in this document should be traceable to something the owner said, not something the agent inferred.
+- **Agent fabrication.** An agent filling this out will confidently invent constraints the owner never chose; they sound reasonable, reviewers praise them, and they get enforced until they block something the owner wanted. Every line must trace to something the owner said. This is why the North Star is authored by interview, not by filling in a template.
+- **Reaching for "The Bet."** It is spike-only. Default to Problem → Solution.
+- **Requirements creeping back.** "How we'll recognize progress" is validation; it turns the North Star into a test suite. It lives nowhere here — if it is testable and load-bearing, it is a plan (`docs/plans/`) or an architecture invariant.
+- **Fabricated anti-goals.** The minor-rule-explosion vector. Default zero; earn each one.
+- **Shape smuggled in as identity.** Delivery belongs in architecture; if it is in the North Star, the North Star churns every time delivery changes.
+- **Pillars without costs.** A "Why" that names no sacrifice is a platitude.
 
-**Pillar contamination.** The most common fabrication target. Agents default to "reasonable-sounding" architectural preferences (local-first, privacy-focused, minimal dependencies) that may or may not reflect the owner's actual values. The interview exists to prevent this.
+---
 
-**Underspecified verbs in requirements.** "Learns," "adapts," "understands," "intelligently handles." Each of these will be interpreted as requiring sophisticated mechanisms. Say what you mean mechanically.
+## The Guardian
 
-**Anti-goals that ban mechanisms instead of intent.** "No text input fields" vs. "the user does not compose ideas into this system." The first bans legitimate UI. The second bans scope violations.
-
-**Pillars without costs.** If the "Why" does not name what you are sacrificing, the pillar is a platitude and will not help the guardian reason about tradeoffs.
-
-**Premature In/Out/Shape.** Filling this section in before the project's boundaries are earned locks in architectural choices that agents will enforce as requirements.
-
-**Empty sections left for months.** An empty requirements section is fine on day one. An empty requirements section three months in means the owner has not revisited the document. The guardian should flag staleness using the "Last Confirmed" metadata field.
+Enforcement is out of scope for this skill, and the Guardian runtime does not exist yet — author and review as if it never will. If it later ships, it reasons over these sections (opener for context, goals for direction, anti-goals as identity boundaries, pillars as tradeoffs to surface). See `guardian-relationship.md`; do not add Guardian ceremony to the North Star itself.

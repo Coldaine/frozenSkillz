@@ -1,33 +1,45 @@
 # Skill Authority and Computer Synchronization
 
-This repository is the reviewed source and distribution boundary for shared active skills. Each computer receives that distribution in its local skill root. Local runtime copies are not a second source of truth.
+This repository has two deliberate authority lanes. Manifest-listed active skills are reviewed here and synchronized outward to computers. Personal or gated skills are authored in the live personal root and mirrored into `_incubator/` for durable review. Mixing those directions recreates the drift this workflow is designed to prevent.
 
 ## Authority Model
+
+### Active distributed skills
 
 The active distribution is the intersection of two requirements:
 
 1. the skill directory exists under `plugins/frozen-skills/skills/<skill-name>/`; and
 2. the same name and path are listed in all four `frozen-skills` plugin manifests.
 
-The synchronizer refuses to run if the Claude, Codex, Cursor, and Gemini manifests disagree on the plugin version or ordered skill list. `_incubator/` is outside the distribution regardless of what it contains.
+The synchronizer refuses to run if the Claude, Codex, Cursor, and Gemini manifests disagree on the plugin version or ordered skill list. For this lane, the repository copy is authoritative and each computer's managed copy is runtime output.
 
-On every computer, the default managed destination is:
+### Personal or gated skills
+
+Personal skills that are not in the active manifests are authored under:
 
 ```text
 ~/.agents/skills/<skill-name>/
 ```
 
-This is the shared personal Agent Skills root discovered by Codex and compatible clients. A client may also maintain its own plugin cache or compatibility mirror; those surfaces do not change the repository's authority.
+When this repository tracks one of those skills, its durable evaluation mirror lives under:
+
+```text
+_incubator/personal-skills/<skill-name>/
+```
+
+The live personal copy is authoritative for this lane. `_incubator/` is review material and is never installed by the active synchronizer.
 
 | Surface | Role |
 |---|---|
 | `plugins/frozen-skills/skills` | Reviewed source for active distributed skills. |
-| Four `plugins/frozen-skills` manifests | Exact allowlist and version contract for the distribution. |
-| `~/.agents/skills` | Default local runtime destination; unrelated personal skills coexist here. |
+| Four `plugins/frozen-skills` manifests | Exact allowlist and version contract for the active distribution. |
+| `~/.agents/skills` | Managed runtime destination for active skills; authoring source for personal/gated skills. |
+| `_incubator/personal-skills` | Durable review mirror for tracked personal/gated skills; never installed. |
 | Client plugin/cache directories | Client-managed runtime state, when a client has its own installer. |
-| `_incubator/` | Gated review material; never synchronized or installed. |
 
-## Synchronize a Computer
+The management record at `~/.agents/skills/.frozen-skills-sync.json` distinguishes active managed copies from unrelated personal skills.
+
+## Synchronize Active Skills to a Computer
 
 Clone this repository once on each computer. After cloning or pulling a new revision, inspect and apply the local plan:
 
@@ -42,7 +54,7 @@ Both commands validate the distribution first. `--check` writes nothing and exit
 - `1` when a safe install, update, adoption, or removal is pending;
 - `2` when the distribution is invalid or local content conflicts with it.
 
-`--apply` writes the active skills and the management record at `~/.agents/skills/.frozen-skills-sync.json`. A matching pre-existing skill is adopted without rewriting it. A previously managed, unchanged copy is safely updated. An unmanaged or locally modified copy is reported as a conflict and left untouched.
+`--apply` writes the active skills and management record under `~/.agents/skills`. A matching pre-existing skill is adopted without rewriting it. A previously managed, unchanged copy is safely updated. An unmanaged or locally modified copy is reported as a conflict and left untouched.
 
 For a non-default root:
 
@@ -51,6 +63,30 @@ python scripts/sync_frozen_skills.py --apply --destination "C:\path\to\skills"
 ```
 
 On macOS or Linux, the same Python command works with POSIX paths.
+
+## Personal/Gated Skill Sync
+
+After a deliberate rewrite or material fix of a personal skill that already has an incubator row:
+
+1. edit and validate `~/.agents/skills/<name>/`;
+2. mirror the live tree into `_incubator/personal-skills/<name>/`, including deletion of removed files;
+3. update the row or notes in `docs/skill-review/tracker.md`; and
+4. commit and push that mirror on a branch/PR in this repository in the same session.
+
+A GitHub issue alone is not the durable rewrite. Uncommitted incubator files are not “in frozenSkillz.” “Stay gated” means do not add the skill to `plugins/frozen-skills/skills` or the manifests; it does not mean skip Git.
+
+## Completion Contract
+
+When the operator asks to rewrite, fix, or sync a skill that this repository tracks, the work is incomplete until the applicable authority lane is durable:
+
+| Required | Not sufficient |
+|---|---|
+| Active source under `plugins/` updated, or live personal source updated | Opening an issue describing the rewrite |
+| Matching active or incubator repository path updated | Copying files only in an uncommitted worktree |
+| Tracker updated when status/work notes change | Deferring repository publication “for later” |
+| Commit + push, with a PR when not already on one | A local-only sync unless explicitly requested |
+
+Exception: the operator explicitly says “live-only, do not touch the repo.” Otherwise, repository landing is part of the task.
 
 ## Removal and Conflict Rules
 
@@ -63,15 +99,15 @@ python scripts/sync_frozen_skills.py --apply --prune
 
 Pruning removes only previously managed content that still matches its recorded digest. A locally modified retired skill becomes a conflict.
 
-`--force` permits overwriting a conflicting active skill or deleting a conflicting retired skill. Review the exact reported skill first. Force is not the normal update path.
+`--force` permits overwriting a conflicting active skill or deleting a conflicting retired skill. Review the exact reported skill first. Force is not the normal update path and does not override a target that changes after planning.
 
 ## Editing and Promotion Flow
 
-For an already active skill, make the reusable change under `plugins/frozen-skills/skills/<skill-name>/`, validate it, review it, and then synchronize computers outward from the merged repository revision.
+For an already active skill, make the reusable change under `plugins/frozen-skills/skills/<skill-name>/`, validate it, review it, merge it, and then synchronize computers outward from that repository revision.
 
-If a useful change was first prototyped in a local runtime copy, do not run `--force` immediately. Compare it with the repository source, deliberately port the reusable part into the source, validate and review that change, then synchronize. The conflict is evidence that authority must be reconciled, not a signal to copy in either direction automatically.
+If an active skill was accidentally edited in a local runtime copy, do not run `--force` immediately. Compare it with the repository source, deliberately port any reusable change into the repository, validate and review it, then synchronize. The conflict is evidence that authority must be reconciled.
 
-New skills enter `_incubator/` and pass the gate in `docs/skill-review/tracker.md` before promotion. Promotion requires adding the skill to all four plugin manifests and aligning the plugin and marketplace versions. On the next synchronization, the new active skill is installed on each computer.
+New skills enter `_incubator/` and pass the gate in `docs/skill-review/tracker.md` before promotion. Promotion requires moving or adapting the skill into `plugins/frozen-skills/skills`, adding it to all four plugin manifests, and aligning plugin and marketplace versions. The next computer synchronization installs it.
 
 ## Marketplace Installation Is Different
 
@@ -82,7 +118,7 @@ Claude Code supports this repository as a marketplace:
 /plugin install frozen-skills@coldaine-skills
 ```
 
-That installs a Claude-managed plugin copy. It does not synchronize `~/.agents/skills` and does not prove that another client's similarly named manifest is installable. The Codex, Cursor, and Gemini manifests remain useful packaging metadata and are enforced as one distribution contract, while `sync_frozen_skills.py` is the repository-owned cross-platform local installation path.
+That installs a Claude-managed plugin copy. It does not synchronize `~/.agents/skills` and does not prove that another client's similarly named manifest is installable. The Codex, Cursor, and Gemini manifests remain packaging metadata and one enforced distribution contract; `sync_frozen_skills.py` is the repository-owned cross-platform local installation path.
 
 ## Required Checks
 
@@ -96,20 +132,37 @@ git diff --check
 
 For JSON manifests touched in the same change, also parse them with `ConvertFrom-Json`.
 
-For an end-to-end smoke test, synchronize into a temporary empty directory, check it, and then remove only that temporary directory:
+For an end-to-end smoke test, use a unique temporary directory, assert both commands, and remove only that verified temporary path:
 
 ```powershell
-$target = Join-Path $env:TEMP "frozen-skills-smoke"
-python scripts/sync_frozen_skills.py --apply --destination $target
-python scripts/sync_frozen_skills.py --check --destination $target
+$tempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
+$target = Join-Path $tempRoot ("frozen-skills-smoke-" + [guid]::NewGuid().ToString("N"))
+try {
+    python scripts/sync_frozen_skills.py --apply --destination $target
+    if ($LASTEXITCODE -ne 0) { throw "Smoke-test apply failed: $LASTEXITCODE" }
+    python scripts/sync_frozen_skills.py --check --destination $target
+    if ($LASTEXITCODE -ne 0) { throw "Smoke-test check failed: $LASTEXITCODE" }
+} finally {
+    $resolvedTarget = [System.IO.Path]::GetFullPath($target)
+    if ($resolvedTarget.StartsWith($tempRoot, [System.StringComparison]::OrdinalIgnoreCase) -and
+        (Test-Path -LiteralPath $resolvedTarget)) {
+        Remove-Item -LiteralPath $resolvedTarget -Recurse -Force
+    }
+}
 ```
 
 ## Reporting
 
-Every distribution change should report:
+For an active distribution change, report:
 
-- which active source paths changed;
-- whether manifests or versions changed;
-- the validation and sync checks run;
-- any destination conflict intentionally left unresolved;
-- which repository revision was synchronized to each computer when that deployment is in scope.
+- active source paths and manifest/version changes;
+- validation and synchronization checks;
+- destination conflicts intentionally left unresolved; and
+- the repository revision synchronized to each computer when deployment is in scope.
+
+For a personal/gated change, report:
+
+- the live path compared and incubator path changed;
+- tracker or promotion status changes;
+- any live-versus-incubator delta intentionally left unsynced; and
+- branch, commit, and PR URL unless the operator requested live-only work.

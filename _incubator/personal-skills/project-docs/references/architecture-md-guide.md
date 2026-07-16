@@ -33,13 +33,13 @@ Every forward-looking claim wears a status label. The labels are the seam betwee
 `architecture.md` does not own:
 
 - project purpose and anti-goals → `NORTH_STAR.md`
-- current task handoff → `PROGRESS.md`
+- current task handoff → GitHub Issues and/or `docs/plans/`
 - long decision rationale → `docs/decisions/`
-- deep subsystem documentation → `docs/components/`
+- deep subsystem documentation → `docs/components/` or topic living docs
 - long procedures → `docs/workflows/`
-- completed work history → `docs/history/`
+- completed work archives → **git** (do not create `docs/history/` for this)
 
-When component detail bloats architecture.md, move it to `docs/components/`. When a decision deserves its own context-rationale-consequences write-up, move it to `docs/decisions/` and add it to the ADR Index.
+When component detail bloats architecture.md, move it to `docs/components/` or a topic living doc. When a decision deserves its own context-rationale-consequences write-up, move it to `docs/decisions/` and add it to the ADR Index.
 
 ---
 
@@ -228,7 +228,7 @@ Authority flows from NORTH_STAR.md down. architecture.md derives from intent.
 
 - If `architecture.md` describes a technical approach that contradicts a NORTH_STAR anti-goal, **NORTH_STAR wins**. architecture.md is updated, or NORTH_STAR is revised consciously.
 - If `architecture.md`'s Current claims disagree with the actual code, **the code wins**. architecture.md is updated.
-- If `architecture.md` and `PROGRESS.md` disagree about what's in flight, **architecture.md's Current/Planned labels win** for technical truth; PROGRESS.md should align.
+- If `architecture.md` and an active Issue/plan disagree about what's in flight, **architecture.md's Current/Planned labels win** for technical truth; the Issue/plan should align (or architecture is deliberately revised first).
 - If `AGENTS.md` references architecture status labels that don't exist or have been renamed, **architecture.md wins**; AGENTS.md is updated.
 
 architecture.md derives from NORTH_STAR; everything downstream of architecture.md derives from architecture.md.

@@ -54,6 +54,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `skill-manager` | B | MOO-567 | 🛑 gated | `_incubator/skill-manager/` | Verify scripts + registry assumptions (`skills.sh`, `~/.agents/skills`). |
 | `session-skill-inferencer` | C | MOO-569 | 🛑 gated · **highest concern** | `_incubator/frozen-skills/skills/` | Fix generation quality before any promotion (see below). |
 | `skill-injector` (was skill-classifier) | C | MOO-570 | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Test end-to-end before enabling; finish internal rename (scripts/module + ADR/doc prose still say "classifier"). |
+| `icepanel-api` | A | — | 🛑 gated · **incubating** | `_incubator/frozen-skills/skills/icepanel-api/` | Live-validate diagram push on a real landscape; attach PNG/share proof to examples; run layout/push scripts; trim description to the ~300-char bar before promotion. |
 
 Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental · Tier A = strong reference, B = functional/narrow, C = rework.
 
@@ -70,9 +71,12 @@ Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental �
 ## Per-skill notes
 
 ### `doppler` — ACTIVE
-Best skill in the repo: security-first, cross-platform, names-only diagnostics, complete `references/` + `agents/`.
-Use it as the quality bar for everything else. Synced from `C:\Users\pmacl\.agents\skills\doppler`
-on 2026-07-06 to preserve the live 2026-06-29 operational learnings in the reviewed frozen copy.
+Security-first reference skill: lean `SKILL.md` (rules + intent table + workflow), progressive
+`references/` (setup, commands, CI/fallbacks), gated `references/homelab-notes.md` for coldaine/ESO/Shipwright
+only, and `evals/triggers.json` for description routing checks. Synced from
+`C:\Users\pmacl\.agents\skills\doppler` on 2026-07-16 to match the promotion bar (WHAT/WHEN description,
+no project diary in the body, progressive disclosure).
+Use it as the quality bar for everything else.
 
 ### `external-skill-intake` — ACTIVE
 Required workflow for evaluating external skill/plugin/agent repos. It keeps source snapshots read-only under
@@ -138,6 +142,17 @@ Codex delegation, Git, commits, pull requests, or unrelated skill use.
   (`skill_classifier.py`), the env vars (`SKILL_CLASSIFIER_*`), the ADRs, and the SKILL.md/README prose still say
   "classifier". Left as-is for now to avoid breaking the untested hook wiring.
 
+### `icepanel-api` — incubating
+- Salvaged from the stale `tempstore` branch (PR #34) onto a clean base; only the skill dir was taken — the branch's
+  AGENTS.md/CLAUDE.md rewrites, `.kilo/plans/`, and `_incubator/temp_sandbox/` were left behind.
+- Structurally sound: lean `SKILL.md` router → `reference/**` + `workflows.md`/`diagrams.md`; all internal links resolve;
+  `agents/` briefs present; UTF-8 clean.
+- **Before promotion:** live-validate a diagram push (attach PNG/share-link proof to `examples.md`), run the layout/push
+  scripts documented in `scripts/README.md`, and trim the description (~500 chars) to the ~300-char promotion bar.
+- **Fidelity gap (adversarial review 2026-07-16):** `schemas.md` enums/required-field lists and the response keys in
+  `examples.md` (`{url,defaultUrl,shareLink}`, `.diagramExportImage.id`, `fileUrls.png`) are hand-transcribed and not
+  yet diffed against the live IcePanel OpenAPI. Verify each against a real response before promotion.
+
 ---
 
 ## Loose ends to reconcile when promoting
@@ -155,6 +170,10 @@ Reference copies of the user's own `~/.agents/skills` personal skills, brought i
 evaluation (the "own a reference copy of all my skills" directive). **Held in `_incubator/personal-skills/` — gated,
 not installable, in no manifest.** Deliberately separate from the marketplace-candidate gated skills above.
 
+**Rewrite rule:** live edit in `~/.agents/skills/<name>/`, then mirror into `_incubator/personal-skills/<name>/`, update this
+tracker row, and **commit + push in frozenSkillz the same session**. Opening an Issue is not enough. “Gated” means not
+marketplace-promoted — not “leave uncommitted.” Full contract: `docs/workflows/skill-authority-and-frozen-sync.md`.
+
 **Excluded on purpose:**
 - `deepinit` — ships in the OMC package (`oh-my-claude-sisyphus/skills`); an *installed plugin* skill, not authored here. Not intake material.
 - `doppler` — already **ACTIVE** in `plugins/frozen-skills/skills/`.
@@ -167,7 +186,7 @@ not installable, in no manifest.** Deliberately separate from the marketplace-ca
 |---|---|---|---|
 | `chat-history` | authored (hardened 2026-07-06) | 🛑 gated | De-personalize (paths, Pieces, UTC-5); run `artifact_hunt.py` / `extract_chat_history.py`. |
 | `retrospective` | authored (`author: pmacl`) | 🛑 gated | De-personalize (agent-control-plane paths); run `session_timeline.py`. |
-| `project-docs` | authored | 🛑 gated | Review; de-opinionate if promoting. |
+| `project-docs` | authored (rewritten 2026-07-16; [#37](https://github.com/Coldaine/frozenSkillz/issues/37)) | 🛑 gated · evaluate | Live + incubator synced: kill PROGRESS/`docs/history` defaults; Issues/plans + promote-then-delete; AGENTS router; CLAUDE→AGENTS; restored `SKILL.md`. Still gated — do not marketplace-promote until promotion bar + de-personalization pass. |
 | `skill-install` | authored | 🛑 gated | Verify recipes/paths. |
 | `run-opencode` | authored | 🛑 gated | Verify commands. |
 | `edit-opencode-config` | authored (was `.claude`-only) | 🛑 gated | Fix canonical-root drift; verify. |
