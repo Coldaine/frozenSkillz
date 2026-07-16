@@ -71,6 +71,32 @@ class ConversationInventoryTests(unittest.TestCase):
         record = self.inventory.SessionRecord(tool="claude-code", native_id="uncertain", kind="conversation", started_at=datetime(2026, 7, 16, 12, tzinfo=timezone.utc), last_activity=datetime(2026, 7, 16, 12, 30, tzinfo=timezone.utc))
         self.assertEqual(self.inventory.state_at(record, datetime(2026, 7, 16, 12, 45, tzinfo=timezone.utc)), "active_or_interrupted")
 
+    def test_later_turn_invalidates_earlier_task_complete(self):
+        record = self.inventory.SessionRecord(
+            tool="codex",
+            native_id="multi-turn",
+            kind="conversation",
+            started_at=datetime(2026, 7, 16, 12, tzinfo=timezone.utc),
+            last_activity=datetime(2026, 7, 16, 12, 50, tzinfo=timezone.utc),
+            terminal_at=datetime(2026, 7, 16, 12, 30, tzinfo=timezone.utc),
+            work_starts=[datetime(2026, 7, 16, 12, 5, tzinfo=timezone.utc), datetime(2026, 7, 16, 12, 40, tzinfo=timezone.utc)],
+        )
+        self.assertEqual(self.inventory.state_at(record, datetime(2026, 7, 16, 12, 45, tzinfo=timezone.utc)), "active")
+        self.assertEqual(self.inventory.state_at(record, None), "active_or_interrupted")
+
+    def test_historical_cutoff_uses_terminal_before_a_future_turn(self):
+        record = self.inventory.SessionRecord(
+            tool="codex",
+            native_id="idle-gap",
+            kind="conversation",
+            started_at=datetime(2026, 7, 16, 12, tzinfo=timezone.utc),
+            last_activity=datetime(2026, 7, 16, 13, tzinfo=timezone.utc),
+            work_starts=[datetime(2026, 7, 16, 12, 5, tzinfo=timezone.utc), datetime(2026, 7, 16, 12, 40, tzinfo=timezone.utc)],
+            terminal_events=[datetime(2026, 7, 16, 12, 30, tzinfo=timezone.utc), datetime(2026, 7, 16, 12, 55, tzinfo=timezone.utc)],
+        )
+        self.assertEqual(self.inventory.state_at(record, datetime(2026, 7, 16, 12, 35, tzinfo=timezone.utc)), "completed")
+        self.assertEqual(self.inventory.state_at(record, datetime(2026, 7, 16, 12, 45, tzinfo=timezone.utc)), "active")
+
     def test_markdown_is_windows_console_safe(self):
         record = self.inventory.SessionRecord(tool="codex", native_id="root", kind="conversation", started_at=datetime(2026, 7, 16, 12, tzinfo=timezone.utc), last_activity=datetime(2026, 7, 16, 13, tzinfo=timezone.utc))
         child = self.inventory.SessionRecord(tool="codex", native_id="child", parent_id="root", kind="subagent", started_at=datetime(2026, 7, 16, 12, tzinfo=timezone.utc), last_activity=datetime(2026, 7, 16, 13, tzinfo=timezone.utc))

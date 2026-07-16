@@ -29,6 +29,8 @@ class SessionRecord:
         source_files: Sequence[str] | None = None,
         evidence: Sequence[str] | None = None,
         user_prompts: Sequence[tuple[datetime, str]] | None = None,
+        work_starts: Sequence[datetime] | None = None,
+        terminal_events: Sequence[datetime] | None = None,
     ) -> None:
         self.tool = tool
         self.native_id = native_id
@@ -42,6 +44,8 @@ class SessionRecord:
         self.source_files = list(source_files or [])
         self.evidence = list(evidence or [])
         self.user_prompts = list(user_prompts or [])
+        self.work_starts = list(work_starts or [])
+        self.terminal_events = list(terminal_events or ([terminal_at] if terminal_at else []))
 
 
 def parse_timestamp(value: Any) -> datetime | None:
@@ -126,8 +130,10 @@ def parse_codex_file(path: Path) -> SessionRecord | None:
     event_title = ""
     timestamps: list[datetime] = []
     terminal_at = None
+    terminal_events: list[datetime] = []
     evidence: list[str] = []
     user_prompts: list[tuple[datetime, str]] = []
+    work_starts: list[datetime] = []
 
     for item in iter_jsonl(path):
         timestamp = parse_timestamp(item.get("timestamp"))
@@ -148,7 +154,10 @@ def parse_codex_file(path: Path) -> SessionRecord | None:
             event_type = payload.get("type")
             if event_type in {"task_complete", "turn_complete", "thread_complete"} and timestamp:
                 terminal_at = timestamp
+                terminal_events.append(timestamp)
                 evidence.append(str(event_type))
+            if event_type in {"task_started", "turn_started", "user_message"} and timestamp:
+                work_starts.append(timestamp)
             if not event_title and event_type == "user_message":
                 event_title = clean_title(text_content(payload.get("message")))
             if event_type == "user_message" and timestamp:
@@ -162,6 +171,7 @@ def parse_codex_file(path: Path) -> SessionRecord | None:
             prompt = clean_title(text_content(payload.get("content")), limit=240)
             if prompt:
                 user_prompts.append((timestamp, prompt))
+                work_starts.append(timestamp)
 
     if not timestamps:
         try:
@@ -182,6 +192,8 @@ def parse_codex_file(path: Path) -> SessionRecord | None:
         source_files=[str(path)],
         evidence=evidence,
         user_prompts=user_prompts,
+        work_starts=work_starts,
+        terminal_events=terminal_events,
     )
 
 
@@ -197,8 +209,10 @@ def parse_claude_file(path: Path) -> SessionRecord | None:
     title = ""
     timestamps: list[datetime] = []
     terminal_at = None
+    terminal_events: list[datetime] = []
     evidence: list[str] = []
     user_prompts: list[tuple[datetime, str]] = []
+    work_starts: list[datetime] = []
 
     for item in iter_jsonl(path):
         timestamp = parse_timestamp(item.get("timestamp"))
@@ -217,9 +231,11 @@ def parse_claude_file(path: Path) -> SessionRecord | None:
             prompt = clean_title(text_content(item.get("message")), limit=240)
             if prompt:
                 user_prompts.append((timestamp, prompt))
+                work_starts.append(timestamp)
         subtype = item.get("subtype")
         if subtype in {"success", "error", "interrupted"} and timestamp:
             terminal_at = timestamp
+            terminal_events.append(timestamp)
             evidence.append(str(subtype))
 
     if not timestamps:
@@ -241,6 +257,8 @@ def parse_claude_file(path: Path) -> SessionRecord | None:
         source_files=[str(path)],
         evidence=evidence,
         user_prompts=user_prompts,
+        work_starts=work_starts,
+        terminal_events=terminal_events,
     )
 
 
@@ -286,13 +304,19 @@ def parse_antigravity_database(path: Path) -> list[SessionRecord]:
 
 def state_at(record: SessionRecord, cutoff: datetime | None) -> str:
     if cutoff is None:
-        return "completed" if record.terminal_at else "active_or_interrupted"
+        latest_start = max(record.work_starts, default=None)
+        latest_terminal = max(record.terminal_events, default=None)
+        terminal_is_current = latest_terminal is not None and (latest_start is None or latest_terminal >= latest_start)
+        return "completed" if terminal_is_current else "active_or_interrupted"
     cutoff = cutoff.astimezone(timezone.utc)
     if record.started_at > cutoff:
         return "not_started"
-    if record.terminal_at and record.terminal_at <= cutoff:
+    latest_start = max((started for started in record.work_starts if started <= cutoff), default=None)
+    latest_terminal = max((ended for ended in record.terminal_events if ended <= cutoff), default=None)
+    terminal_is_current = latest_terminal is not None and (latest_start is None or latest_terminal >= latest_start)
+    if terminal_is_current:
         return "completed"
-    if (record.terminal_at and record.terminal_at > cutoff) or record.last_activity > cutoff:
+    if any(ended > cutoff for ended in record.terminal_events) or record.last_activity > cutoff:
         return "active"
     return "active_or_interrupted"
 
@@ -301,14 +325,14 @@ def build_report(records: Sequence[SessionRecord], at: datetime | None = None, w
     conversations = [record for record in records if record.kind == "conversation"]
     children = [record for record in records if record.kind == "subagent"]
     evidence = [record for record in records if record.kind not in {"conversation", "subagent"}]
-    children_by_parent: dict[str, list[SessionRecord]] = {}
+    children_by_parent: dict[tuple[str, str], list[SessionRecord]] = {}
     for child in children:
         if child.parent_id:
-            children_by_parent.setdefault(child.parent_id, []).append(child)
+            children_by_parent.setdefault((child.tool, child.parent_id), []).append(child)
 
     rendered = []
     for record in sorted(conversations, key=lambda item: item.last_activity, reverse=True):
-        attached = children_by_parent.get(record.native_id, [])
+        attached = children_by_parent.get((record.tool, record.native_id), [])
         prompt_cutoff = at.astimezone(timezone.utc) if at else None
         eligible_prompts = [item for item in record.user_prompts if prompt_cutoff is None or item[0] <= prompt_cutoff]
         last_user = max(eligible_prompts, key=lambda item: item[0])[1] if eligible_prompts else ""
@@ -330,8 +354,8 @@ def build_report(records: Sequence[SessionRecord], at: datetime | None = None, w
             "last_user_at_cutoff": last_user,
             "incident_window_prompts": [{"timestamp": timestamp.isoformat(), "text": text} for timestamp, text in recent_prompts[-20:]],
         })
-    root_ids = {root.native_id for root in conversations}
-    unattached = [child for child in children if not child.parent_id or child.parent_id not in root_ids]
+    root_ids = {(root.tool, root.native_id) for root in conversations}
+    unattached = [child for child in children if not child.parent_id or (child.tool, child.parent_id) not in root_ids]
     return {
         "cutoff": at.isoformat() if at else None,
         "user_conversation_count": len(conversations),
