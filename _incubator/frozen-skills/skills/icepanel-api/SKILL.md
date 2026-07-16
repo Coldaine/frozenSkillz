@@ -1,11 +1,10 @@
 ---
 name: icepanel-api
 description: >-
-  Operates on IcePanel REST API v1 for C4 landscapes — model import, positioned
-  diagrams, flows, ADRs, drafts, landscape merge/copy, exports, share links,
-  webhooks, and action-log forensics. Use for IcePanel, icepanel.io, blank canvas,
-  diagram-content-update, landscape-import, merge landscapes, C4 modeling,
-  ICE_PANEL_ADMIN, Doppler, or IcePanel MCP/OAuth.
+  Operates on the IcePanel REST API v1 for C4 landscapes — model import, positioned
+  diagrams, flows, ADRs, drafts, landscape merge/copy, exports, share links, webhooks,
+  and action-log forensics. Use when working with IcePanel / icepanel.io: importing a
+  landscape, fixing a blank canvas, merging landscapes, or C4 modeling via the API or MCP.
 ---
 
 # IcePanel API
