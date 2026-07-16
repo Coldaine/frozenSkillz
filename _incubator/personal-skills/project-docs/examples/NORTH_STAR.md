@@ -42,9 +42,3 @@ Agents drift fastest when no document tells them what a project refuses to be, a
 **Authority-flow over local correctness.** We accept that a locally well-formed doc that contradicts an upstream doc is still a finding. The reasonable opposite — "if it looks fine on its own, it is fine" — is faster to review but lets drift accrete between docs.
 
 **Authoring-time clarity over runtime enforcement.** We accept that the skill can only surface findings, not block changes. The reasonable opposite — build enforcement into the skill — would catch more but conflate authoring with PR-time concerns and make the skill brittle as the Guardian evolves separately.
-
-## Open Questions
-
-- Should the skill bootstrap the overflow subdirectories (`docs/decisions/`, `docs/components/`) when it bootstraps the primaries, or only when it detects a need for them?
-- How does the skill detect "this content should move out of doc X into home Y" without rewriting doc X?
-- On a repo that already has CLAUDE.md, `.cursorrules`, and copilot-instructions.md, what is the migration workflow's order of operations?

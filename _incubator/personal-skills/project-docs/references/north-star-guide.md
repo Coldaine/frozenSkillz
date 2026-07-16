@@ -22,6 +22,8 @@ Deleted from the old pattern: **Requirements** (goals-as-validation) and **Shape
 
 **Minimum viable North Star: Opener + Goals.** Everything else is earned, not filled in. The document stays small enough to read every session through content discipline, not a line count.
 
+Open or unresolved questions are **current work**, not a North Star section — route them to Issues or `docs/plans/` (see `current-work-and-lifecycle.md`). A sixth "Open Questions" section is exactly the drift this pattern removes.
+
 ---
 
 ## The Opener
