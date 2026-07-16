@@ -1,0 +1,46 @@
+name: Validate frozenSkillz
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.13"
+
+      - name: Check for whitespace errors
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]]; then
+            BASE_SHA=HEAD^
+          fi
+          git diff --check "$BASE_SHA" HEAD
+
+      - name: Validate plugin manifests
+        run: python scripts/validate_manifests.py
+
+      - name: Test local skill synchronization
+        run: python -m unittest discover -s tests -v
+
+      - name: Smoke-test a fresh local skill root
+        run: |
+          target="${RUNNER_TEMP}/frozen-skills-smoke"
+          python scripts/sync_frozen_skills.py --apply --destination "$target"
+          python scripts/sync_frozen_skills.py --check --destination "$target"

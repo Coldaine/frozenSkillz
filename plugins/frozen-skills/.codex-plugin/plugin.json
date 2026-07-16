@@ -1,7 +1,7 @@
 {
   "name": "frozen-skills",
-  "description": "Reviewed active skills: Doppler secrets management and external skill intake. Other reference skills are gated in _incubator/ pending review (see docs/skill-review).",
-  "version": "2.1.0",
+  "description": "Installs the reviewed Doppler, external-skill-intake, and OMC maintenance skills. Content under _incubator is not included.",
+  "version": "2.2.0",
   "author": {
     "name": "Coldaine",
     "url": "https://github.com/Coldaine"
@@ -15,6 +15,10 @@
     {
       "name": "external-skill-intake",
       "path": "skills/external-skill-intake"
+    },
+    {
+      "name": "omc-reference",
+      "path": "skills/omc-reference"
     }
   ]
 }

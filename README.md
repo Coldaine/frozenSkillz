@@ -2,27 +2,54 @@
 
 Cross-platform agent skills, rules, and plugin metadata for reusable agent workflows.
 
-This repository is maintained as a plugin marketplace and source/registry boundary for shared skills. It is not a dumping ground for local client caches, raw external repos, or unreviewed experimental skill copies.
+`frozenSkillz` is the reviewed source repository and marketplace. `frozen-skills` is the active distribution inside it. The four aligned plugin manifests define the distribution: only their entries under `plugins/frozen-skills/skills/` are synchronized or packaged. Content under `_incubator/` is stored for review and is never installed.
+
+This repository is not a dumping ground for local client caches, raw external repos, or unreviewed experimental skill copies.
 
 ## Plugins
 
 | Plugin | Category | Status | Purpose |
 |---|---|---|---|
-| `frozen-skills` | reference | active | Installable skills that passed the review gate. Active skills: `doppler`, `external-skill-intake`. |
+| `frozen-skills` | reference | active | Installable package for reviewed skills. Installs `doppler`, `external-skill-intake`, and `omc-reference`. |
 | `skill-injector` | development | experimental, untested | UserPromptSubmit hook and subagent prompt quality gate for LLM-assisted skill suggestions. Review/test before enabling. |
 
 Historical reference/workflow skills remain gated in `_incubator/` until they pass the quality bar in `docs/skill-review/tracker.md`.
 
-## Install
+## Synchronize a Computer
 
-Claude Code marketplace:
+Clone or update this repository on each computer, then run the cross-platform synchronizer:
+
+```powershell
+python scripts/sync_frozen_skills.py --check
+python scripts/sync_frozen_skills.py --apply
+```
+
+The default destination is `~/.agents/skills`, the shared personal skill root used by Codex and other clients that discover Agent Skills. The synchronizer:
+
+- validates that the Claude, Codex, Cursor, and Gemini manifests have the same version and active skill list;
+- installs or updates only those manifest-listed skills;
+- leaves unrelated personal skills alone;
+- records managed content in `~/.agents/skills/.frozen-skills-sync.json`;
+- refuses to overwrite an unmanaged or locally modified destination skill.
+
+Use `--destination <path>` for another local skill root. Use `--prune` to remove unchanged, previously managed skills that have left the active manifests. `--force` overwrites local conflicts and should be used only after reviewing the reported plan.
+
+The destination must be disjoint from the repository: it cannot be inside the frozenSkillz checkout or contain that checkout. This enforces outward-only deployment and prevents reverse synchronization into reviewed source.
+
+After pulling a new revision on any computer, `--check` exits nonzero when that computer needs synchronization; `--apply` converges it to the reviewed distribution.
+
+## Client-managed Plugin Install
+
+Claude Code can instead let its marketplace manage a client-specific plugin copy:
 
 ```bash
 /plugin marketplace add Coldaine/frozenSkillz
 /plugin install frozen-skills@coldaine-skills
 ```
 
-Cross-platform manifests are also present for Codex, Cursor, and Gemini-compatible consumers where supported by those clients.
+That command installs the same three manifest-listed skills into Claude Code's plugin-managed location. It does not populate `~/.agents/skills` and does not install anything from `_incubator/`.
+
+The Codex, Cursor, and Gemini manifests are packaging metadata and a consistency contract. Their presence alone is not an installer. Use `sync_frozen_skills.py` for a verified local installation unless a specific client provides and documents its own plugin installer.
 
 ## Active Skills
 
@@ -30,6 +57,7 @@ Cross-platform manifests are also present for Codex, Cursor, and Gemini-compatib
 
 - `doppler`: Doppler CLI and secret-injection workflow guidance that avoids exposing secret values.
 - `external-skill-intake`: sandbox, inventory, score, evaluate, and package external skill/plugin/agent repos before any promotion.
+- `omc-reference`: maintain Oh My ClaudeCode as a separate Claude Code plugin from Codex without importing OMC workflow rules into ordinary Codex work.
 
 ## External Skill Intake
 
@@ -51,13 +79,15 @@ gemini-marketplace.json          Gemini-facing marketplace metadata
 plugins/
   frozen-skills/                 Active installable skill plugin
   skill-injector/                Experimental hook plugin
+scripts/
+  sync_frozen_skills.py          Manifest-driven local synchronizer
 _incubator/                      Gated skills and scout snapshots
 docs/
   skill-review/                  Quality gate and tracker
   workflows/                     Long-form workflows
 ```
 
-For the live workstation skill-root model and the frozen sync process, see
+For the source-to-computer authority model and synchronization process, see
 `docs/workflows/skill-authority-and-frozen-sync.md`.
 
 ## Validation
@@ -77,6 +107,7 @@ Get-Content plugins/frozen-skills/gemini-extension.json -Raw | ConvertFrom-Json 
 
 # Repo checks
 python scripts/validate_manifests.py
+python -m unittest discover -s tests -v
 git diff --check
 ```
 
@@ -85,7 +116,8 @@ For skill additions, verify every manifest `skills[].path` exists under the plug
 ## Contribution Rules
 
 - Add shared active skills under `plugins/frozen-skills/skills/<name>/SKILL.md` only after passing the review gate.
-- Keep active frozen skills synced with reviewed live practice in `C:\Users\pmacl\.agents\skills` when a same-name live skill exists.
+- Treat `plugins/frozen-skills/skills` as the source for active distributed skills. Make reviewed changes here, then synchronize them outward to local computers.
+- Treat managed copies under `~/.agents/skills` as runtime outputs. Do not silently copy local edits back into the reviewed source.
 - Keep external scout snapshots under `_incubator/scout/` and never edit scout `source/` after import.
 - Keep plugin manifests and marketplace versions aligned when adding public skills.
 - Do not commit secret values, client runtime caches, or local installed-skill copies.

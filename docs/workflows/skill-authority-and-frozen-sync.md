@@ -1,116 +1,170 @@
-# Skill Authority and Frozen Sync
+# Skill Authority and Computer Synchronization
 
-This repository is the durable marketplace and registry boundary for reviewed shared skills. It is not the live runtime root for every local agent client.
+This repository has two deliberate authority lanes. Manifest-listed active skills are reviewed here and synchronized outward to computers. Personal or gated skills are authored in the live personal root and mirrored into `_incubator/` for durable review. Mixing those directions recreates the drift this workflow is designed to prevent.
 
 ## Authority Model
 
-On this Windows workstation, personal shared skills are authored and installed as one real copy under:
+### Active distributed skills
+
+The active distribution is the intersection of two requirements:
+
+1. the skill directory exists under `plugins/frozen-skills/skills/<skill-name>/`; and
+2. the same name and path are listed in all four `frozen-skills` plugin manifests.
+
+The synchronizer refuses to run if the Claude, Codex, Cursor, and Gemini manifests disagree on the plugin version or ordered skill list. For this lane, the repository copy is authoritative and each computer's managed copy is runtime output.
+
+### Personal or gated skills
+
+Personal skills that are not in the active manifests are authored under:
 
 ```text
-C:\Users\pmacl\.agents\skills\<skill-name>\
+~/.agents/skills/<skill-name>/
 ```
 
-Tool-specific skill folders are compatibility or runtime surfaces:
-
-| Client surface | Role |
-|---|---|
-| `C:\Users\pmacl\.agents\skills` | Canonical live personal skill root. |
-| `C:\Users\pmacl\.claude\skills` | Claude Code compatibility mirror. Personal skills should be junctions to `.agents\skills`, not independent copies. |
-| `C:\Users\pmacl\.config\opencode\skills` | OpenCode-specific real skill root. Keep empty unless a skill is intentionally OpenCode-only. |
-| `C:\Users\pmacl\.codex\skills` | Codex system/runtime surface. Personal skills should not be authored here. |
-| `C:\Users\pmacl\.gemini\skills`, `C:\Users\pmacl\.cursor\skills`, `C:\Users\pmacl\.kilo\skills` | Tool-specific roots. Real copies here are exceptions and must be treated as possible drift unless intentionally tool-only. |
-
-`frozenSkillz` owns the reviewed, publishable copy under:
-
-```text
-plugins/frozen-skills/skills/<skill-name>/
-```
-
-That copy is what marketplace consumers install. It should reflect reviewed live practice, but it is not the first place to make local live edits.
-
-## Active vs Gated Skills
-
-Active marketplace skills are listed in all frozen-skills manifests and live under `plugins/frozen-skills/skills/`.
-
-Gated or historical skills live under `_incubator/`. Do not treat `_incubator/` as installable runtime state. Promote from `_incubator/` only through `docs/skill-review/tracker.md` and the manifest update process.
-
-## Sync Rule
-
-When a live shared skill and an active frozen skill have the same name, compare the live `.agents` copy against the frozen copy:
-
-```powershell
-git diff --no-index -- "C:\Users\pmacl\.agents\skills\<skill-name>" "D:\_projects\frozenSkillz\plugins\frozen-skills\skills\<skill-name>"
-```
-
-If the live copy contains reviewed improvements that are broadly reusable, update the frozen copy and note the sync in this repo. If the delta is local-only, project-specific, or unreviewed, leave the frozen copy unchanged and document why.
-
-Do not auto-promote every live `.agents` skill into `plugins/frozen-skills/skills/`. A new active frozen skill needs the review gate in `docs/skill-review/tracker.md`, manifest entries, and version updates.
-
-If an active frozen skill has no live `.agents` counterpart, treat frozenSkillz as the source for that skill.
-
-### Personal / gated skills (`_incubator/personal-skills/`)
-
-Many personal skills also have a gated evaluation copy under:
+When this repository tracks one of those skills, its durable evaluation mirror lives under:
 
 ```text
 _incubator/personal-skills/<skill-name>/
 ```
 
-**Live edit still starts in `~/.agents/skills/<name>/`.** After a deliberate rewrite or material fix of a skill that already has an incubator row:
+The live personal copy is authoritative for this lane. `_incubator/` is review material and is never installed by the active synchronizer.
 
-1. Sync the live tree into `_incubator/personal-skills/<name>/` (mirror; delete removed files).
-2. Update the tracker row in `docs/skill-review/tracker.md`.
-3. **Commit and push that sync on a branch / PR in this repo in the same session.**
+| Surface | Role |
+|---|---|
+| `plugins/frozen-skills/skills` | Reviewed source for active distributed skills. |
+| Four `plugins/frozen-skills` manifests | Exact allowlist and version contract for the active distribution. |
+| `~/.agents/skills` | Managed runtime destination for active skills; authoring source for personal/gated skills. |
+| `_incubator/personal-skills` | Durable review mirror for tracked personal/gated skills; never installed. |
+| Client plugin/cache directories | Client-managed runtime state, when a client has its own installer. |
 
-A GitHub Issue alone is not the durable rewrite. Uncommitted incubator files on disk are not “in frozenSkillz.” “Stay gated” means do **not** promote into `plugins/frozen-skills/skills/` or manifests — it does **not** mean skip git.
+The management record at `~/.agents/skills/.frozen-skills-sync.json` distinguishes active managed copies from unrelated personal skills.
 
-## Completion Contract (do not skip)
+## Synchronize Active Skills to a Computer
 
-When the operator asks to rewrite, fix, or sync a skill that this repo tracks (active under `plugins/` **or** gated under `_incubator/`), the work is incomplete until:
+Clone this repository once on each computer. After cloning or pulling a new revision, inspect and apply the local plan:
+
+```powershell
+python scripts/sync_frozen_skills.py --check
+python scripts/sync_frozen_skills.py --apply
+```
+
+Both commands validate the distribution first. `--check` writes nothing and exits with:
+
+- `0` when every active skill and the management record are current;
+- `1` when a safe install, update, adoption, or removal is pending;
+- `2` when the distribution is invalid or local content conflicts with it.
+
+`--apply` writes the active skills and management record under `~/.agents/skills`. A matching pre-existing skill is adopted without rewriting it. A previously managed, unchanged copy is safely updated. An unmanaged or locally modified copy is reported as a conflict and left untouched.
+
+For a non-default root:
+
+```powershell
+python scripts/sync_frozen_skills.py --apply --destination "C:\path\to\skills"
+```
+
+On macOS or Linux, the same Python command works with POSIX paths.
+
+The destination must be disjoint from the repository. The synchronizer rejects a destination inside the checkout and a destination that contains the checkout. It never reverse-synchronizes installed content into reviewed active source.
+
+## Personal/Gated Skill Sync
+
+After a deliberate rewrite or material fix of a personal skill that already has an incubator row:
+
+1. edit and validate `~/.agents/skills/<name>/`;
+2. mirror the live tree into `_incubator/personal-skills/<name>/`, including deletion of removed files;
+3. update the row or notes in `docs/skill-review/tracker.md`; and
+4. commit and push that mirror on a branch/PR in this repository in the same session.
+
+A GitHub issue alone is not the durable rewrite. Uncommitted incubator files are not “in frozenSkillz.” “Stay gated” means do not add the skill to `plugins/frozen-skills/skills` or the manifests; it does not mean skip Git.
+
+## Completion Contract
+
+When the operator asks to rewrite, fix, or sync a skill that this repository tracks, the work is incomplete until the applicable authority lane is durable:
 
 | Required | Not sufficient |
 |---|---|
-| Live `~/.agents` updated (if that skill is live-authored) | Opening an Issue describing the rewrite |
-| Matching path under `plugins/…` or `_incubator/…` updated | Robocopy / copy left only in the working tree |
-| Tracker updated when status/work notes change | “Commit when you want” / deferring the PR |
-| **Commit + push** (branch + PR when not on an open PR) | Local-only sync “for later” |
+| Active source under `plugins/` updated, or live personal source updated | Opening an issue describing the rewrite |
+| Matching active or incubator repository path updated | Copying files only in an uncommitted worktree |
+| Tracker updated when status/work notes change | Deferring repository publication “for later” |
+| Commit + push, with a PR when not already on one | A local-only sync unless explicitly requested |
 
-Exception: operator explicitly says “live-only, do not touch the repo.” Otherwise assume **repo landing is part of the task**.
+Exception: the operator explicitly says “live-only, do not touch the repo.” Otherwise, repository landing is part of the task.
 
-Do not treat the global agent habit “ask before committing” as license to leave frozenSkillz skill rewrites uncommitted. In this repository, a requested skill rewrite implies commit and push unless told otherwise.
+## Removal and Conflict Rules
 
-## Current Snapshot: 2026-07-06
+Removing a skill from the manifests does not delete it from computers during an ordinary apply. This makes removal a separate, reviewable operation:
 
-The active frozen-skills plugin registers two skills:
+```powershell
+python scripts/sync_frozen_skills.py --check --prune
+python scripts/sync_frozen_skills.py --apply --prune
+```
 
-| Skill | Live `.agents` counterpart | Sync status |
-|---|---|---|
-| `doppler` | `C:\Users\pmacl\.agents\skills\doppler` | Synced in this pass; frozen copy now includes the live 2026-06-29 learnings. |
-| `external-skill-intake` | None found | FrozenSkillz is the source copy. |
+Pruning removes only previously managed content that still matches its recorded digest. A locally modified retired skill becomes a conflict.
 
-The broader machine still has tool-local skill surfaces and some stale junctions. Treat those as runtime/config hygiene, not as authoritative source unless a tool-specific skill is intentionally maintained outside `.agents`.
+`--force` permits overwriting a conflicting active skill or deleting a conflicting retired skill. Review the exact reported skill first. Force is not the normal update path and does not override a target that changes after planning.
 
-On 2026-07-06 the user's personal `~/.agents/skills` set was reference-copied into `_incubator/personal-skills/` (gated, not installable) so the repo owns a copy of each for evaluation. `deepinit` was excluded (installed OMC package skill) and `doppler` was already active. See `docs/skill-review/tracker.md` → "Personal skills intake" for per-skill provenance/status. The live `.agents` copies remain the source of truth; these frozen copies are evaluation reference, not runtime.
+## Editing and Promotion Flow
+
+For an already active skill, make the reusable change under `plugins/frozen-skills/skills/<skill-name>/`, validate it, review it, merge it, and then synchronize computers outward from that repository revision.
+
+If an active skill was accidentally edited in a local runtime copy, do not run `--force` immediately. Compare it with the repository source, deliberately port any reusable change into the repository, validate and review it, then synchronize. The conflict is evidence that authority must be reconciled.
+
+New skills enter `_incubator/` and pass the gate in `docs/skill-review/tracker.md` before promotion. Promotion requires moving or adapting the skill into `plugins/frozen-skills/skills`, adding it to all four plugin manifests, and aligning plugin and marketplace versions. The next computer synchronization installs it.
+
+## Marketplace Installation Is Different
+
+Claude Code supports this repository as a marketplace:
+
+```text
+/plugin marketplace add Coldaine/frozenSkillz
+/plugin install frozen-skills@coldaine-skills
+```
+
+That installs a Claude-managed plugin copy. It does not synchronize `~/.agents/skills` and does not prove that another client's similarly named manifest is installable. The Codex, Cursor, and Gemini manifests remain packaging metadata and one enforced distribution contract; `sync_frozen_skills.py` is the repository-owned cross-platform local installation path.
 
 ## Required Checks
 
-Before publishing a sync:
+Before publishing a source or synchronization change:
 
 ```powershell
 python scripts/validate_manifests.py
+python -m unittest discover -s tests -v
 git diff --check
 ```
 
 For JSON manifests touched in the same change, also parse them with `ConvertFrom-Json`.
 
+For an end-to-end smoke test, use a unique temporary directory, assert both commands, and remove only that verified temporary path:
+
+```powershell
+$tempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
+$target = Join-Path $tempRoot ("frozen-skills-smoke-" + [guid]::NewGuid().ToString("N"))
+try {
+    python scripts/sync_frozen_skills.py --apply --destination $target
+    if ($LASTEXITCODE -ne 0) { throw "Smoke-test apply failed: $LASTEXITCODE" }
+    python scripts/sync_frozen_skills.py --check --destination $target
+    if ($LASTEXITCODE -ne 0) { throw "Smoke-test check failed: $LASTEXITCODE" }
+} finally {
+    $resolvedTarget = [System.IO.Path]::GetFullPath($target)
+    if ($resolvedTarget.StartsWith($tempRoot, [System.StringComparison]::OrdinalIgnoreCase) -and
+        (Test-Path -LiteralPath $resolvedTarget)) {
+        Remove-Item -LiteralPath $resolvedTarget -Recurse -Force
+    }
+}
+```
+
 ## Reporting
 
-Every frozen sync should report:
+For an active distribution change, report:
 
-- which live skill path was compared;
-- which frozen path changed (`plugins/…` or `_incubator/…`);
-- whether the skill was active or gated;
-- whether manifests changed;
-- validation commands run;
-- any live-vs-frozen delta intentionally left unsynced;
-- **branch / commit / PR URL** where the sync landed (required unless operator said live-only).
+- active source paths and manifest/version changes;
+- validation and synchronization checks;
+- destination conflicts intentionally left unresolved; and
+- the repository revision synchronized to each computer when deployment is in scope.
+
+For a personal/gated change, report:
+
+- the live path compared and incubator path changed;
+- tracker or promotion status changes;
+- any live-versus-incubator delta intentionally left unsynced; and
+- branch, commit, and PR URL unless the operator requested live-only work.
