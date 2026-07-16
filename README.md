@@ -2,13 +2,15 @@
 
 Cross-platform agent skills, rules, and plugin metadata for reusable agent workflows.
 
-This repository is maintained as a plugin marketplace and source/registry boundary for shared skills. It is not a dumping ground for local client caches, raw external repos, or unreviewed experimental skill copies.
+`frozenSkillz` is the source repository and marketplace. `frozen-skills` is the installable plugin inside it. Installing `frozen-skills` installs the active skills listed in that plugin's manifests under `plugins/frozen-skills/skills/`; content under `_incubator/` is stored for review and is not installed.
+
+This repository is not a dumping ground for local client caches, raw external repos, or unreviewed experimental skill copies.
 
 ## Plugins
 
 | Plugin | Category | Status | Purpose |
 |---|---|---|---|
-| `frozen-skills` | reference | active | Installable skills that passed the review gate. Active skills: `doppler`, `external-skill-intake`. |
+| `frozen-skills` | reference | active | Installable package for reviewed skills. Installs `doppler`, `external-skill-intake`, and `omc-reference`. |
 | `skill-injector` | development | experimental, untested | UserPromptSubmit hook and subagent prompt quality gate for LLM-assisted skill suggestions. Review/test before enabling. |
 
 Historical reference/workflow skills remain gated in `_incubator/` until they pass the quality bar in `docs/skill-review/tracker.md`.
@@ -22,6 +24,8 @@ Claude Code marketplace:
 /plugin install frozen-skills@coldaine-skills
 ```
 
+That command installs the three active skills listed below. It does not install anything from `_incubator/`.
+
 Cross-platform manifests are also present for Codex, Cursor, and Gemini-compatible consumers where supported by those clients.
 
 ## Active Skills
@@ -30,6 +34,7 @@ Cross-platform manifests are also present for Codex, Cursor, and Gemini-compatib
 
 - `doppler`: Doppler CLI and secret-injection workflow guidance that avoids exposing secret values.
 - `external-skill-intake`: sandbox, inventory, score, evaluate, and package external skill/plugin/agent repos before any promotion.
+- `omc-reference`: maintain Oh My ClaudeCode as a separate Claude Code plugin from Codex without importing OMC workflow rules into ordinary Codex work.
 
 ## External Skill Intake
 

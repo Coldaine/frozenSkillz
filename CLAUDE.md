@@ -15,13 +15,14 @@ Agents should read `AGENTS.md` first. Humans can use this file as the quickstart
 
 | Plugin | Status | Purpose |
 |---|---|---|
-| `frozen-skills` | active | Installable skills that passed the quality gate. |
+| `frozen-skills` | active | Installable package containing the manifest-listed reviewed skills. `_incubator/` content is not installed. |
 | `skill-injector` | experimental, untested | Prompt hook and subagent prompt quality gate. Review before enabling. |
 
 ## Active Skills
 
 - `doppler`: Doppler CLI and secret-injection workflows with strict secret hygiene.
 - `external-skill-intake`: Sandbox, evaluate, and package external skill/plugin/agent repos.
+- `omc-reference`: Configure and troubleshoot the separate Oh My ClaudeCode installation without applying OMC workflow rules to ordinary Codex work.
 
 Most historical reference skills are gated in `_incubator/` until they pass the review bar in `docs/skill-review/tracker.md`.
 

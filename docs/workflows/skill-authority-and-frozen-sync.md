@@ -48,14 +48,15 @@ Do not auto-promote every live `.agents` skill into `plugins/frozen-skills/skill
 
 If an active frozen skill has no live `.agents` counterpart, treat frozenSkillz as the source for that skill.
 
-## Current Snapshot: 2026-07-06
+## Current Snapshot: 2026-07-16
 
-The active frozen-skills plugin registers two skills:
+The active `frozen-skills` plugin registers three skills. Installing the plugin installs exactly these manifest-listed skills; `_incubator/` content is not installed:
 
 | Skill | Live `.agents` counterpart | Sync status |
 |---|---|---|
 | `doppler` | `C:\Users\pmacl\.agents\skills\doppler` | Synced in this pass; frozen copy now includes the live 2026-06-29 learnings. |
 | `external-skill-intake` | None found | FrozenSkillz is the source copy. |
+| `omc-reference` | `C:\Users\pmacl\.agents\skills\omc-reference` | Synced and promoted after narrowing it to maintenance of the separate Oh My ClaudeCode installation and verifying its source route against OMC 4.14.4. |
 
 The broader machine still has tool-local skill surfaces and some stale junctions. Treat those as runtime/config hygiene, not as authoritative source unless a tool-specific skill is intentionally maintained outside `.agents`.
 

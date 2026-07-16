@@ -5,7 +5,7 @@
 > skills are limited to reviewed, installable workflows.
 
 **Established:** 2026-05-28
-**Gate decision:** strict — `doppler` and `external-skill-intake` are active and on the
+**Gate decision:** strict — `doppler`, `external-skill-intake`, and `omc-reference` are active and on the
 marketplace menu; older reference/workflow skills remain gated pending review.
 **Holding location:** `_incubator/` (in-repo, easy to promote back; not installable).
 **Linear:** planning lives in Linear — project **frozenSkillz** (under the *ClaudeReconfigurations*
@@ -44,6 +44,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 |---|---|---|---|---|---|
 | `doppler` | A | — (done) | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/doppler` | None — reference standard. |
 | `external-skill-intake` | A | — | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/external-skill-intake` | Workflow for sandboxing, scoring, evaluating, and packaging external inspiration repos before promotion. |
+| `omc-reference` | A | — | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/omc-reference` | Maintains the separate Oh My ClaudeCode installation; verified against the local OMC 4.14.4 source and explicitly excluded from ordinary Codex delegation, Git, commit, and unrelated-skill routing. |
 | `plugin-authoring-guide` ("skill guide") | A | MOO-562 | 🛑 gated · **rework** | `_incubator/frozen-skills/skills/` | **Rework** (user directive). |
 | `mcp-deployment-guide` ("MCP guide") | A | MOO-563 | 🛑 gated · **update** | `_incubator/frozen-skills/skills/` | **Update** (user directive). |
 | `agent-config-megaref` | A | MOO-564 | 🛑 gated · **light update** | `_incubator/frozen-skills/skills/` | Light update **+ confer/cross-reference with the LLM archiver project** (user directive). |
@@ -77,6 +78,12 @@ on 2026-07-06 to preserve the live 2026-06-29 operational learnings in the revie
 Required workflow for evaluating external skill/plugin/agent repos. It keeps source snapshots read-only under
 `_incubator/scout/`, requires inventory, artifact rubrics, live eval evidence, and a packaging decision before any
 candidate idea moves into active marketplace content.
+
+### `omc-reference` — ACTIVE
+Configuration and troubleshooting reference for Oh My ClaudeCode, a separate Claude Code orchestration plugin.
+The live and frozen copies were verified against the local OMC 4.14.4 checkout. The skill deliberately reads the
+active installed OMC sources instead of preserving a copied command or agent catalog, and it does not govern normal
+Codex delegation, Git, commits, pull requests, or unrelated skill use.
 
 ### `plugin-authoring-guide` ("skill guide") — REWORK
 - **User directive:** needs to be reworked.
@@ -173,7 +180,6 @@ not installable, in no manifest.** Deliberately separate from the marketplace-ca
 | `skill-finder` | **provenance unconfirmed** | 🛑 gated · confirm origin | Confirm authored vs downloaded. |
 | `context7-mcp` | **provenance unconfirmed** | 🛑 gated · thin/redundant? | Likely overlaps global `~/.claude/rules/context7.md` — decide keep/drop. |
 | `google-stitch-ui-designer` | **provenance unconfirmed** | 🛑 gated · confirm origin | External-tool guide; confirm authored vs downloaded. |
-| `omc-reference` | authored live OMC configuration reference | 🛑 gated · newly captured | Verify the OMC agent, command, tool, and model catalogs against the installed OMC version before considering promotion. Trigger is intentionally limited to OMC setup/configuration/diagnosis. |
 
 Next pass: confirm provenance on the 5 unconfirmed, fix `insight-extractor` frontmatter, then decide which earn promotion toward active (each needs de-personalization + manifest entries + version bump per the promotion bar).
 
