@@ -173,6 +173,7 @@ not installable, in no manifest.** Deliberately separate from the marketplace-ca
 | `skill-finder` | **provenance unconfirmed** | 🛑 gated · confirm origin | Confirm authored vs downloaded. |
 | `context7-mcp` | **provenance unconfirmed** | 🛑 gated · thin/redundant? | Likely overlaps global `~/.claude/rules/context7.md` — decide keep/drop. |
 | `google-stitch-ui-designer` | **provenance unconfirmed** | 🛑 gated · confirm origin | External-tool guide; confirm authored vs downloaded. |
+| `omc-reference` | authored live OMC configuration reference | 🛑 gated · newly captured | Verify the OMC agent, command, tool, and model catalogs against the installed OMC version before considering promotion. Trigger is intentionally limited to OMC setup/configuration/diagnosis. |
 
 Next pass: confirm provenance on the 5 unconfirmed, fix `insight-extractor` frontmatter, then decide which earn promotion toward active (each needs de-personalization + manifest entries + version bump per the promotion bar).
 
