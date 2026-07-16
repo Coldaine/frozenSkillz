@@ -40,7 +40,7 @@ PRs, run CI, or assign Guardian severities.
 | Review or critique an existing authority doc | `references/review-checklist.md` + the relevant doc guide |
 | Reconcile multiple docs against each other | `references/authority-flow.md` |
 | Migrate instructions into the AGENTS.md pattern | `references/agents-md-guide.md` + `references/write-workflow.md` |
-| Handle current work / finished work / leftover PROGRESS | `references/current-work-and-lifecycle.md` (+ `progress-md-guide.md` only if migrating legacy PROGRESS away) |
+| Handle current work / finished work / leftover PROGRESS | `references/current-work-and-lifecycle.md` (+ `references/progress-md-guide.md` only if migrating legacy PROGRESS away) |
 | Understand the future Guardian boundary | `references/guardian-relationship.md` |
 
 Per-document guides:
@@ -141,3 +141,7 @@ See `references/guardian-relationship.md`.
 #### Configuration Notes
 - Live canonical: `~/.agents/skills/project-docs/`. Gated evaluation copy: `frozenSkillz/_incubator/personal-skills/project-docs/`. Stay gated until promotion bar; do not auto-publish to marketplace.
 - Claude Code: junction `~/.claude/skills/project-docs` → `~/.agents/skills/project-docs`.
+
+### 2026-06-29 (preserved — the guardrail behind promote-then-delete)
+- **Do not recommend deleting a doc that still reflects verified live state.** Recommending "delete PROGRESS" while it had just been reconciled to live secrets/cluster state (kubectl + helmfile diff) produced conflicting advice in the same session. Promote-then-delete removes *superseded/temporary* content — not the current, load-bearing handoff. Promote first; delete only once the lasting facts are in their living home. This is the scar that promote-then-delete is built around; keep it.
+- **Do not assert live state from a doc alone.** Stating cluster blockers from PROGRESS without running `kubectl` on the session machine drew correct owner pushback ("how do you know?"). A doc is a claim to verify, not ground truth.
