@@ -19,6 +19,8 @@
 | VQ-12 | Inventory current trust/approval and health observability per client | Read-only client state/API evidence and controlled launch results | Configured, approved, and healthy must remain distinct even when a client exposes no detection API |
 | VQ-13 | Establish source-transcript retention policy | User decision on committing the full source versus retaining only hash/line ledger, plus secret/privacy scan | The attachment path is not a durable repository artifact |
 | VQ-14 | Verify update-consumer discovery surfaces | Repository manifests, code search, clone inventory, and GitHub authorization boundaries | Cross-repository PR automation must target real consumers only |
+| VQ-15 | Re-verify any named competitive or IDE-sync positioning immediately before public use | Current primary documentation and dated capability matrix for Smithery, MCP-Get, relevant proxies, VS Code, Cursor, and any other named product | Time-sensitive marketing comparisons must not become architecture assumptions or stale public claims |
+| VQ-16 | Verify the managed proxy/session contract against every selected client and reusable backend | Exact client/backend/version fixtures covering stdio startup, initialization/capabilities, roots, auth, IDs, callbacks, cancellation, notifications, tool-list changes, disconnect, and process/container reuse | Generic MCP semantics do not prove that a particular client/backend pair can be mediated or safely shared |
 
 ## Evidence discipline
 

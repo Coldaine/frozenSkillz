@@ -19,6 +19,7 @@ plane, alter current manifests, or migrate live skill directories.
 - [Source ledger](../evidence/source-ledger.md)
 - [Decision register](../evidence/decision-register.md)
 - [Current/proposed authority and installation analysis](../evidence/authority-lifecycle-and-installation.md)
+- [Supplemental control-plane architecture review](../evidence/supplemental-control-plane-review.md)
 - [Requirements matrix](../evidence/requirements-matrix.md)
 - [Interface inventory](../evidence/interfaces-and-schemas.md)
 - Current `AGENTS.md`, tracker, external-intake workflow, authority/sync workflow,
@@ -53,6 +54,12 @@ A third option is a phased/per-artifact transition: each skill records its curre
 authority and target steady state, so frozen-only and live-first skills can migrate at
 different times. This is useful for safety but must converge; "hybrid" cannot become
 an undocumented permanent authority rule.
+
+For presentation, evaluate the supplemental five-plane lens: governance/publication,
+project intent, distribution/materialization, execution, and observation. It is only
+useful if distribution remains a first-class responsibility and observations remain
+stale-able facts rather than desired-state authority. The lens must not pre-decide
+the active reviewed-source direction above.
 
 ## Phase 1A: Evidence closure
 
@@ -108,6 +115,15 @@ Resolve and specify, without contradictory aliases:
   project rendering, machine-global discovery, and inventory-only;
 - MCP logical identity, tool allowlists, namespace/collision policy, root binding,
   direct/gateway/project-process categories, and trust/health states;
+- independently select managed discovery filtering for visibility/context shaping
+  and call-time rejection for hard authorization; define each selected policy's
+  defaults, errors, audit evidence, unmanaged/direct-route boundary, and whether
+  sampling-driven tool use or other capabilities are outside scope or mediated;
+- independent MCP session semantics, backend process/container sharing eligibility,
+  auth/consent isolation, local daemon peer security, and cleanup;
+- runtime root-source order/lifecycle and, separately, canonicalized containment
+  within authorized roots; post-initialization client roots may narrow access but do
+  not establish pre-launch identity or provide OS sandboxing;
 - observation schema and optional transport boundary;
 - CLI executable name, public commands, JSON I/O, exit codes, dry-run, conflicts,
   atomicity, and compatibility policy;
@@ -122,8 +138,8 @@ acceptance ID, plausible failure ID, and implementation phase.
 
 ## Phase 1D: Approval and repository transition plan
 
-1. Present the design in bounded sections: governance/publication, distribution,
-   project desired state, execution, observation, security, and rollout.
+1. Present the design in bounded sections: governance/publication, project intent,
+   distribution/materialization, execution, observation, security, and rollout.
 2. Record user approval or correction for each section.
 3. Run an adversarial review for unclassified contradictions, orphan requirements,
    untestable criteria, and accidental scope expansion.
@@ -132,8 +148,9 @@ acceptance ID, plausible failure ID, and implementation phase.
    active frozen content, tool-only skills, plugin caches, and project copies.
 
 **Plan 1 complete when:** the approved design can be implemented without choosing a
-new authority rule, public filename, command, lifecycle state, support boundary, or
-failure policy inside implementation code.
+new authority rule, public filename, command, lifecycle state, support boundary,
+tool-policy threat model, backend-sharing rule, root-security rule, or failure policy
+inside implementation code.
 
 ## Explicit non-actions
 

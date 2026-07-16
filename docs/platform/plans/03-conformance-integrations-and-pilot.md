@@ -30,6 +30,11 @@ the pilot as a conformance exercise rather than a design exercise.
 5. Define agent-effectiveness benchmarks before making effectiveness claims: corpus,
    baseline, model/version controls, repetitions, intended-tool metric, wrong-tool
    rate, tool/context cost, latency budget, and thresholds.
+6. For every retained managed-proxy capability, include its adversarial cases: direct
+   disallowed tool calls, paginated/list-changed discovery, identical concurrent
+   request IDs, capability/root/auth separation, callbacks, cancellation, disconnect,
+   daemon peer access, redaction, dynamic root narrowing, and canonicalized
+   runtime-root escape.
 
 **Exit gate:** the harness produces deterministic, independently interpretable
 evidence and no successful connection is mistaken for full correctness.
@@ -90,8 +95,9 @@ candidate until the supported-client matrix and repositories are explicitly appr
 1. Snapshot the declared environments without importing secret values into evidence.
 2. Install/materialize from the approved source and run the exact committed procedure.
 3. Execute all required conformance and failure cases, including cross-scope collision,
-   approval-pending state, root binding, gateway concurrency, drift, rollback, and
-   Windows/Linux logical equivalence.
+   approval-pending state, drift, rollback, and Windows/Linux logical equivalence;
+   when retained by the approved design, also run authorized root containment,
+   tool-call enforcement, per-client session isolation, and gateway concurrency.
 4. Compare observations with the hand-built golden result.
 5. Run the predeclared agent-effectiveness benchmark only after configuration and
    runtime correctness pass.

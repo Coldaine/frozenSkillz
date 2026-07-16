@@ -76,12 +76,22 @@ existence, and an unsupported/new format fails without destructive rewriting.
    declaration to inject arbitrary commands.
 3. Enforce pins and host minimum versions; missing or incompatible implementations
    fail explicitly without guessing.
-4. Bind project roots through the approved protocol/client/shim order and use cwd only
-   under the approved fallback contract.
+4. Implement the approved root-source order and lifecycle rather than assuming cwd.
+   If authorized-root containment is retained, canonicalize the selected root and
+   enforce the approved boundary; handle post-initialization root-list changes without
+   silently preserving stale broader access.
 5. Hide Docker Gateway or another backend behind the stable platform interface.
-6. Implement tool-level allowlists and downstream gateway inventory.
-7. Test simultaneous-client startup, OAuth state, process/container reuse, resource
-   budgets, log attribution, timeout, shutdown, and orphan handling.
+6. Implement only the approved tool-policy guarantees and downstream gateway
+   inventory. If discovery filtering is selected, cover every page/refresh; if hard
+   authorization is selected, reject disallowed calls before backend dispatch.
+7. If a managed proxy/session broker is retained, preserve an independent stateful
+   MCP session for every managed client relationship. Reuse a backend process or
+   container only for implementations declared and proven safe for isolated
+   multi-session operation.
+8. For retained broker/reuse capabilities, test simultaneous-client startup,
+   transport-appropriate authorization isolation, request/callback routing,
+   capabilities, roots, cancellation, notifications, process/container reuse,
+   resource budgets, log attribution, timeout, shutdown, and orphan handling.
 
 **Exit gate:** portable and host-bound fixtures pass on deterministic Windows and
 Linux environments with correct roots, pins, exposure, failure classes, and cleanup.
@@ -108,8 +118,11 @@ Automate all approved repository, merge, client, platform, runtime, inventory,
 security, and failure-injection cases that do not require a central service or real
 consumer PRs. Required cases include vendor drift, stale MCP collision, missing host
 launcher, stale clone, malformed JSONC, mixed settings/comments, fork conversion,
-gateway downstream discovery, interrupted sync, concurrent modification, unavailable
-pins, secret injection, path escape, unsupported clients, and duplicate clones.
+gateway downstream discovery and every retained conditional runtime case, including
+direct tool-policy bypass, paginated tool refresh, authorization isolation,
+cross-session ID/cancellation isolation, dynamic root narrowing, and runtime path
+escape; also interrupted sync, concurrent modification, unavailable pins, secret
+injection, install-path escape, unsupported clients, and duplicate clones.
 
 **Plan 2 complete when:** the local system and all declared adapters pass deterministic
 fixtures on Windows and Linux, produce a reproducible evidence bundle, and leave no

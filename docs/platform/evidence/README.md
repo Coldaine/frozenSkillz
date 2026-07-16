@@ -12,7 +12,9 @@ authority documents and active plugin content.
 | Source | Coverage | Evidence status |
 |---|---:|---|
 | `C:\Users\pmacl\.codex\attachments\678c4dad-dc18-43cb-b6cc-427ed13b86d7\pasted-text.txt` | 1,132 of 1,132 lines; 35,989 bytes; SHA-256 `113FCF645F52D9D8EB56EFCB39040C744C146E7FF41B46FF717A8EC91B9CF237` | Source-recovered, but flattened and missing speaker labels. Most text is assistant-authored proposal, not an approved user decision. |
+| `C:\Users\pmacl\.codex\attachments\e02c11ce-7010-490a-8d14-ea3bace784df\pasted-text.txt` | 17 physically collapsed lines; 8,176 bytes; SHA-256 `D7C20EDDB06DF94914686B64CFFD161E5BFE78140B1E2AE0E894C1CAB827358B` | User-supplied secondary architecture reference. Its self-description as canonical is not accepted; useful deltas are classified in `supplemental-control-plane-review.md`. |
 | Three independent transcript passes | Decision extraction, architecture/adversarial critique, and requirements/conformance capture | Complete for the supplied file; reconciled findings still need user review. |
+| Three independent supplemental passes | Full-source delta/coverage audit, MCP/security audit, and cross-plan fit/consistency audit | Complete for the second attachment; post-edit reviews corrected updater, tool-policy, session/OAuth, root-lifecycle, status, conditionality, and traceability wording. |
 | Directives in the current Codex task | User corrections about frozenSkillz's existing lifecycle, real discovery-directory materialization, durable scratchpads, multi-agent review, and consolidation into two or three plans | Direct user evidence; recorded separately in the decision register because it is outside the flattened attachment. |
 | `AGENTS.md` | Current repository router and authority order | Current documented authority. |
 | `docs/skill-review/tracker.md` | Active, gated, scout, and promotion status | Highest current lifecycle/status authority. |
@@ -55,6 +57,7 @@ repeated, current-documented, or directly requested as a planning action.
 | [open-verification-queue.md](open-verification-queue.md) | Factual research tasks kept separate from unresolved product decisions. |
 | [implementation-dependency-map.md](implementation-dependency-map.md) | Ordered phases and gates; the pilot remains after contract and implementation completion. |
 | [plan-to-finish-the-plan.md](plan-to-finish-the-plan.md) | The meta-plan, review passes, stop conditions, and approval path for completing the design. |
+| [supplemental-control-plane-review.md](supplemental-control-plane-review.md) | Differential review of the second architecture note, including retained, adapted, deferred, rejected, and decision-needed material. |
 
 ## Definition of a decision-complete design
 
