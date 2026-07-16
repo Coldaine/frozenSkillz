@@ -332,12 +332,13 @@ def build_report(records: Sequence[SessionRecord], at: datetime | None = None, w
 
     rendered = []
     for record in sorted(conversations, key=lambda item: item.last_activity, reverse=True):
-        attached = children_by_parent.get((record.tool, record.native_id), [])
+        attached = sorted(children_by_parent.get((record.tool, record.native_id), []), key=lambda child: (child.last_activity, child.native_id))
         prompt_cutoff = at.astimezone(timezone.utc) if at else None
         eligible_prompts = [item for item in record.user_prompts if prompt_cutoff is None or item[0] <= prompt_cutoff]
         last_user = max(eligible_prompts, key=lambda item: item[0])[1] if eligible_prompts else ""
         recent_prompts = [item for item in eligible_prompts if window_start is None or item[0] >= window_start.astimezone(timezone.utc)]
-        recent_prompts = list({text: (timestamp, text) for timestamp, text in recent_prompts}.values())
+        # Preserve repeated human instructions; only identical duplicate records collapse.
+        recent_prompts = sorted(set(recent_prompts), key=lambda item: (item[0], item[1]))
         rendered.append({
             "tool": record.tool,
             "id": record.native_id,
@@ -352,7 +353,7 @@ def build_report(records: Sequence[SessionRecord], at: datetime | None = None, w
             "source_files": record.source_files,
             "evidence": record.evidence,
             "last_user_at_cutoff": last_user,
-            "incident_window_prompts": [{"timestamp": timestamp.isoformat(), "text": text} for timestamp, text in recent_prompts[-20:]],
+            "incident_window_prompts": [{"timestamp": timestamp.isoformat(), "text": text} for timestamp, text in recent_prompts],
         })
     root_ids = {(root.tool, root.native_id) for root in conversations}
     unattached = [child for child in children if not child.parent_id or (child.tool, child.parent_id) not in root_ids]
@@ -392,6 +393,16 @@ def discover(tool: str, roots: Sequence[Path]) -> tuple[list[Path], str]:
     patterns = ["*.db", "*.vscdb", "*.pb"] if tool == "antigravity" else ["*.jsonl"]
     files = [path for root in existing for pattern in patterns for path in root.rglob(pattern)]
     return files, "searched" if files else "present-empty"
+
+
+def effective_mtime(path: Path) -> float:
+    mtimes = []
+    for candidate in (path, Path(str(path) + "-wal"), Path(str(path) + "-shm")):
+        try:
+            mtimes.append(candidate.stat().st_mtime)
+        except OSError:
+            continue
+    return max(mtimes, default=0.0)
 
 
 def render_markdown(report: dict[str, Any], coverage: dict[str, dict[str, Any]], explain: bool = False) -> str:
@@ -452,7 +463,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         candidate_files = []
         for path in files:
             try:
-                if path.stat().st_mtime >= start.timestamp():
+                if effective_mtime(path) >= start.timestamp():
                     candidate_files.append(path)
             except OSError:
                 continue

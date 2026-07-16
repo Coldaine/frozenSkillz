@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 from pathlib import Path
 from typing import Sequence
@@ -37,11 +38,19 @@ def verify(registry_path: Path, upstream: Path) -> list[str]:
     return findings
 
 
+def default_upstream(repo: Path) -> Path:
+    configured = os.environ.get("LLM_ARCHIVER_PATH")
+    if configured:
+        return Path(configured).expanduser()
+    sibling = repo.parent / "llm-archiver"
+    return sibling if sibling.exists() else Path.home() / "llm-archiver"
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     repo = Path(__file__).resolve().parents[1]
     parser.add_argument("--registry", type=Path, default=repo / "plugins/frozen-skills/skills/chat-history/references/source-registry.json")
-    parser.add_argument("--upstream", type=Path, default=Path("D:/_projects/llm-archiver"))
+    parser.add_argument("--upstream", type=Path, default=default_upstream(repo), help="llm-archiver checkout; defaults to LLM_ARCHIVER_PATH, a sibling checkout, then ~/llm-archiver")
     args = parser.parse_args(argv)
     findings = verify(args.registry, args.upstream)
     if findings:

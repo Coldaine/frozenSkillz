@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import shutil
 import tempfile
 from pathlib import Path
@@ -22,11 +23,19 @@ def validate_direction(source: Path, destination: Path) -> None:
         raise ValueError("refusing reverse synchronization into the repository source")
 
 
-def tree_files(root: Path) -> dict[str, bytes]:
+def file_hash(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def tree_files(root: Path) -> dict[str, str]:
     if not root.exists():
         return {}
     return {
-        str(path.relative_to(root)).replace("\\", "/"): path.read_bytes()
+        str(path.relative_to(root)).replace("\\", "/"): file_hash(path)
         for path in root.rglob("*")
         if path.is_file() and not any(part in IGNORED for part in path.parts)
     }
@@ -36,10 +45,14 @@ def trees_match(source: Path, destination: Path) -> bool:
     return tree_files(source) == tree_files(destination)
 
 
-def deploy(source: Path, destination: Path, *, force: bool = False) -> None:
-    validate_direction(source, destination)
+def validate_source_skill(source: Path) -> None:
     if not source.joinpath("SKILL.md").is_file():
         raise ValueError(f"source is not a skill: {source}")
+
+
+def deploy(source: Path, destination: Path, *, force: bool = False) -> None:
+    validate_direction(source, destination)
+    validate_source_skill(source)
     if destination.exists() and not trees_match(source, destination) and not force:
         raise ValueError("destination drift detected; inspect it or pass --force to replace it from frozenSkillz")
     if destination.exists() and trees_match(source, destination):
@@ -70,6 +83,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     source = args.repo_root / "plugins/frozen-skills/skills" / args.skill
     destination = args.target_root / args.skill
     validate_direction(source, destination)
+    validate_source_skill(source)
     if args.check:
         print("synced" if trees_match(source, destination) else "drift")
         return 0 if trees_match(source, destination) else 1

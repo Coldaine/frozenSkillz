@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import os
 import tempfile
 import unittest
 from datetime import datetime, timezone
@@ -129,6 +130,33 @@ class ConversationInventoryTests(unittest.TestCase):
         prompts = [item["text"] for item in report["conversations"][0]["incident_window_prompts"]]
         self.assertIn("deploy the new Codex configuration", prompts)
 
+    def test_repeated_and_more_than_twenty_prompts_are_all_preserved(self):
+        start = datetime(2026, 7, 16, 12, tzinfo=timezone.utc)
+        prompts = [(start.replace(minute=index), "continue" if index in {3, 7} else f"prompt-{index}") for index in range(25)]
+        record = self.inventory.SessionRecord(tool="claude-code", native_id="long", kind="conversation", started_at=start, last_activity=start.replace(minute=30), user_prompts=prompts)
+        report = self.inventory.build_report([record], at=start.replace(minute=30), window_start=start)
+        output = report["conversations"][0]["incident_window_prompts"]
+        self.assertEqual(len(output), 25)
+        self.assertEqual(sum(item["text"] == "continue" for item in output), 2)
+
+    def test_sqlite_wal_mtime_keeps_active_database_candidate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            database = Path(tmp) / "conversation.db"
+            wal = Path(str(database) + "-wal")
+            database.write_bytes(b"db")
+            wal.write_bytes(b"wal")
+            os.utime(database, (100, 100))
+            os.utime(wal, (200, 200))
+            self.assertEqual(self.inventory.effective_mtime(database), 200)
+
+    def test_attached_children_are_sorted_deterministically(self):
+        start = datetime(2026, 7, 16, 12, tzinfo=timezone.utc)
+        root = self.inventory.SessionRecord(tool="codex", native_id="root", kind="conversation", started_at=start, last_activity=start)
+        later = self.inventory.SessionRecord(tool="codex", native_id="later", parent_id="root", kind="subagent", started_at=start, last_activity=start.replace(minute=20))
+        earlier = self.inventory.SessionRecord(tool="codex", native_id="earlier", parent_id="root", kind="subagent", started_at=start, last_activity=start.replace(minute=10))
+        report = self.inventory.build_report([root, later, earlier])
+        self.assertEqual([child["id"] for child in report["conversations"][0]["children"]], ["earlier", "later"])
+
     def test_claude_subagent_is_attached_not_flattened(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / "project"
@@ -156,6 +184,11 @@ class DeploymentDirectionTests(unittest.TestCase):
         source = ROOT / "plugins/frozen-skills/skills/chat-history"
         with self.assertRaises(ValueError):
             self.deploy.validate_direction(source, source / "runtime-copy")
+
+    def test_check_rejects_missing_source_skill(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(ValueError):
+                self.deploy.validate_source_skill(Path(tmp) / "missing")
 
     def test_check_detects_destination_drift(self):
         with tempfile.TemporaryDirectory() as tmp:
