@@ -53,6 +53,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `skill-manager` | B | MOO-567 | 🛑 gated | `_incubator/skill-manager/` | Verify scripts + registry assumptions (`skills.sh`, `~/.agents/skills`). |
 | `session-skill-inferencer` | C | MOO-569 | 🛑 gated · **highest concern** | `_incubator/frozen-skills/skills/` | Fix generation quality before any promotion (see below). |
 | `skill-injector` (was skill-classifier) | C | MOO-570 | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Test end-to-end before enabling; finish internal rename (scripts/module + ADR/doc prose still say "classifier"). |
+| `icepanel-api` | A | — | 🛑 gated · **incubating** | `_incubator/frozen-skills/skills/icepanel-api/` | Live-validate diagram push on a real landscape; attach PNG/share proof to examples; run layout/push scripts; trim description to the ~300-char bar before promotion. |
 
 Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental · Tier A = strong reference, B = functional/narrow, C = rework.
 
@@ -133,6 +134,17 @@ candidate idea moves into active marketplace content.
 - **TODO before relying on it:** test end-to-end; then finish the rename internally — the Python scripts/module
   (`skill_classifier.py`), the env vars (`SKILL_CLASSIFIER_*`), the ADRs, and the SKILL.md/README prose still say
   "classifier". Left as-is for now to avoid breaking the untested hook wiring.
+
+### `icepanel-api` — incubating
+- Salvaged from the stale `tempstore` branch (PR #34) onto a clean base; only the skill dir was taken — the branch's
+  AGENTS.md/CLAUDE.md rewrites, `.kilo/plans/`, and `_incubator/temp_sandbox/` were left behind.
+- Structurally sound: lean `SKILL.md` router → `reference/**` + `workflows.md`/`diagrams.md`; all internal links resolve;
+  `agents/` briefs present; UTF-8 clean.
+- **Before promotion:** live-validate a diagram push (attach PNG/share-link proof to `examples.md`), run the layout/push
+  scripts documented in `scripts/README.md`, and trim the description (~500 chars) to the ~300-char promotion bar.
+- **Fidelity gap (adversarial review 2026-07-16):** `schemas.md` enums/required-field lists and the response keys in
+  `examples.md` (`{url,defaultUrl,shareLink}`, `.diagramExportImage.id`, `fileUrls.png`) are hand-transcribed and not
+  yet diffed against the live IcePanel OpenAPI. Verify each against a real response before promotion.
 
 ---
 
