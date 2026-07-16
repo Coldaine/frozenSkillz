@@ -6,10 +6,21 @@ Agents should read `AGENTS.md` first. Humans can use this file as the quickstart
 
 ## Quickstart
 
+Synchronize the reviewed distribution into the computer's shared skill root:
+
+```powershell
+python scripts/sync_frozen_skills.py --check
+python scripts/sync_frozen_skills.py --apply
+```
+
+Claude Code can alternatively install a plugin-managed copy:
+
 ```bash
 /plugin marketplace add Coldaine/frozenSkillz
 /plugin install frozen-skills@coldaine-skills
 ```
+
+The marketplace command does not populate `~/.agents/skills`. Cross-platform manifests are packaging metadata; use the synchronizer for a verified local copy.
 
 ## Active Plugin
 
@@ -36,6 +47,7 @@ Use `external-skill-intake` and `docs/workflows/external-skill-intake.md` before
 Get-Content .claude-plugin/marketplace.json -Raw | ConvertFrom-Json | Out-Null
 Get-Content plugins/frozen-skills/.claude-plugin/plugin.json -Raw | ConvertFrom-Json | Out-Null
 python scripts/validate_manifests.py
+python -m unittest discover -s tests -v
 git diff --check
 ```
 
@@ -44,6 +56,7 @@ git diff --check
 ```text
 plugins/frozen-skills/       Active installable skill plugin
 plugins/skill-injector/      Experimental hook plugin
+scripts/sync_frozen_skills.py Manifest-driven local synchronizer
 _incubator/                  Gated skills and scout snapshots
 AGENTS.md                    Agent router and operating contract
 ```

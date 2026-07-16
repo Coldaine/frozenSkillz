@@ -1,85 +1,115 @@
-# Skill Authority and Frozen Sync
+# Skill Authority and Computer Synchronization
 
-This repository is the durable marketplace and registry boundary for reviewed shared skills. It is not the live runtime root for every local agent client.
+This repository is the reviewed source and distribution boundary for shared active skills. Each computer receives that distribution in its local skill root. Local runtime copies are not a second source of truth.
 
 ## Authority Model
 
-On this Windows workstation, personal shared skills are authored and installed as one real copy under:
+The active distribution is the intersection of two requirements:
+
+1. the skill directory exists under `plugins/frozen-skills/skills/<skill-name>/`; and
+2. the same name and path are listed in all four `frozen-skills` plugin manifests.
+
+The synchronizer refuses to run if the Claude, Codex, Cursor, and Gemini manifests disagree on the plugin version or ordered skill list. `_incubator/` is outside the distribution regardless of what it contains.
+
+On every computer, the default managed destination is:
 
 ```text
-C:\Users\pmacl\.agents\skills\<skill-name>\
+~/.agents/skills/<skill-name>/
 ```
 
-Tool-specific skill folders are compatibility or runtime surfaces:
+This is the shared personal Agent Skills root discovered by Codex and compatible clients. A client may also maintain its own plugin cache or compatibility mirror; those surfaces do not change the repository's authority.
 
-| Client surface | Role |
+| Surface | Role |
 |---|---|
-| `C:\Users\pmacl\.agents\skills` | Canonical live personal skill root. |
-| `C:\Users\pmacl\.claude\skills` | Claude Code compatibility mirror. Personal skills should be junctions to `.agents\skills`, not independent copies. |
-| `C:\Users\pmacl\.config\opencode\skills` | OpenCode-specific real skill root. Keep empty unless a skill is intentionally OpenCode-only. |
-| `C:\Users\pmacl\.codex\skills` | Codex system/runtime surface. Personal skills should not be authored here. |
-| `C:\Users\pmacl\.gemini\skills`, `C:\Users\pmacl\.cursor\skills`, `C:\Users\pmacl\.kilo\skills` | Tool-specific roots. Real copies here are exceptions and must be treated as possible drift unless intentionally tool-only. |
+| `plugins/frozen-skills/skills` | Reviewed source for active distributed skills. |
+| Four `plugins/frozen-skills` manifests | Exact allowlist and version contract for the distribution. |
+| `~/.agents/skills` | Default local runtime destination; unrelated personal skills coexist here. |
+| Client plugin/cache directories | Client-managed runtime state, when a client has its own installer. |
+| `_incubator/` | Gated review material; never synchronized or installed. |
 
-`frozenSkillz` owns the reviewed, publishable copy under:
+## Synchronize a Computer
 
-```text
-plugins/frozen-skills/skills/<skill-name>/
-```
-
-That copy is what marketplace consumers install. It should reflect reviewed live practice, but it is not the first place to make local live edits.
-
-## Active vs Gated Skills
-
-Active marketplace skills are listed in all frozen-skills manifests and live under `plugins/frozen-skills/skills/`.
-
-Gated or historical skills live under `_incubator/`. Do not treat `_incubator/` as installable runtime state. Promote from `_incubator/` only through `docs/skill-review/tracker.md` and the manifest update process.
-
-## Sync Rule
-
-When a live shared skill and an active frozen skill have the same name, compare the live `.agents` copy against the frozen copy:
+Clone this repository once on each computer. After cloning or pulling a new revision, inspect and apply the local plan:
 
 ```powershell
-git diff --no-index -- "C:\Users\pmacl\.agents\skills\<skill-name>" "D:\_projects\frozenSkillz\plugins\frozen-skills\skills\<skill-name>"
+python scripts/sync_frozen_skills.py --check
+python scripts/sync_frozen_skills.py --apply
 ```
 
-If the live copy contains reviewed improvements that are broadly reusable, update the frozen copy and note the sync in this repo. If the delta is local-only, project-specific, or unreviewed, leave the frozen copy unchanged and document why.
+Both commands validate the distribution first. `--check` writes nothing and exits with:
 
-Do not auto-promote every live `.agents` skill into `plugins/frozen-skills/skills/`. A new active frozen skill needs the review gate in `docs/skill-review/tracker.md`, manifest entries, and version updates.
+- `0` when every active skill and the management record are current;
+- `1` when a safe install, update, adoption, or removal is pending;
+- `2` when the distribution is invalid or local content conflicts with it.
 
-If an active frozen skill has no live `.agents` counterpart, treat frozenSkillz as the source for that skill.
+`--apply` writes the active skills and the management record at `~/.agents/skills/.frozen-skills-sync.json`. A matching pre-existing skill is adopted without rewriting it. A previously managed, unchanged copy is safely updated. An unmanaged or locally modified copy is reported as a conflict and left untouched.
 
-## Current Snapshot: 2026-07-16
+For a non-default root:
 
-The active `frozen-skills` plugin registers three skills. Installing the plugin installs exactly these manifest-listed skills; `_incubator/` content is not installed:
+```powershell
+python scripts/sync_frozen_skills.py --apply --destination "C:\path\to\skills"
+```
 
-| Skill | Live `.agents` counterpart | Sync status |
-|---|---|---|
-| `doppler` | `C:\Users\pmacl\.agents\skills\doppler` | Synced in this pass; frozen copy now includes the live 2026-06-29 learnings. |
-| `external-skill-intake` | None found | FrozenSkillz is the source copy. |
-| `omc-reference` | `C:\Users\pmacl\.agents\skills\omc-reference` | Synced and promoted after narrowing it to maintenance of the separate Oh My ClaudeCode installation and verifying its source route against OMC 4.14.4. |
+On macOS or Linux, the same Python command works with POSIX paths.
 
-The broader machine still has tool-local skill surfaces and some stale junctions. Treat those as runtime/config hygiene, not as authoritative source unless a tool-specific skill is intentionally maintained outside `.agents`.
+## Removal and Conflict Rules
 
-On 2026-07-06 the user's personal `~/.agents/skills` set was reference-copied into `_incubator/personal-skills/` (gated, not installable) so the repo owns a copy of each for evaluation. `deepinit` was excluded (installed OMC package skill) and `doppler` was already active. See `docs/skill-review/tracker.md` → "Personal skills intake" for per-skill provenance/status. The live `.agents` copies remain the source of truth; these frozen copies are evaluation reference, not runtime.
+Removing a skill from the manifests does not delete it from computers during an ordinary apply. This makes removal a separate, reviewable operation:
+
+```powershell
+python scripts/sync_frozen_skills.py --check --prune
+python scripts/sync_frozen_skills.py --apply --prune
+```
+
+Pruning removes only previously managed content that still matches its recorded digest. A locally modified retired skill becomes a conflict.
+
+`--force` permits overwriting a conflicting active skill or deleting a conflicting retired skill. Review the exact reported skill first. Force is not the normal update path.
+
+## Editing and Promotion Flow
+
+For an already active skill, make the reusable change under `plugins/frozen-skills/skills/<skill-name>/`, validate it, review it, and then synchronize computers outward from the merged repository revision.
+
+If a useful change was first prototyped in a local runtime copy, do not run `--force` immediately. Compare it with the repository source, deliberately port the reusable part into the source, validate and review that change, then synchronize. The conflict is evidence that authority must be reconciled, not a signal to copy in either direction automatically.
+
+New skills enter `_incubator/` and pass the gate in `docs/skill-review/tracker.md` before promotion. Promotion requires adding the skill to all four plugin manifests and aligning the plugin and marketplace versions. On the next synchronization, the new active skill is installed on each computer.
+
+## Marketplace Installation Is Different
+
+Claude Code supports this repository as a marketplace:
+
+```text
+/plugin marketplace add Coldaine/frozenSkillz
+/plugin install frozen-skills@coldaine-skills
+```
+
+That installs a Claude-managed plugin copy. It does not synchronize `~/.agents/skills` and does not prove that another client's similarly named manifest is installable. The Codex, Cursor, and Gemini manifests remain useful packaging metadata and are enforced as one distribution contract, while `sync_frozen_skills.py` is the repository-owned cross-platform local installation path.
 
 ## Required Checks
 
-Before publishing a sync:
+Before publishing a source or synchronization change:
 
 ```powershell
 python scripts/validate_manifests.py
+python -m unittest discover -s tests -v
 git diff --check
 ```
 
 For JSON manifests touched in the same change, also parse them with `ConvertFrom-Json`.
 
+For an end-to-end smoke test, synchronize into a temporary empty directory, check it, and then remove only that temporary directory:
+
+```powershell
+$target = Join-Path $env:TEMP "frozen-skills-smoke"
+python scripts/sync_frozen_skills.py --apply --destination $target
+python scripts/sync_frozen_skills.py --check --destination $target
+```
+
 ## Reporting
 
-Every frozen sync should report:
+Every distribution change should report:
 
-- which live skill path was compared;
-- which frozen path changed;
-- whether the skill was active or gated;
-- whether manifests changed;
-- validation commands run;
-- any live-vs-frozen delta intentionally left unsynced.
+- which active source paths changed;
+- whether manifests or versions changed;
+- the validation and sync checks run;
+- any destination conflict intentionally left unresolved;
+- which repository revision was synchronized to each computer when that deployment is in scope.
