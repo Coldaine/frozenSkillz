@@ -217,7 +217,7 @@ GET .../diagrams/{diagramId}/thumbnail
 
 Debug script: see consuming project overlay (e.g. `icepanel-ui-debug.ps1`).
 
-Automation patterns: [scripts/README.md](../scripts/README.md)
+Automation patterns: [scripts/README.md](scripts/README.md)
 
 ---
 

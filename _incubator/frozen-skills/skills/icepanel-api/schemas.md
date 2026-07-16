@@ -1,6 +1,6 @@
 # IcePanel API — Key schemas and enums
 
-Quick field reference. Full OpenAPI: `tools/openapi-output.txt`.
+Quick field reference. Full OpenAPI: the live IcePanel spec at <https://developer.icepanel.io/> (see the `llms.txt` index).
 
 ---
 
@@ -137,7 +137,7 @@ Minimal valid payload:
       "name": "Connection",
       "direction": "outgoing",
       "originId": "object-2",
-      "targetId": "object-3"
+      "targetId": "object-1"
     }
   ],
   "tagGroups": [{ "id": "tag-group-1", "name": "Tag Group", "icon": "bug" }],

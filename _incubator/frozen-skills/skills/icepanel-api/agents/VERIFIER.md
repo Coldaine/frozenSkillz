@@ -58,7 +58,7 @@ GET .../export/image/{diagramExportImageId}
 
 ```http
 GET .../share-link
-POST .../share-link/options  (mode: diagram, diagramId)
+POST .../share-link  (body: ShareLinkOptions — mode: diagram, diagramId)
 ```
 
 ```
