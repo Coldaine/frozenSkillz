@@ -34,8 +34,21 @@ class SyncError(RuntimeError):
     """Raised when the distribution or destination cannot be synchronized safely."""
 
 
+class TargetChangedError(SyncError):
+    """Raised when a destination changes after its synchronization plan."""
+
+    def __init__(self, target: Path, current_digest: str | None):
+        """Record the target and newly observed digest for conflict reporting."""
+
+        super().__init__(f"Destination changed after planning: {target}")
+        self.target = target
+        self.current_digest = current_digest
+
+
 @dataclass(frozen=True)
 class SkillSource:
+    """A validated active skill and the digest of its reviewed source tree."""
+
     name: str
     path: Path
     digest: str
@@ -43,29 +56,40 @@ class SkillSource:
 
 @dataclass(frozen=True)
 class Action:
+    """One planned synchronization action and the target state it observed."""
+
     kind: str
     name: str
     detail: str
+    observed_digest: str | None = None
 
 
 @dataclass(frozen=True)
 class SyncResult:
+    """The complete synchronization plan or apply result."""
+
     actions: tuple[Action, ...]
 
     @property
     def conflicts(self) -> tuple[Action, ...]:
+        """Return actions that require human conflict resolution."""
+
         return tuple(action for action in self.actions if action.kind == "conflict")
 
     @property
     def changes(self) -> tuple[Action, ...]:
+        """Return actions that make or record a distribution change."""
+
         return tuple(
             action
             for action in self.actions
-            if action.kind in {"install", "update", "adopt", "remove", "forget"}
+            if action.kind in {"install", "update", "adopt", "remove", "forget", "state"}
         )
 
 
 def _load_json(path: Path) -> dict:
+    """Load a JSON object or raise a synchronization-specific error."""
+
     try:
         with path.open("r", encoding="utf-8") as handle:
             data = json.load(handle)
@@ -77,11 +101,15 @@ def _load_json(path: Path) -> dict:
 
 
 def _validate_skill_name(name: str, source: Path) -> None:
+    """Reject names that could escape a destination root."""
+
     if not SKILL_NAME_PATTERN.fullmatch(name) or name in {".", ".."}:
         raise SyncError(f"Unsafe skill name {name!r} in {source}")
 
 
 def _manifest_skill_set(data: dict, manifest: Path) -> tuple[tuple[str, str], ...]:
+    """Return a validated ordered name/path tuple from one manifest."""
+
     entries = data.get("skills")
     if not isinstance(entries, list):
         raise SyncError(f"Manifest has no skills list: {manifest}")
@@ -106,6 +134,8 @@ def _manifest_skill_set(data: dict, manifest: Path) -> tuple[tuple[str, str], ..
 
 
 def _iter_skill_files(root: Path) -> Iterable[Path]:
+    """Yield deterministic source files while rejecting symbolic links."""
+
     for path in sorted(root.rglob("*"), key=lambda item: item.as_posix()):
         relative_parts = path.relative_to(root).parts
         if any(part in IGNORED_NAMES for part in relative_parts):
@@ -117,6 +147,8 @@ def _iter_skill_files(root: Path) -> Iterable[Path]:
 
 
 def digest_directory(root: Path) -> str:
+    """Hash a skill tree with explicit path and per-file content framing."""
+
     if not root.is_dir():
         raise SyncError(f"Skill path is not a directory: {root}")
 
@@ -127,15 +159,22 @@ def digest_directory(root: Path) -> str:
         relative = path.relative_to(root).as_posix().encode("utf-8")
         digest.update(len(relative).to_bytes(8, "big"))
         digest.update(relative)
+        file_digest = hashlib.sha256()
+        content_length = 0
         with path.open("rb") as handle:
             while chunk := handle.read(1024 * 1024):
-                digest.update(chunk)
+                content_length += len(chunk)
+                file_digest.update(chunk)
+        digest.update(content_length.to_bytes(8, "big"))
+        digest.update(file_digest.digest())
     if not found_file:
         raise SyncError(f"Skill directory is empty: {root}")
     return digest.hexdigest()
 
 
 def load_distribution(repo_root: Path) -> tuple[Path, str, tuple[SkillSource, ...]]:
+    """Validate aligned manifests and load the active reviewed distribution."""
+
     plugin_root = (repo_root / "plugins/frozen-skills").resolve()
     manifests: list[tuple[Path, dict, tuple[tuple[str, str], ...]]] = []
     for relative_manifest in MANIFEST_PATHS:
@@ -181,10 +220,14 @@ def load_distribution(repo_root: Path) -> tuple[Path, str, tuple[SkillSource, ..
 
 
 def _empty_state() -> dict:
+    """Return a new empty synchronization management record."""
+
     return {"schema": STATE_SCHEMA, "plugin": "frozen-skills", "skills": {}}
 
 
 def load_state(destination: Path) -> dict:
+    """Load and validate the destination's management record."""
+
     path = destination / STATE_FILE
     if not path.exists():
         return _empty_state()
@@ -205,11 +248,25 @@ def load_state(destination: Path) -> dict:
 
 
 def _target_digest(target: Path) -> str | None:
+    """Return a destination tree digest, or None when it is absent."""
+
+    is_junction = getattr(os.path, "isjunction", lambda _path: False)
+    if target.is_symlink() or is_junction(target):
+        raise SyncError(f"Skill destination must be a real directory, not a link: {target}")
     if not target.exists():
         return None
     if not target.is_dir():
         raise SyncError(f"Skill destination is not a directory: {target}")
     return digest_directory(target)
+
+
+def _validate_direction(repo_root: Path, destination: Path) -> None:
+    """Require an outward destination disjoint from the source repository."""
+
+    if destination == repo_root or repo_root in destination.parents:
+        raise SyncError("Destination must be outside the frozenSkillz repository")
+    if destination in repo_root.parents:
+        raise SyncError("Destination must not contain the frozenSkillz repository")
 
 
 def plan_sync(
@@ -220,6 +277,8 @@ def plan_sync(
     prune: bool,
     force: bool,
 ) -> tuple[Action, ...]:
+    """Plan safe distribution changes from one observed destination snapshot."""
+
     actions: list[Action] = []
     recorded = state["skills"]
     active_names = {source.name for source in sources}
@@ -245,7 +304,7 @@ def plan_sync(
         else:
             kind = "conflict"
             detail = "destination has locally modified or unmanaged content"
-        actions.append(Action(kind, source.name, detail))
+        actions.append(Action(kind, source.name, detail, current_digest))
 
     if prune:
         for name in sorted(set(recorded) - active_names):
@@ -254,29 +313,57 @@ def plan_sync(
             prior_entry = recorded.get(name)
             prior_digest = prior_entry.get("digest") if isinstance(prior_entry, dict) else None
             if current_digest is None:
-                actions.append(Action("forget", name, "managed skill is already absent"))
+                actions.append(
+                    Action("forget", name, "managed skill is already absent", current_digest)
+                )
             elif prior_digest and current_digest == prior_digest:
-                actions.append(Action("remove", name, "no longer listed in active manifests"))
+                actions.append(
+                    Action(
+                        "remove",
+                        name,
+                        "no longer listed in active manifests",
+                        current_digest,
+                    )
+                )
             elif force:
                 actions.append(
-                    Action("remove", name, "remove locally modified retired skill (--force)")
+                    Action(
+                        "remove",
+                        name,
+                        "remove locally modified retired skill (--force)",
+                        current_digest,
+                    )
                 )
             else:
                 actions.append(
-                    Action("conflict", name, "retired managed skill has local modifications")
+                    Action(
+                        "conflict",
+                        name,
+                        "retired managed skill has local modifications",
+                        current_digest,
+                    )
                 )
 
     return tuple(actions)
 
 
 def _remove_path(path: Path) -> None:
+    """Remove one explicitly selected file, link, or directory tree."""
+
     if path.is_symlink() or path.is_file():
         path.unlink()
     elif path.exists():
         shutil.rmtree(path)
 
 
-def _replace_directory(source: Path, target: Path) -> None:
+def _replace_directory(
+    source: Path,
+    target: Path,
+    expected_source_digest: str,
+    observed_target_digest: str | None,
+) -> None:
+    """Stage and replace one skill while preserving a failed rollback backup."""
+
     target.parent.mkdir(parents=True, exist_ok=True)
     nonce = uuid.uuid4().hex
     staged = target.parent / f".{target.name}.frozen-skills-stage-{nonce}"
@@ -287,20 +374,35 @@ def _replace_directory(source: Path, target: Path) -> None:
             staged,
             ignore=shutil.ignore_patterns(".DS_Store", "Thumbs.db", "__pycache__", "*.pyc", "*.pyo"),
         )
+        staged_digest = digest_directory(staged)
+        if staged_digest != expected_source_digest:
+            raise SyncError(
+                f"Reviewed source changed while staging {source}; rerun synchronization"
+            )
+        current_target_digest = _target_digest(target)
+        if current_target_digest != observed_target_digest:
+            raise TargetChangedError(target, current_target_digest)
         if target.exists():
             os.replace(target, backup)
         os.replace(staged, target)
         _remove_path(backup)
     except Exception:
         if backup.exists() and not target.exists():
-            os.replace(backup, target)
+            try:
+                os.replace(backup, target)
+            except Exception as restore_error:
+                raise SyncError(
+                    f"Replacing {target} failed and rollback also failed; "
+                    f"the original copy is preserved at {backup}"
+                ) from restore_error
         raise
     finally:
         _remove_path(staged)
-        _remove_path(backup)
 
 
 def _write_state(destination: Path, state: dict) -> None:
+    """Atomically write the synchronization management record."""
+
     destination.mkdir(parents=True, exist_ok=True)
     target = destination / STATE_FILE
     staged = destination / f".{STATE_FILE}.{uuid.uuid4().hex}.tmp"
@@ -322,22 +424,114 @@ def sync(
     prune: bool,
     force: bool,
 ) -> SyncResult:
-    plugin_root, version, sources = load_distribution(repo_root.resolve())
+    """Check or apply the reviewed distribution to one local skill root."""
+
+    repo_root = repo_root.resolve()
     destination = destination.resolve()
+    _validate_direction(repo_root, destination)
+    plugin_root, version, sources = load_distribution(repo_root)
     state = load_state(destination)
-    actions = plan_sync(sources, destination, state, prune=prune, force=force)
-    result = SyncResult(actions)
+    actions = list(plan_sync(sources, destination, state, prune=prune, force=force))
+    if state["skills"] and state.get("plugin_version") != version:
+        actions.append(
+            Action(
+                "state",
+                "frozen-skills",
+                "management record plugin version differs",
+            )
+        )
+    result = SyncResult(tuple(actions))
 
     if not apply or result.conflicts:
         return result
 
     source_by_name = {source.name: source for source in sources}
     for action in actions:
+        if action.kind == "state":
+            continue
         target = destination / action.name
         if action.kind in {"install", "update"}:
-            _replace_directory(source_by_name[action.name].path, target)
+            source = source_by_name[action.name]
+            try:
+                _replace_directory(
+                    source.path,
+                    target,
+                    source.digest,
+                    action.observed_digest,
+                )
+            except TargetChangedError as exc:
+                return SyncResult(
+                    tuple(actions)
+                    + (
+                        Action(
+                            "conflict",
+                            action.name,
+                            "destination changed after the synchronization plan was created; rerun",
+                            exc.current_digest,
+                        ),
+                    )
+                )
         elif action.kind == "remove":
+            current_digest = _target_digest(target)
+            if current_digest != action.observed_digest:
+                return SyncResult(
+                    tuple(actions)
+                    + (
+                        Action(
+                            "conflict",
+                            action.name,
+                            "destination changed after the synchronization plan was created; rerun",
+                            current_digest,
+                        ),
+                    )
+                )
             _remove_path(target)
+        else:
+            current_digest = _target_digest(target)
+            if current_digest != action.observed_digest:
+                return SyncResult(
+                    tuple(actions)
+                    + (
+                        Action(
+                            "conflict",
+                            action.name,
+                            "destination changed after the synchronization plan was created; rerun",
+                            current_digest,
+                        ),
+                    )
+                )
+
+    for source in sources:
+        current_digest = _target_digest(destination / source.name)
+        if current_digest != source.digest:
+            return SyncResult(
+                tuple(actions)
+                + (
+                    Action(
+                        "conflict",
+                        source.name,
+                        "destination changed before synchronization state was recorded; rerun",
+                        current_digest,
+                    ),
+                )
+            )
+    if prune:
+        for action in actions:
+            if action.kind not in {"remove", "forget"}:
+                continue
+            current_digest = _target_digest(destination / action.name)
+            if current_digest is not None:
+                return SyncResult(
+                    tuple(actions)
+                    + (
+                        Action(
+                            "conflict",
+                            action.name,
+                            "retired destination reappeared before state was recorded; rerun",
+                            current_digest,
+                        ),
+                    )
+                )
 
     next_skills = dict(state["skills"])
     for source in sources:
@@ -360,10 +554,14 @@ def sync(
 
 
 def _expanded_path(value: str) -> Path:
+    """Expand user and environment markers in a command-line path."""
+
     return Path(os.path.expandvars(os.path.expanduser(value)))
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the command-line parser."""
+
     parser = argparse.ArgumentParser(
         description=(
             "Synchronize manifest-listed frozen-skills into a local skill root. "
@@ -399,6 +597,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the synchronizer and return its documented process status."""
+
     args = build_parser().parse_args(argv)
     try:
         result = sync(

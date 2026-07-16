@@ -84,6 +84,7 @@ Required workflow for evaluating external skill/plugin/agent repos. It keeps sou
 candidate idea moves into active marketplace content.
 
 ### `omc-reference` — ACTIVE
+
 Configuration and troubleshooting reference for Oh My ClaudeCode, a separate Claude Code orchestration plugin.
 The live and frozen copies were verified against the local OMC 4.14.4 checkout. The skill deliberately reads the
 active installed OMC sources instead of preserving a copied command or agent catalog, and it does not govern normal

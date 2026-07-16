@@ -64,6 +64,8 @@ python scripts/sync_frozen_skills.py --apply --destination "C:\path\to\skills"
 
 On macOS or Linux, the same Python command works with POSIX paths.
 
+The destination must be disjoint from the repository. The synchronizer rejects a destination inside the checkout and a destination that contains the checkout. It never reverse-synchronizes installed content into reviewed active source.
+
 ## Personal/Gated Skill Sync
 
 After a deliberate rewrite or material fix of a personal skill that already has an incubator row:

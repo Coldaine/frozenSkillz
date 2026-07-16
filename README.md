@@ -34,6 +34,8 @@ The default destination is `~/.agents/skills`, the shared personal skill root us
 
 Use `--destination <path>` for another local skill root. Use `--prune` to remove unchanged, previously managed skills that have left the active manifests. `--force` overwrites local conflicts and should be used only after reviewing the reported plan.
 
+The destination must be disjoint from the repository: it cannot be inside the frozenSkillz checkout or contain that checkout. This enforces outward-only deployment and prevents reverse synchronization into reviewed source.
+
 After pulling a new revision on any computer, `--check` exits nonzero when that computer needs synchronization; `--apply` converges it to the reviewed distribution.
 
 ## Client-managed Plugin Install

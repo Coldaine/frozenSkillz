@@ -4,6 +4,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/sync_frozen_skills.py"
@@ -32,13 +33,13 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         skill.mkdir(parents=True, exist_ok=True)
         (skill / "SKILL.md").write_text(body, encoding="utf-8")
 
-    def _write_manifests(self, names, *, divergent_cursor=False):
+    def _write_manifests(self, names, *, divergent_cursor=False, version="1.0.0"):
         manifest_paths = sync_module.MANIFEST_PATHS
         for relative in manifest_paths:
             names_for_manifest = ["different"] if divergent_cursor and "cursor" in str(relative) else names
             data = {
                 "name": "frozen-skills",
-                "version": "1.0.0",
+                "version": version,
                 "description": "test",
                 "skills": [
                     {"name": name, "path": f"skills/{name}"} for name in names_for_manifest
@@ -162,6 +163,175 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         )
         with self.assertRaises(sync_module.SyncError):
             self._sync(prune=True)
+
+    def test_digest_frames_each_file_content(self):
+        first = self.root / "first"
+        second = self.root / "second"
+        first.mkdir()
+        second.mkdir()
+        (first / "SKILL.md").write_bytes(b"common")
+        (second / "SKILL.md").write_bytes(b"common")
+        (first / "a").write_bytes((1).to_bytes(8, "big") + b"b" + b"payload")
+        (second / "a").write_bytes(b"")
+        (second / "b").write_bytes(b"payload")
+
+        self.assertNotEqual(
+            sync_module.digest_directory(first),
+            sync_module.digest_directory(second),
+        )
+
+    def test_target_change_after_plan_is_not_overwritten(self):
+        original_target_digest = sync_module._target_digest
+        target_calls = 0
+
+        def racing_target_digest(target):
+            nonlocal target_calls
+            if target.name == "alpha":
+                target_calls += 1
+                if target_calls == 1:
+                    return None
+                if target_calls == 2:
+                    target.mkdir(parents=True)
+                    (target / "SKILL.md").write_text("racing local edit", encoding="utf-8")
+            return original_target_digest(target)
+
+        with mock.patch.object(
+            sync_module, "_target_digest", side_effect=racing_target_digest
+        ):
+            result = self._sync(apply=True)
+
+        self.assertTrue(result.conflicts)
+        self.assertEqual(
+            (self.destination / "alpha/SKILL.md").read_text(encoding="utf-8"),
+            "racing local edit",
+        )
+        self.assertFalse((self.destination / sync_module.STATE_FILE).exists())
+
+    def test_failed_rollback_preserves_the_original_backup(self):
+        source = self.root / "replacement"
+        target = self.root / "managed"
+        source.mkdir()
+        target.mkdir()
+        (source / "SKILL.md").write_text("new", encoding="utf-8")
+        (target / "SKILL.md").write_text("original", encoding="utf-8")
+        real_replace = sync_module.os.replace
+        replace_calls = 0
+
+        def failing_replace(source_path, target_path):
+            nonlocal replace_calls
+            replace_calls += 1
+            if replace_calls == 1:
+                return real_replace(source_path, target_path)
+            if replace_calls == 3:
+                competing_target = Path(target_path)
+                competing_target.mkdir(parents=True)
+                (competing_target / "SKILL.md").write_text(
+                    "competing edit", encoding="utf-8"
+                )
+            raise OSError("simulated replace failure")
+
+        with mock.patch.object(sync_module.os, "replace", side_effect=failing_replace):
+            with self.assertRaises(sync_module.SyncError):
+                sync_module._replace_directory(
+                    source,
+                    target,
+                    sync_module.digest_directory(source),
+                    sync_module.digest_directory(target),
+                )
+
+        backups = list(self.root.glob(".managed.frozen-skills-backup-*"))
+        self.assertEqual(
+            (target / "SKILL.md").read_text(encoding="utf-8"), "competing edit"
+        )
+        self.assertEqual(len(backups), 1)
+        self.assertEqual(
+            (backups[0] / "SKILL.md").read_text(encoding="utf-8"), "original"
+        )
+
+    def test_plugin_version_drift_requires_state_refresh(self):
+        self._sync(apply=True)
+        self._write_manifests(["alpha"], version="2.0.0")
+
+        checked = self._sync()
+        self.assertIn("state", [action.kind for action in checked.actions])
+        self.assertTrue(checked.changes)
+
+        self._sync(apply=True)
+        state = json.loads(
+            (self.destination / sync_module.STATE_FILE).read_text(encoding="utf-8")
+        )
+        self.assertEqual(state["plugin_version"], "2.0.0")
+
+    def test_destination_must_be_disjoint_from_repository(self):
+        with self.assertRaises(sync_module.SyncError):
+            sync_module.sync(
+                self.repo,
+                self.repo / "runtime-skills",
+                apply=False,
+                prune=False,
+                force=False,
+            )
+        with self.assertRaises(sync_module.SyncError):
+            sync_module.sync(
+                self.repo,
+                self.root,
+                apply=False,
+                prune=False,
+                force=False,
+            )
+
+    def test_source_change_during_staging_leaves_target_untouched(self):
+        source = self.root / "changing-source"
+        target = self.root / "untouched-target"
+        source.mkdir()
+        target.mkdir()
+        (source / "SKILL.md").write_text("changed", encoding="utf-8")
+        (target / "SKILL.md").write_text("original", encoding="utf-8")
+
+        with self.assertRaises(sync_module.SyncError):
+            sync_module._replace_directory(
+                source,
+                target,
+                "0" * 64,
+                sync_module.digest_directory(target),
+            )
+
+        self.assertEqual(
+            (target / "SKILL.md").read_text(encoding="utf-8"), "original"
+        )
+
+    def test_target_created_during_staging_is_not_overwritten(self):
+        original_copytree = sync_module.shutil.copytree
+
+        def racing_copytree(source, staged, **kwargs):
+            result = original_copytree(source, staged, **kwargs)
+            target = self.destination / "alpha"
+            target.mkdir(parents=True)
+            (target / "SKILL.md").write_text("late local edit", encoding="utf-8")
+            return result
+
+        with mock.patch.object(
+            sync_module.shutil, "copytree", side_effect=racing_copytree
+        ):
+            result = self._sync(apply=True)
+
+        self.assertTrue(result.conflicts)
+        self.assertEqual(
+            (self.destination / "alpha/SKILL.md").read_text(encoding="utf-8"),
+            "late local edit",
+        )
+
+    def test_destination_skill_link_is_rejected(self):
+        self.destination.mkdir(parents=True)
+        target = self.destination / "alpha"
+        missing = self.root / "missing-skill"
+        try:
+            target.symlink_to(missing, target_is_directory=True)
+        except OSError as exc:
+            self.skipTest(f"symbolic links unavailable: {exc}")
+
+        with self.assertRaises(sync_module.SyncError):
+            self._sync()
 
 
 if __name__ == "__main__":
