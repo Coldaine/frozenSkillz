@@ -187,12 +187,12 @@ sequenceDiagram
 | Phase | Owner | Done when |
 |-------|-------|-----------|
 | 1 Model | Per-landscape agent | Import job `completed`, objects > 0 |
-| 2 Integrate | Parent | Cross-landscape connections in portfolio |
-| 3 Diagram | Diagrammer agent | `diagrams.length > 0`, objects placed |
-| 4 Flow | Optional | Key sequences on app diagrams |
+| 2 Diagram | Diagrammer agent | `diagrams.length > 0`, objects placed |
+| 3 Flow | Optional | Key sequences on app diagrams |
+| 4 Integrate | Parent | Cross-landscape connections in portfolio |
 | 5 Verify | Verifier | PNG export OK, share link renders |
 
-Never skip phase 3. Details: [workflows.md](workflows.md).
+Never skip phase 2 (Diagrams) — model without a diagram renders as an empty canvas. Details: [workflows.md](workflows.md).
 
 ---
 

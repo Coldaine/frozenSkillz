@@ -301,6 +301,8 @@ Step type reference: [reference/flows-storytelling.md](reference/flows-storytell
 
 ---
 
+## Share link (retrieve URL)
+
 1. `GET .../share-link` → `{ url, defaultUrl, shareLink }`
 2. `defaultUrl` opens overview; for one diagram set options `mode: "diagram"`, `diagramId: "<id>"`
 3. Pattern: `https://s.icepanel.io/BKWC9YAovn1qa9/<optionsHandle>`

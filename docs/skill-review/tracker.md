@@ -139,6 +139,9 @@ candidate idea moves into active marketplace content.
   `agents/` briefs present; UTF-8 clean.
 - **Before promotion:** live-validate a diagram push (attach PNG/share-link proof to `examples.md`), run the layout/push
   scripts documented in `scripts/README.md`, and trim the description (~500 chars) to the ~300-char promotion bar.
+- **Fidelity gap (adversarial review 2026-07-16):** `schemas.md` enums/required-field lists and the response keys in
+  `examples.md` (`{url,defaultUrl,shareLink}`, `.diagramExportImage.id`, `fileUrls.png`) are hand-transcribed and not
+  yet diffed against the live IcePanel OpenAPI. Verify each against a real response before promotion.
 
 ---
 
