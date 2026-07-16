@@ -1,0 +1,102 @@
+# Platform Design Working Decision Register
+
+> **NON-AUTHORITATIVE SCRATCH**
+>
+> This register is an extraction from the transcript identified in `source-ledger.md`. It records what must be reconciled; it does not amend `docs/skill-review/tracker.md`, `docs/workflows/external-skill-intake.md`, active skills, manifests, or any other repository authority.
+
+## Status vocabulary
+
+- **direct-user** — an explicit user directive recoverable in the source or current task.
+- **indirect-missing-context** — only an assistant acknowledgement of an omitted user statement survives.
+- **current-documented** — verified against the current repository authority chain.
+- **candidate** — assistant proposal worth preserving, often repeated in the later contract, but not explicitly approved by the user.
+- **open** — a decision is required or an interface is insufficiently specified.
+- **superseded** — a prior assistant proposal is replaced by a later correction in the same transcript.
+- **unverified** — a factual or implementation claim lacks current source/runtime evidence.
+
+`approved` is deliberately absent: no platform design section has received explicit
+user approval yet.
+
+An item may carry two statuses when its direction is useful but its factual basis or implementation remains unverified.
+
+## Directives and decisions
+
+| ID | Status | Working decision or question | Evidence and reconciliation note |
+|---|---|---|---|
+| DR-001 | direct-user | Stress-test the design and identify holes before treating it as implementable. | Explicit user directive (`pasted-text.txt:L479-L480`). |
+| DR-002 | direct-user | Define and stand up the complete system and conformance contract before running a pilot. The pilot validates the contract; it does not invent it. | Explicit user correction and acknowledgment (`pasted-text.txt:L952-L955`, `pasted-text.txt:L1132-L1132`). |
+| DR-003 | candidate | Keep project rules project-owned and native. frozenSkillz may scaffold, validate, inventory, provide reference templates, and prepare reviewable updates, but must not continually overwrite or generically transpile rules. | Repeated assistant position (`pasted-text.txt:L1-L27`, `pasted-text.txt:L609-L641`, `pasted-text.txt:L924-L948`). |
+| DR-004 | candidate, unverified | Preserve the current reviewed marketplace/incubator lifecycle while adding platform capabilities. | Proposed repeatedly (`pasted-text.txt:L29-L85`, `pasted-text.txt:L1002-L1004`), but the actual repository lifecycle was not inspected or enumerated in the transcript. |
+| DR-005 | current-documented | The current frozenSkillz lifecycle has now been reconstructed from repository authorities: separate external scout, personal-reference, and ordinary gated lanes; review/promotion; active plugin source; plugin manifests/version; catalogs; and the current live-personal sync relationship. | The transcript could not establish this (`pasted-text.txt:L29-L85`, `pasted-text.txt:L1002-L1004`); the current result is recorded in `authority-lifecycle-and-installation.md`. Frozen-to-global install/update/remove remains a new open contract under DR-007. |
+| DR-006 | open, unverified | Decide the durable authority relationship among frozenSkillz Git, project Git, the incubator, and live machine-global skill roots. Do not adopt the proposed authority transition without reconciliation. | The transition is assistant-authored and never approved (`pasted-text.txt:L89-L105`). |
+| DR-007 | open | Specify the mandatory frozenSkillz-to-global-install lifecycle for `C:\Users\pmacl\.agents\skills` and other client discovery roots. Agents require materialized skills in their live directories; Git authority alone is not execution. | The directory is named only in an authority proposal (`pasted-text.txt:L91-L105`); the concrete design covers project copies, not global installation (`pasted-text.txt:L297-L315`, `pasted-text.txt:L643-L666`). |
+| DR-008 | candidate | Let project Git own specialization: each repository selects only relevant MCPs and skills, commits actual native files, and does not make those capabilities globally visible merely because the clone exists. | Repeated focused and final contract (`pasted-text.txt:L235-L295`, `pasted-text.txt:L985-L1000`). |
+| DR-009 | open | Choose one project manifest and lock interface. Reconcile `.agents/frozen.yaml`/`.agents/frozen.lock.yaml` with the later `.agents/config.yaml`. | Conflicting proposals (`pasted-text.txt:L111-L121`, `pasted-text.txt:L151-L163`, `pasted-text.txt:L237-L258`, `pasted-text.txt:L565-L582`). |
+| DR-010 | candidate | Restrict the canonical project declaration to managed MCP selection and shared-skill provenance; keep rules native. | Later go/no-go position (`pasted-text.txt:L924-L933`) supersedes the earlier proposed `rules.packs` entry (`pasted-text.txt:L248-L258`). |
+| DR-011 | candidate | Commit the real native client files. Treat managed MCP sections and necessary skill adapters as deterministic outputs while preserving project-authored rules and unmanaged client settings. | Proposed render model and structural ownership (`pasted-text.txt:L264-L295`, `pasted-text.txt:L565-L607`, `pasted-text.txt:L865-L905`). |
+| DR-012 | open | Define exact managed/unmanaged merge semantics, comment retention, state-file format, conflict behavior, and atomic rollback for every mixed native file. | Requirements are stated but only an illustrative state file is shown (`pasted-text.txt:L565-L607`); Kilo merge is admitted unfinished (`pasted-text.txt:L1127-L1127`). |
+| DR-013 | candidate | Vendor selected shared skills into project `.agents/skills/`; project-local skills may be authored there. Add client-specific generated adapters only where discovery requires them. | Proposed project materialization (`pasted-text.txt:L297-L315`, `pasted-text.txt:L643-L666`). |
+| DR-014 | open, unverified | Verify current discovery paths and rendering behavior for Claude Code, Cursor, VS Code, Kilo, and Antigravity before claiming parity. Decide copy versus link behavior per OS/client. | The transcript explicitly withholds Cursor/Antigravity parity pending fixtures (`pasted-text.txt:L643-L666`) and lists all-client fixtures as unfinished (`pasted-text.txt:L1126-L1126`). |
+| DR-015 | candidate | Track shared-skill ownership as `vendor`, `fork`, or `local`; never silently overwrite modified vendor content and never rewrite fork/local content. | Proposed and repeated in final contract/conformance (`pasted-text.txt:L668-L695`, `pasted-text.txt:L1006-L1012`, `pasted-text.txt:L1045-L1052`). |
+| DR-016 | open | Decide where provenance and ownership live: skill frontmatter, project lock, adjacent render state, or a combination. | Frontmatter and state are only examples (`pasted-text.txt:L307-L315`, `pasted-text.txt:L594-L605`, `pasted-text.txt:L843-L863`). |
+| DR-017 | candidate | Machines resolve execution facts for capabilities already selected by project Git; machines do not select project capabilities. | Repeated contract (`pasted-text.txt:L317-L348`, `pasted-text.txt:L1014-L1025`). |
+| DR-018 | candidate | Use a real `frozen mcp exec <id>` shim, or an explicitly verified stable PATH launcher, for host-bound MCP resolution. A passive machine registry is insufficient. | Stress-test correction retained by the final contract (`pasted-text.txt:L501-L542`, `pasted-text.txt:L907-L911`, `pasted-text.txt:L1020-L1025`). |
+| DR-019 | candidate | Resolve project roots through MCP `roots/list` where possible, then client-specific environment rendering or the shim; use cwd only as fallback. | Assistant proposal and conformance requirement (`pasted-text.txt:L544-L563`, `pasted-text.txt:L1053-L1062`). |
+| DR-020 | candidate | Define MCPs logically, independently of client JSON syntax; pin packages, images, schemas, skill revisions, and host minimum versions. | Logical definition and pin requirements (`pasted-text.txt:L194-L234`, `pasted-text.txt:L843-L863`, `pasted-text.txt:L932-L933`). |
+| DR-021 | candidate | Support project-level tool allowlists, not just server selection, so irrelevant tools can be excluded before client exposure. | Proposed and made a go/no-go condition (`pasted-text.txt:L773-L793`, `pasted-text.txt:L932-L933`). |
+| DR-022 | open | Specify the MCP catalog schema, lock/pin representation, environment/secret references, transport types, portable/host/project classification, health contract, and tool-filter wire shape. | The transcript supplies illustrative snippets but no decision-complete interface (`pasted-text.txt:L194-L234`, `pasted-text.txt:L773-L793`, `pasted-text.txt:L843-L863`). |
+| DR-023 | candidate | Detect and report MCP shadowing across scopes. Managed names must avoid collisions; approval and runtime health remain distinct from configuration presence. | Collision and trust requirements (`pasted-text.txt:L697-L737`, `pasted-text.txt:L1053-L1062`). |
+| DR-024 | open | Select a stable naming/namespace policy and model client-specific precedence from verified current behavior. | Namespaces are illustrative only (`pasted-text.txt:L711-L722`); client precedence assertions are unverified (`pasted-text.txt:L697-L710`). |
+| DR-025 | candidate | Treat Docker MCP Gateway as an implementation detail behind a frozen wrapper; do not expose its changing CLI directly in committed project files or create per-project profiles in v1. | Wrapper and non-goal proposals (`pasted-text.txt:L739-L756`, `pasted-text.txt:L912-L930`). |
+| DR-026 | open | Define and test Docker process ownership across simultaneous clients, container reuse, OAuth state, latency, memory, logs, concurrency, and downstream inventory. | Explicit unresolved risks (`pasted-text.txt:L758-L771`, `pasted-text.txt:L795-L818`). |
+| DR-027 | open | Add the Docker wrapper to the public CLI contract or explicitly reject it. It is required by the Docker design but absent from the final four commands and claimed implementation list. | Wrapper proposed at `frozen mcp gateway` (`pasted-text.txt:L745-L756`); final command set omits it (`pasted-text.txt:L895-L911`, `pasted-text.txt:L970-L975`). |
+| DR-028 | candidate | Maintain separate desired repository state and observed machine state. Observations include repository/clone/revision/dirty state, manifests, native files, skills/provenance, rules, clients, launchers, gateway downstreams, approval, and health. | Repeated inventory model (`pasted-text.txt:L107-L148`, `pasted-text.txt:L419-L468`, `pasted-text.txt:L795-L841`, `pasted-text.txt:L1027-L1039`). |
+| DR-029 | candidate | Make `frozen scan --json` the normalized discovery contract. Obot may receive/store/display observations but is not the v1 scanner dependency. | Corrected dependency direction (`pasted-text.txt:L795-L841`, `pasted-text.txt:L921-L931`, `pasted-text.txt:L1027-L1039`). |
+| DR-030 | open | Specify repository discovery, device identity, scan schema/versioning, secret redaction, transport/auth, retention, desired-state indexing, and Obot submission. | Hard-coded discovery is to be replaced (`pasted-text.txt:L148-L148`, `pasted-text.txt:L1039-L1039`), while submission/indexing remain unfinished (`pasted-text.txt:L1129-L1129`). |
+| DR-031 | candidate | Propagate shared updates through deterministic reviewable PRs only to actual consumers, preserving unrelated settings and fork/local content and allowing rollback by PR revert. | Proposed update loop and conformance (`pasted-text.txt:L394-L418`, `pasted-text.txt:L1073-L1082`). |
+| DR-032 | open | Choose the cross-repository automation mechanism only after sync semantics pass conformance. | App/workflow/script is deliberately deferred (`pasted-text.txt:L394-L418`, `pasted-text.txt:L1130-L1130`). |
+| DR-033 | candidate | Use the narrow core CLI `sync`, `validate`, `mcp exec`, and `scan`, subject to resolving the missing Docker/global-install interfaces. | Later four-command proposal (`pasted-text.txt:L895-L911`) supersedes the early large CLI (`pasted-text.txt:L150-L163`). |
+| DR-034 | candidate | Keep v1 non-goals explicit: no generic rule transpilation, bidirectional UI sync, new gateway, project Docker profiles, trust bypass, premature Obot dependency, or automatic fork rewriting. | Assistant non-goal list (`pasted-text.txt:L912-L922`). |
+| DR-035 | candidate | Pilot topology: one Python repository, one infrastructure repository, Windows 11, Linux, five clients, one portable MCP, and one host-bound MCP. | Proposed topology (`pasted-text.txt:L950-L950`); the user corrected timing, not this composition (`pasted-text.txt:L952-L955`). |
+| DR-036 | candidate | Pilot conformance covers parseability, completeness, idempotence, vendor conflict safety, fork/local preservation, client discovery, relevant-only MCP exposure, shadow detection, approval-state separation, correct roots, OS equivalence, no personal paths/secrets, safe update PRs, and exact inventory. | Detailed conformance proposal (`pasted-text.txt:L1041-L1093`). |
+| DR-037 | open | Define the golden inventory corpus and why 100% precision/recall is measured against the correct universe of repositories, clones, clients, scopes, launchers, and downstream gateway servers. | Numeric target is stated without corpus mechanics (`pasted-text.txt:L1083-L1093`). |
+| DR-038 | open | Define agent-effectiveness scenarios, baselines, thresholds, repetitions, and telemetry for intended-tool selection, irrelevant-tool suppression, naming discrimination, gateway discovery, and tool filtering. | Only evaluation questions are supplied (`pasted-text.txt:L1094-L1104`). |
+| DR-039 | open | For each failure injection, specify expected detection, exit status, report shape, preservation guarantee, and recovery procedure. | Faults are enumerated but outcomes are only "detect or safely handle" (`pasted-text.txt:L1106-L1119`). |
+| DR-040 | open | Decide whether the early GHCR catalog publication and Project Skill MCP survive, are deferred, or are rejected. | They appear only in the initial stack (`pasted-text.txt:L150-L157`) and disappear from the revised/final architecture. |
+| DR-041 | unverified | A control-plane foundation allegedly exists with architecture, conformance, schemas, fixture, CLI, CI, and passing tests. Locate and verify it before incorporating any implementation. | The transcript gives claims and a hash but no artifact path, URL, branch, commit, diff, or test output (`pasted-text.txt:L957-L983`). |
+
+## Directives from the current task
+
+These directives were stated directly in the current Codex task after the flattened
+attachment was supplied. They are kept separate because they have no line number in
+`pasted-text.txt`.
+
+| ID | Status | Directive | Planning consequence |
+|---|---|---|---|
+| CTD-001 | direct-user | Inspect and preserve the lifecycle frozenSkillz already proposes; do not invent an "originating live skill directory" model without reading the repository. | Current tracker and workflows must be the baseline for any transition, and stale downstream authority docs must be deliberately migrated rather than ignored. |
+| CTD-002 | direct-user | A Git source is not enough for execution: reusable skills must be copied, linked, plugin-installed, or otherwise materialized into the directories agents actually discover. | Global/plugin/project installation lanes and real discovery targets are mandatory parts of the lifecycle contract. The exact active-source authority direction remains the first open decision. |
+| CTD-003 | direct-user | The source is too large to leave in chat context; start durable scratchpads and first write a plan for finishing the plan. | Maintain a planning evidence pack with source coverage, decisions, requirements, gaps, and conformance traceability. |
+| CTD-004 | direct-user | Send the full source through multiple independent agent reasoning passes rather than relying on one summary. | Decision, architecture, conformance, and second-order audit lanes must be recorded before consolidation. |
+| CTD-005 | direct-user | Consolidate the result into roughly two or three plan documents organized by phase. | The evidence pack supports three user-facing plans; it is not itself thirteen separate plans. |
+| CTD-006 | direct-user | Explain what the planning evidence files are, how they hang together, and how they relate to the repository. | Add a platform router showing evidence pack -> phase plans -> approved authority/implementation changes. |
+| CTD-007 | direct-user | Re-ask the authority-transition question after inspecting the existing frozenSkillz lifecycle. | Ask for row-by-row confirmation of the lifecycle authority matrix; do not collapse source authority into install-directory location. |
+
+## Superseded proposals
+
+| ID | Superseded proposal | Replaced by | Evidence |
+|---|---|---|---|
+| SR-001 | frozenSkillz owns centrally rendered reusable rule packs. | Rules remain native project files; frozenSkillz scaffolds and inventories but does not compile them. | `pasted-text.txt:L194-L213`, `pasted-text.txt:L248-L258`, `pasted-text.txt:L470-L470` replaced by `pasted-text.txt:L609-L641`, `pasted-text.txt:L924-L948`. |
+| SR-002 | `~/.frozen/machine.yaml` resolves stable commands by itself. | A real PATH launcher or `frozen mcp exec` must read the registry. | `pasted-text.txt:L317-L348` replaced by `pasted-text.txt:L501-L542`. |
+| SR-003 | Host MCPs can use `--workspace .`. | Resolve roots explicitly and use cwd only as fallback. | `pasted-text.txt:L375-L381` replaced by `pasted-text.txt:L544-L563`. |
+| SR-004 | Native files can invoke Docker's complete gateway CLI directly. | Hide Docker behind a frozen wrapper. | `pasted-text.txt:L350-L373` replaced by `pasted-text.txt:L739-L756`. |
+| SR-005 | Obot scans clones and owns discovery. | `frozen scan --json` owns normalized discovery; Obot is a sink. | `pasted-text.txt:L419-L468` replaced by `pasted-text.txt:L795-L841`. |
+| SR-006 | The core CLI is initialize/lock/render/apply/serve/validate/scan/report. | Narrow it to sync/validate/mcp-exec/scan, pending missing interfaces. | `pasted-text.txt:L150-L163`, `pasted-text.txt:L283-L295` replaced by `pasted-text.txt:L895-L911`. |
+| SR-007 | A two-repository/two-machine pilot is the immediate design gate. | Complete the system and conformance contract first; pilot afterward. | `pasted-text.txt:L950-L950` corrected by `pasted-text.txt:L952-L955`, `pasted-text.txt:L1132-L1132`. |
+
+## Required next reconciliation passes
+
+1. Read the repository authority chain and document the **actual current frozenSkillz lifecycle** before changing authority or publication semantics.
+2. Specify the **global live-install path** from reviewed frozenSkillz content to `C:\Users\pmacl\.agents\skills` and equivalent client roots; keep it distinct from project vendoring.
+3. Verify all current client, Docker, and Obot behavior against primary documentation and executable fixtures.
+4. Locate and verify the claimed hashed implementation, or mark it unavailable and plan from confirmed repository state.
+5. Convert only reconciled candidate items into an authoritative architecture and conformance specification; unresolved items remain open rather than being silently defaulted.
