@@ -48,6 +48,37 @@ Do not auto-promote every live `.agents` skill into `plugins/frozen-skills/skill
 
 If an active frozen skill has no live `.agents` counterpart, treat frozenSkillz as the source for that skill.
 
+### Personal / gated skills (`_incubator/personal-skills/`)
+
+Many personal skills also have a gated evaluation copy under:
+
+```text
+_incubator/personal-skills/<skill-name>/
+```
+
+**Live edit still starts in `~/.agents/skills/<name>/`.** After a deliberate rewrite or material fix of a skill that already has an incubator row:
+
+1. Sync the live tree into `_incubator/personal-skills/<name>/` (mirror; delete removed files).
+2. Update the tracker row in `docs/skill-review/tracker.md`.
+3. **Commit and push that sync on a branch / PR in this repo in the same session.**
+
+A GitHub Issue alone is not the durable rewrite. Uncommitted incubator files on disk are not “in frozenSkillz.” “Stay gated” means do **not** promote into `plugins/frozen-skills/skills/` or manifests — it does **not** mean skip git.
+
+## Completion Contract (do not skip)
+
+When the operator asks to rewrite, fix, or sync a skill that this repo tracks (active under `plugins/` **or** gated under `_incubator/`), the work is incomplete until:
+
+| Required | Not sufficient |
+|---|---|
+| Live `~/.agents` updated (if that skill is live-authored) | Opening an Issue describing the rewrite |
+| Matching path under `plugins/…` or `_incubator/…` updated | Robocopy / copy left only in the working tree |
+| Tracker updated when status/work notes change | “Commit when you want” / deferring the PR |
+| **Commit + push** (branch + PR when not on an open PR) | Local-only sync “for later” |
+
+Exception: operator explicitly says “live-only, do not touch the repo.” Otherwise assume **repo landing is part of the task**.
+
+Do not treat the global agent habit “ask before committing” as license to leave frozenSkillz skill rewrites uncommitted. In this repository, a requested skill rewrite implies commit and push unless told otherwise.
+
 ## Current Snapshot: 2026-07-06
 
 The active frozen-skills plugin registers two skills:
@@ -77,8 +108,9 @@ For JSON manifests touched in the same change, also parse them with `ConvertFrom
 Every frozen sync should report:
 
 - which live skill path was compared;
-- which frozen path changed;
+- which frozen path changed (`plugins/…` or `_incubator/…`);
 - whether the skill was active or gated;
 - whether manifests changed;
 - validation commands run;
-- any live-vs-frozen delta intentionally left unsynced.
+- any live-vs-frozen delta intentionally left unsynced;
+- **branch / commit / PR URL** where the sync landed (required unless operator said live-only).

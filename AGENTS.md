@@ -20,6 +20,7 @@ If documents disagree, follow the highest applicable source above and fix the st
 | Promote a gated skill | `docs/skill-review/tracker.md` and the relevant plugin manifests |
 | Update installable frozen-skills content | `plugins/frozen-skills/.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, `.cursor-plugin/plugin.json`, `gemini-extension.json` |
 | Compare live skill roots to frozenSkillz | `docs/workflows/skill-authority-and-frozen-sync.md`, then `docs/skill-review/tracker.md` if promotion is needed |
+| Rewrite / fix a personal or gated skill | `docs/workflows/skill-authority-and-frozen-sync.md` (Completion Contract + personal/gated sync), then the skill under `_incubator/` or `plugins/`; update tracker; **commit and push** |
 | Update marketplace catalog metadata | `.claude-plugin/marketplace.json`, `.codex-plugin/marketplace.json`, `.cursor-plugin/marketplace.json`, `gemini-marketplace.json` |
 
 ## Operating Contract
@@ -29,6 +30,7 @@ If documents disagree, follow the highest applicable source above and fix the st
 - Keep scout `source/` directories read-only.
 - Keep active `SKILL.md` files lean and route heavy detail to `references/` or `templates/`.
 - Treat `C:\Users\pmacl\.agents\skills` as the live personal skill source and this repo as the reviewed frozen publication boundary.
+- **Skill rewrite done means committed+pushed in this repo** (incubator or plugins path). “Stay gated” ≠ “skip git.” See Completion Contract in `docs/workflows/skill-authority-and-frozen-sync.md`.
 - Update all four plugin manifests when adding or removing active frozen-skills skills.
 - Bump aligned plugin and marketplace versions when public plugin metadata changes.
 - Validate changed JSON and every manifest `skills[].path` before publishing.

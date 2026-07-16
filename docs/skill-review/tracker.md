@@ -151,6 +151,10 @@ Reference copies of the user's own `~/.agents/skills` personal skills, brought i
 evaluation (the "own a reference copy of all my skills" directive). **Held in `_incubator/personal-skills/` — gated,
 not installable, in no manifest.** Deliberately separate from the marketplace-candidate gated skills above.
 
+**Rewrite rule:** live edit in `~/.agents/skills/<name>/`, then mirror into `_incubator/personal-skills/<name>/`, update this
+tracker row, and **commit + push in frozenSkillz the same session**. Opening an Issue is not enough. “Gated” means not
+marketplace-promoted — not “leave uncommitted.” Full contract: `docs/workflows/skill-authority-and-frozen-sync.md`.
+
 **Excluded on purpose:**
 - `deepinit` — ships in the OMC package (`oh-my-claude-sisyphus/skills`); an *installed plugin* skill, not authored here. Not intake material.
 - `doppler` — already **ACTIVE** in `plugins/frozen-skills/skills/`.
