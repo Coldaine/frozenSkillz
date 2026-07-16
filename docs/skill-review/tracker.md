@@ -69,9 +69,12 @@ Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental �
 ## Per-skill notes
 
 ### `doppler` — ACTIVE
-Best skill in the repo: security-first, cross-platform, names-only diagnostics, complete `references/` + `agents/`.
-Use it as the quality bar for everything else. Synced from `C:\Users\pmacl\.agents\skills\doppler`
-on 2026-07-06 to preserve the live 2026-06-29 operational learnings in the reviewed frozen copy.
+Security-first reference skill: lean `SKILL.md` (rules + intent table + workflow), progressive
+`references/` (setup, commands, CI/fallbacks), gated `references/homelab-notes.md` for coldaine/ESO/Shipwright
+only, and `evals/triggers.json` for description routing checks. Synced from
+`C:\Users\pmacl\.agents\skills\doppler` on 2026-07-16 to match the promotion bar (WHAT/WHEN description,
+no project diary in the body, progressive disclosure).
+Use it as the quality bar for everything else.
 
 ### `external-skill-intake` — ACTIVE
 Required workflow for evaluating external skill/plugin/agent repos. It keeps source snapshots read-only under
@@ -160,7 +163,7 @@ not installable, in no manifest.** Deliberately separate from the marketplace-ca
 |---|---|---|---|
 | `chat-history` | authored (hardened 2026-07-06) | 🛑 gated | De-personalize (paths, Pieces, UTC-5); run `artifact_hunt.py` / `extract_chat_history.py`. |
 | `retrospective` | authored (`author: pmacl`) | 🛑 gated | De-personalize (agent-control-plane paths); run `session_timeline.py`. |
-| `project-docs` | authored | 🛑 gated | Review; de-opinionate if promoting. |
+| `project-docs` | authored (rewritten 2026-07-16; [#37](https://github.com/Coldaine/frozenSkillz/issues/37)) | 🛑 gated · evaluate | Live + incubator synced: kill PROGRESS/`docs/history` defaults; Issues/plans + promote-then-delete; AGENTS router; CLAUDE→AGENTS; restored `SKILL.md`. Still gated — do not marketplace-promote until promotion bar + de-personalization pass. |
 | `skill-install` | authored | 🛑 gated | Verify recipes/paths. |
 | `run-opencode` | authored | 🛑 gated | Verify commands. |
 | `edit-opencode-config` | authored (was `.claude`-only) | 🛑 gated | Fix canonical-root drift; verify. |

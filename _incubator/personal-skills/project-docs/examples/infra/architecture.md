@@ -64,5 +64,5 @@ tree but not yet reconciled is **Planned**, not Current.
 ## Links
 
 - Intent and anti-goals: `NORTH_STAR.md`
-- Current handoff: `PROGRESS.md`
+- Current work: GitHub Issues and/or `docs/plans/`
 - Decisions: `docs/decisions/`

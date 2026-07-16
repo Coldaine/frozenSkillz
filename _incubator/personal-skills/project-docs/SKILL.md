@@ -1,135 +1,115 @@
 ---
 name: project-docs
 description: >
-  Create, review, reconcile, and migrate the project authority documents
-  (NORTH_STAR.md, architecture.md, PROGRESS.md, AGENTS.md) and the
-  overflow subdirectories that support them (docs/decisions, docs/components,
-  docs/workflows, docs/history). Use whenever a repo needs its documentation
-  pattern established, audited, reconciled, or repaired. This skill is the
-  authoring-time enforcer for the project authority stack; the future
-  Guardian runtime is downstream and out of scope here. Trigger when the
-  user mentions any of these documents by name, asks to bootstrap a repo's
-  docs, asks to review or audit existing docs, asks to migrate an existing
-  CLAUDE.md / instructions file to AGENTS.md, or asks how to keep the docs
-  consistent with each other.
+  Create, review, reconcile, and migrate project authority docs
+  (NORTH_STAR, architecture, AGENTS) plus living overflow. Prefer
+  Issues/docs/plans for current work; promote then delete temporary
+  docs. No PROGRESS.md or docs/history/. Trigger on bootstrap, audit,
+  CLAUDE→AGENTS migration, or authority-stack repair.
 ---
 
 # Project Docs Authoring
 
 <context>
-A repo's documentation pattern has an authority hierarchy:
+Authority hierarchy (no status diary in the ladder):
+
 NORTH_STAR (intent) → architecture (technical strategy and shape) →
-PROGRESS (current handoff) → AGENTS (agent operating contract).
-This skill creates, reviews, reconciles, and migrates those documents.
-It produces drafts, edit plans, review findings, and authority-flow
-notes. It does not block PRs, run CI, assign severity, or enforce
-policy; that belongs to the future Guardian runtime.
+AGENTS (thin router). Current work lives in GitHub Issues and/or
+`docs/plans/`. Finished work is promoted into living homes, then the
+temporary file is deleted. Git / tags / PRs are the archive.
 
-Authority flows one direction. When a downstream doc disagrees with
-an upstream doc, the downstream doc is always the wrong one.
+AGENTS.md is a pure router, not a container. It states authority order,
+routes each task category to the doc that owns it, lists real commands,
+and stops. Project identity lives in NORTH_STAR; do not restate it in
+AGENTS. CLAUDE.md is a one-line pointer to AGENTS.md — no second doctrine
+file.
 
-AGENTS.md is a pure router, not a container. It states the authority
-order, routes each task category to the doc that owns it, lists the
-commands, and stops there. The project's identity is eager-loaded from
-NORTH_STAR; everything else is reached through lazy bare-path routes the
-agent follows only when a task needs them. Inlining content into
-AGENTS.md instead of routing to it is the pattern's most common failure;
-the default is to inline nothing and route everything, and any AGENTS.md
-that holds doctrine of its own is a finding.
+Authority flows one direction. When a downstream doc disagrees with an
+upstream doc, the downstream doc is wrong until the owner revises upstream
+on purpose.
+
+This skill drafts, reviews, reconciles, and migrates. It does not block
+PRs, run CI, or assign Guardian severities.
 </context>
 
 <task_router>
 
-Identify the task and load the appropriate references.
-
 | User wants to... | Load these files |
 |---|---|
-| Create a new authority doc that does not exist | `references/write-workflow.md` + the relevant doc guide below |
-| Review or critique an existing authority doc | `references/review-checklist.md` + the relevant doc guide below |
+| Create a new authority doc that does not exist | `references/write-workflow.md` + the relevant doc guide |
+| Review or critique an existing authority doc | `references/review-checklist.md` + the relevant doc guide |
 | Reconcile multiple docs against each other | `references/authority-flow.md` |
-| Migrate a repo's existing instructions into the AGENTS.md pattern | `references/agents-md-guide.md` + `references/write-workflow.md` |
-| Understand the relationship to the future Guardian | `references/guardian-relationship.md` |
+| Migrate instructions into the AGENTS.md pattern | `references/agents-md-guide.md` + `references/write-workflow.md` |
+| Handle current work / finished work / leftover PROGRESS | `references/current-work-and-lifecycle.md` (+ `progress-md-guide.md` only if migrating legacy PROGRESS away) |
+| Understand the future Guardian boundary | `references/guardian-relationship.md` |
 
-Per-document guides (load when working on that specific doc):
+Per-document guides:
 
 | Doc | Guide |
 |---|---|
 | NORTH_STAR.md | `references/north-star-guide.md` |
 | architecture.md | `references/architecture-md-guide.md` |
-| PROGRESS.md | `references/progress-md-guide.md` |
 | AGENTS.md | `references/agents-md-guide.md` |
+| Legacy PROGRESS.md (migrate away only) | `references/progress-md-guide.md` |
 
-Exemplars (open when drafting a new doc to see what "good" looks like):
-`examples/NORTH_STAR.md`, `examples/architecture.md`, `examples/PROGRESS.md`,
+Exemplars: `examples/NORTH_STAR.md`, `examples/architecture.md`,
 `examples/AGENTS.md`, `examples/CLAUDE.md`.
 
-For an infrastructure / GitOps repo (manifests are the implementation, and
-status means applied-not-authored), see the parallel set under `examples/infra/`:
-`examples/infra/NORTH_STAR.md`, `examples/infra/architecture.md`,
-`examples/infra/PROGRESS.md`, `examples/infra/AGENTS.md`, `examples/infra/CLAUDE.md`.
+Infrastructure / GitOps parallel set: `examples/infra/`.
 
 </task_router>
 
 <scope>
 
-The skill covers four primary documents and four overflow destinations.
-
 Primary documents:
-- `NORTH_STAR.md` — project intent, goals, anti-goals, pillars
+- `NORTH_STAR.md` — intent, goals, anti-goals, pillars
 - `architecture.md` — technical strategy, system shape, invariants
-- `PROGRESS.md` — current handoff state, blockers, next-session focus
-- `AGENTS.md` — agent entrypoint and operating contract
+- `AGENTS.md` — agent entrypoint and operating contract (router only)
 
-Overflow destinations (legal homes for content expelled from the four primaries):
-- `docs/decisions/` — ADRs (durable decisions with rationale)
-- `docs/components/` — deep subsystem documentation
-- `docs/workflows/` — long procedures and agent workflows
-- `docs/history/` — archived progress, completed milestones
+Living overflow (legal homes for content expelled from primaries):
+- `docs/decisions/` — ADRs
+- `docs/components/` **or** topic living docs (e.g. `systems/<topic>.md`) — deep subsystem truth
+- `docs/workflows/` — long procedures
+- `docs/plans/` — active executable plans (optional if Issues carry the work)
 
-Documentation lives only in the authority docs and these overflow homes.
-Implementation directories hold implementation, not prose docs: a stray
-README or design note in a source or manifest directory is content without a
-legal home, and it belongs in one of the doc destinations above. A one-line
-pointer file that routes to the real doc is the only exception.
+Do **not** recommend:
+- `PROGRESS.md` (legacy; migrate away)
+- `docs/history/` as a rolling archive (git is the archive)
+- `docs/README.md` meta-indexes, HANDOFF.md / STATUS.md renames of PROGRESS
 
-The skill does NOT create or rewrite docs unless the user asks. It surfaces
-findings, drafts, and suggested edits. Neighboring docs are never silently
-rewritten as a side effect of working on one doc.
+Documentation lives in the authority docs and living overflow homes.
+Implementation directories hold implementation, not prose — a one-line pointer
+is the only exception.
+
+The skill does NOT create or rewrite docs unless the user asks. Neighboring
+docs are never silently rewritten as a side effect of working on one doc.
 
 </scope>
 
 <minimum_viable_stack>
 
-Do not create all four primary documents merely to satisfy the pattern.
+Do not create every primary document merely to satisfy the pattern.
 
 - `AGENTS.md` is always recommended.
-- `NORTH_STAR.md` is needed when project intent is non-obvious or drift-prone.
-- `PROGRESS.md` is needed when work spans sessions.
-- `architecture.md` is needed when technical structure or intended direction is complex enough to go stale or be misunderstood.
+- `NORTH_STAR.md` when intent is non-obvious or drift-prone.
+- `architecture.md` when technical shape is complex enough to go stale.
+- Current work: Issues and/or `docs/plans/` — not a fourth primary doc.
+- Topic living docs are optional; use when a repo outgrows a single architecture.md.
 
-A new repo can start with `AGENTS.md` alone and accrete the others as need
-becomes evident. The skill should not push for completeness.
+A new repo can start with `AGENTS.md` alone. Do not push for completeness.
 
 </minimum_viable_stack>
 
 <output_types>
 
-The skill returns one of:
+Returns one of: proposed draft · patch-style edit plan · review report ·
+authority-flow summary · migration recommendation (including promote-then-delete).
 
-- a proposed document draft
-- a patch-style edit plan
-- a review report
-- an authority-flow summary
-- a migration recommendation
-
-Findings cite the relevant doc section. Suggested edits are concrete.
+Findings cite the relevant section. Suggested edits are concrete.
 
 </output_types>
 
 <vocabulary>
-
-Use skill vocabulary, not Guardian vocabulary. The Guardian runtime is
-a separate, downstream system.
 
 | Skill (authoring time) | Guardian (PR / runtime) |
 |---|---|
@@ -140,23 +120,24 @@ a separate, downstream system.
 | authority-flow check | enforcement |
 | suggested edit | CI failure / PR gate |
 
-See `references/guardian-relationship.md` for the boundary.
+See `references/guardian-relationship.md`.
 
 </vocabulary>
 
 ## Learnings
 
-### 2026-06-29
+### 2026-07-16
 
 #### What Worked
-- When PROGRESS reflects **verified live cluster state** (kubectl + helmfile diff) and parallel workstreams, keep it — it earns its place as handoff.
-- When PROGRESS drifts into changelog + second roadmap contradicting the active plan (`docs/plans/*.md`), **gut the diary**, add a Status block to the plan, and shrink PROGRESS to pointers — don't delete handoff entirely.
-- Template/advice questions: score options against **accepted ADRs and live artifacts** (Phase 0 history, capability registry), not generic homelab comparison tables.
+- Settled owner preference: no PROGRESS; no `docs/history/` roll-off; Issues/`docs/plans` for current work; promote lasting facts then **delete** temporary docs; AGENTS thin router; CLAUDE one-line → AGENTS.
+- Topic living docs + AGENTS find-table (coldaine-configurations PR #16) as an allowed optional shape, not a universal mandate.
+- Restoring a discoverable `SKILL.md` after a references-only live root regression.
 
 #### What Failed
-- Recommending "delete PROGRESS" while the doc had just been reconciled to live secrets/cluster state — created conflicting advice in the same session.
-- Stating cluster blockers (e.g. "KubeBlocks degraded") from PROGRESS alone without `kubectl` on the session machine — user pushback ("how do you know?") was correct.
+- Teaching “movement, not deletion” into `docs/history/` — that was the sprawl machine (dated-record convention).
+- Keeping PROGRESS as a recommended primary while the owner was deleting it across repos.
+- Live `~/.agents/skills/project-docs` missing `SKILL.md` — skill undiscoverable despite intact references.
 
 #### Configuration Notes
-- Pre-implementation with one active plan: plan Status block may suffice; post–wave-A/B with secrets cutover and open PRs: PROGRESS + `docs/components/*.md` live inventory are worth maintaining.
-- Durable outcomes belong in ADRs + component docs; PROGRESS "Recently Changed" should roll off after merge, not accumulate.
+- Live canonical: `~/.agents/skills/project-docs/`. Gated evaluation copy: `frozenSkillz/_incubator/personal-skills/project-docs/`. Stay gated until promotion bar; do not auto-publish to marketplace.
+- Claude Code: junction `~/.claude/skills/project-docs` → `~/.agents/skills/project-docs`.

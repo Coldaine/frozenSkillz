@@ -3,7 +3,7 @@ title: project-docs North Star
 date: 2026-05-19
 author: Patrick MacLyman
 status: living
-last_confirmed: 2026-05-19
+last_confirmed: 2026-07-16
 ---
 
 # project-docs North Star
@@ -28,7 +28,7 @@ Agents drift fastest when no document tells them what the project refuses to be,
 
 ### Requirements
 
-- **G1-R1.** The skill's router exposes the four primary documents and the four overflow destinations as distinct task targets.
+- **G1-R1.** The skill's router exposes the primary authority docs (NORTH_STAR, architecture, AGENTS) and living overflow (decisions, components/topics, workflows, plans) as distinct task targets.
 - **G1-R2.** The skill produces an authority-flow finding when a downstream doc contradicts an upstream doc.
 - **G2-R1.** The skill's generation workflow opens with open-ended interview questions, not a template.
 - **G2-R2.** The skill records provenance tags (`[OWNER]`, `[INFERRED]`, `[OPEN]`) on every draft before review.
