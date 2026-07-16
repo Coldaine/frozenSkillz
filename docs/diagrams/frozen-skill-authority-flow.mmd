@@ -1,0 +1,18 @@
+flowchart LR
+    A["frozenSkillz source\nAuthor • Review • Test"] --> B["Versioned plugin release"]
+    B --> C[".agents/skills"]
+    B --> D["Claude / Codex"]
+    B --> E["Cursor / Gemini / Kilo"]
+    C -. "hash + load status only" .-> F["Verification report"]
+    D -. "hash + load status only" .-> F
+    E -. "hash + load status only" .-> F
+    F -. "issue / reviewed change" .-> A
+
+    classDef authority fill:#18212f,color:#ffffff,stroke:#38bdf8,stroke-width:3px;
+    classDef release fill:#0f766e,color:#ffffff,stroke:#5eead4,stroke-width:2px;
+    classDef runtime fill:#f1f5f9,color:#0f172a,stroke:#64748b,stroke-width:1.5px;
+    classDef report fill:#fef3c7,color:#78350f,stroke:#f59e0b,stroke-width:2px;
+    class A authority;
+    class B release;
+    class C,D,E runtime;
+    class F report;

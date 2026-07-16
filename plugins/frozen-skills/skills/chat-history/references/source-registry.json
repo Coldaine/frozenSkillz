@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-16",
+  "upstream": {
+    "repository": "https://github.com/Coldaine/llm-archiver",
+    "local_checkout": "D:/_projects/llm-archiver",
+    "commit": "77fd9cb37963420b61924400ec49e712355cc511",
+    "note": "Only the listed, hashed files were imported; unrelated upstream worktree changes are excluded."
+  },
+  "imports": [
+    {
+      "path": "tools/codex.yaml",
+      "sha256": "d8bf8ffadf9880bbbf9b630d8c2fa33b527c589896dc26ded308ea18f7a17f40"
+    },
+    {
+      "path": "tools/families/claude.yaml",
+      "sha256": "4084338ffb87bf72bab9f1124bcf2274623dd070d75de45f43ac121462b2efd2"
+    },
+    {
+      "path": "tools/families/vscode.yaml",
+      "sha256": "85c523f1f8d5af0c713dea08d95c12004df4b1c955a380a3ac28b7b12e76210f"
+    },
+    {
+      "path": "src/llm_chat_parser/ingestion_v2/stream_taxonomy.py",
+      "sha256": "2b81941f891846612b3a02cf82c31d15cb8c6b2f255f4358b23bbfd03ba48aec"
+    }
+  ],
+  "sources": [
+    {
+      "tool": "codex",
+      "role": "conversation_transcript",
+      "paths": ["~/.codex/sessions/**/*.jsonl", "~/.codex/archived_sessions/rollout-*.jsonl"],
+      "parser_status": "implemented"
+    },
+    {
+      "tool": "codex",
+      "role": "session_index",
+      "paths": ["~/.codex/history.jsonl"],
+      "parser_status": "discovery_only"
+    },
+    {
+      "tool": "claude-code",
+      "role": "conversation_transcript",
+      "paths": ["~/.claude/projects/*/*.jsonl"],
+      "parser_status": "implemented"
+    },
+    {
+      "tool": "claude-code",
+      "role": "subagent_transcript",
+      "paths": ["~/.claude/projects/*/*/subagents/*.jsonl", "~/.claude/projects/**/subagents/**/*.jsonl"],
+      "parser_status": "implemented",
+      "provenance": "first path imported from llm-archiver; recursive workflow-child path verified on live machine and closes an upstream registry depth gap"
+    },
+    {
+      "tool": "antigravity",
+      "role": "state_db",
+      "paths": ["%APPDATA%/Antigravity/User/globalStorage/state.vscdb", "%APPDATA%/Antigravity/User/workspaceStorage/*/state.vscdb"],
+      "parser_status": "discovery_only"
+    },
+    {
+      "tool": "antigravity",
+      "role": "wire_or_mirror_event",
+      "paths": ["~/.gemini/antigravity/*.pb", "~/.gemini/antigravity/**/*.pb"],
+      "parser_status": "evidence_only",
+      "provenance": "paths imported from llm-archiver; protobuf schemas are not projected as conversations"
+    },
+    {
+      "tool": "antigravity-cli",
+      "role": "state_db",
+      "paths": ["~/.gemini/antigravity-cli/conversations/*.db"],
+      "parser_status": "schema-probed",
+      "provenance": "live-machine extension; absent from imported llm-archiver registry"
+    }
+  ],
+  "projection_policy": {
+    "conversation_transcript": "project_to_conversation",
+    "subagent_transcript": "attach_to_parent",
+    "ui_event": "evidence_only",
+    "wire_event": "evidence_only",
+    "event_log": "evidence_only",
+    "session_index": "evidence_only",
+    "state_db": "discovery_or_schema_probe"
+  }
+}

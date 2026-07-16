@@ -1,16 +1,21 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "frozen-skills",
-  "description": "Reviewed active skills: Doppler secrets management and external skill intake. Other reference skills are gated in _incubator/ pending review (see docs/skill-review).",
-  "version": "2.1.0",
+  "description": "Reviewed active skills: deterministic chat-history recovery, Doppler secrets management, and external skill intake.",
+  "version": "2.2.0",
   "category": "reference",
   "author": {
     "name": "Coldaine",
     "url": "https://github.com/Coldaine"
   },
   "license": "MIT",
-  "tags": ["secrets", "doppler", "intake", "reference"],
+  "tags": ["chat-history", "recovery", "secrets", "doppler", "intake", "reference"],
   "skills": [
+    {
+      "name": "chat-history",
+      "path": "skills/chat-history",
+      "description": "Find, reconstruct, audit, or recover prior AI chats and interrupted work with deterministic transcript inventory, parent-child stitching, and explicit source coverage."
+    },
     {
       "name": "doppler",
       "path": "skills/doppler",

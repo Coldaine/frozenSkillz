@@ -44,6 +44,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 |---|---|---|---|---|---|
 | `doppler` | A | — (done) | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/doppler` | None — reference standard. |
 | `external-skill-intake` | A | — | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/external-skill-intake` | Workflow for sandboxing, scoring, evaluating, and packaging external inspiration repos before promotion. |
+| `chat-history` | A | — | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/chat-history` | Deterministic incident inventory, root/child stitching, explicit coverage, and provenance-pinned LLM Archiver registry. |
 | `plugin-authoring-guide` ("skill guide") | A | MOO-562 | 🛑 gated · **rework** | `_incubator/frozen-skills/skills/` | **Rework** (user directive). |
 | `mcp-deployment-guide` ("MCP guide") | A | MOO-563 | 🛑 gated · **update** | `_incubator/frozen-skills/skills/` | **Update** (user directive). |
 | `agent-config-megaref` | A | MOO-564 | 🛑 gated · **light update** | `_incubator/frozen-skills/skills/` | Light update **+ confer/cross-reference with the LLM archiver project** (user directive). |
@@ -144,21 +145,21 @@ candidate idea moves into active marketplace content.
 
 ## Personal skills intake (2026-07-06)
 
-Reference copies of the user's own `~/.agents/skills` personal skills, brought in so frozenSkillz owns a copy for
-evaluation (the "own a reference copy of all my skills" directive). **Held in `_incubator/personal-skills/` — gated,
-not installable, in no manifest.** Deliberately separate from the marketplace-candidate gated skills above.
+Reference copies of personal runtime skills were brought in for evaluation. Remaining entries are held in
+`_incubator/personal-skills/`, gated and not installable. Promotion moves ownership into the repository's active
+source tree; runtime copies then become downstream deployment outputs.
 
 **Excluded on purpose:**
 - `deepinit` — ships in the OMC package (`oh-my-claude-sisyphus/skills`); an *installed plugin* skill, not authored here. Not intake material.
 - `doppler` — already **ACTIVE** in `plugins/frozen-skills/skills/`.
 
 **Drift found during intake (fix separately):**
-- `edit-opencode-config` lived only in `~/.claude/skills/` (real dir, not a `.agents` junction) — missing from the canonical `~/.agents/skills` root. Copied here from `.claude`.
+- At intake time, `edit-opencode-config` lived only in `~/.claude/skills/` rather than the shared runtime root `~/.agents/skills`; its reference snapshot was copied from `.claude`. Neither runtime location is repository authority.
 - `~/.claude/skills/omc-learned/` holds learner notes (`edit-opencode-config.md`, `phantom-substrate-inheritance.md`) — a half-promoted staging area to reconcile.
 
 | Skill | Provenance | Status | Work before promotion |
 |---|---|---|---|
-| `chat-history` | authored (hardened 2026-07-06) | 🛑 gated | De-personalize (paths, Pieces, UTC-5); run `artifact_hunt.py` / `extract_chat_history.py`. |
+| `chat-history` | repository-owned; LLM Archiver paths cross-checked 2026-07-16 | ✅ **PROMOTED** | Active at `plugins/frozen-skills/skills/chat-history`; deterministic tests and source-registry verification added. |
 | `retrospective` | authored (`author: pmacl`) | 🛑 gated | De-personalize (agent-control-plane paths); run `session_timeline.py`. |
 | `project-docs` | authored | 🛑 gated | Review; de-opinionate if promoting. |
 | `skill-install` | authored | 🛑 gated | Verify recipes/paths. |
@@ -178,16 +179,16 @@ Next pass: confirm provenance on the 5 unconfirmed, fix `insight-extractor` fron
 
 ### PR #35 review findings (routed 2026-07-06)
 
-Automated review of the intake PR — **Kilo 13 + Copilot 7, all WARNING (0 critical)**. These are gated reference copies = faithful snapshots of the live `~/.agents/skills` source, so fixes land in the **live source and re-sync at promotion**, not in the frozen snapshot. Routed here as promotion-work:
+Automated review of the intake PR — **Kilo 13 + Copilot 7, all WARNING (0 critical)**. These findings were promotion-work. Under the corrected authority model, fixes land in a frozenSkillz branch; installed copies are replaced from the reviewed repository result.
 
 **Expected — de-personalization (the headline promotion gate):**
-- `chat-history/SKILL.md` L43/L61/L214 (`D:\_projects`), L68 (`C:\Users\pmacl`).
+- `chat-history` path/UTC assumptions: **resolved in promotion** by `Path.home()`, CLI inputs, and references.
 - `retrospective/SKILL.md` L81 (`pmacl`), L132/L278 (`D:\_projects`).
 - `edit-opencode-config/SKILL.md` L31 (`pmacl`).
 
-**Genuine bugs to fix in the LIVE source, then re-sync:**
-- `chat-history/extract-chats.sh` L59 — `while read` missing `-r` (backslash corruption). *Real bug.*
-- `chat-history/extract_chat_history.py` L15 — docstring lists a `gemini` extractor that isn't implemented; implement or drop.
+**Genuine bugs to fix in repository source before outward deployment:**
+- `chat-history/extract-chats.sh` `read -r` bug: **resolved in promotion**.
+- `chat-history/extract_chat_history.py` stale Gemini claim: **resolved in promotion**; deterministic coverage reports Gemini/Antigravity support precisely.
 - `insight-extractor` — no YAML frontmatter; self-contradictory paths (`~/.Codex` vs `~/.claude`) at L7/L43/L55.
 - `review-claudemd/SKILL.md` L4 — frontmatter `name` ≠ dir name (breaks discovery/dedupe); L15 — duplicate `-name "AGENTS.md"` in the `find` example.
 - `run-opencode/driver.mjs` L8 — header says all-but-`backup` is read-only, but `profile` also writes `oh-my-openagent.json[c]`; fix the comment.
