@@ -65,6 +65,9 @@ Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental �
 | Intake | Status | Location | Required work |
 |---|---|---|---|
 | `coldaine-infra/skills/frozen` submodule snapshot (`c2868ee2c0b49eaecdbd365bc00ffec0685487fe`) | scout · incubated | `_incubator/scout/2026-06-16-coldaine-infra-skills-frozen-submodule/` | Compare against current `_incubator/` and `plugins/skill-injector/`; frozen-rules + `gh-common-workflows` matched current incubator files in the 2026-06-16 audit, but `agent-config-megaref`, `mcp-deployment-guide`, `plugin-authoring-guide`, and old `skill-classifier` hook/script/test files have deltas that need review before promotion or deletion. |
+| `github/awesome-copilot` — `create-technical-spike` (`cf04ddde790008b3cf01dcdbb1f7213cd6e55a71`) | scout · evaluation pending | `_incubator/scout/2026-07-17-github-awesome-copilot-create-technical-spike/` | Run the defined three-variant technical-unknown eval; measure decision quality and time-to-action; assess host-specific input interpolation and Copilot/VS Code tool names; then decide adapt-concept-only, merge, or discard. |
+| `wondelai/skills` — `pragmatic-programmer` (`ed2930cf8496336641441eef513ad2ad857b65a1`) | scout · evaluation pending | `_incubator/scout/2026-07-17-wondelai-skills-pragmatic-programmer/` | Evaluate only the tracer-bullet/prototype scope first; run the defined live comparison; review repository-license versus underlying-book provenance; avoid whole-skill promotion unless its broad triggers and context cost independently earn it. |
+| `AaravKashyap12/advise-project-approach` (`371f8d58ec7131b8f16c10d007199cb8dba584aa`) | scout · evaluation pending | `_incubator/scout/2026-07-17-aaravkashyap12-advise-project-approach/` | Run the defined mid-build research eval with fresh primary sources; score scope control and context/time cost; prototype progressive disclosure for the 21.9 KB monolith before any adaptation or promotion. |
 
 ---
 
