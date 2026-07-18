@@ -46,7 +46,9 @@ If documents disagree, follow the highest applicable source above and fix the st
 
 ```powershell
 git diff --check
+python -m pip install -r requirements-validation.txt
 python scripts/validate_manifests.py
+python scripts/validate_skills.py
 python -m unittest discover -s tests -v
 ```
 

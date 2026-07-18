@@ -15,6 +15,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
+try:
+    from scripts.skill_validation import SkillMetadataError, validate_skill_metadata
+except ModuleNotFoundError:  # Direct execution: python scripts/sync_frozen_skills.py
+    from skill_validation import SkillMetadataError, validate_skill_metadata
+
 
 MANIFEST_PATHS = (
     Path(".claude-plugin/plugin.json"),
@@ -215,6 +220,10 @@ def load_distribution(repo_root: Path) -> tuple[Path, str, tuple[SkillSource, ..
             )
         if not (candidate / "SKILL.md").is_file():
             raise SyncError(f"Skill {name!r} has no SKILL.md: {candidate}")
+        try:
+            validate_skill_metadata(candidate / "SKILL.md", name)
+        except SkillMetadataError as exc:
+            raise SyncError(f"Skill {name!r} has invalid SKILL.md: {exc}") from exc
         sources.append(SkillSource(name, candidate, digest_directory(candidate)))
 
     return plugin_root, version, tuple(sources)

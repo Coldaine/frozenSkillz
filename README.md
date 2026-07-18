@@ -120,7 +120,9 @@ Get-Content plugins/frozen-skills/.cursor-plugin/plugin.json -Raw | ConvertFrom-
 Get-Content plugins/frozen-skills/gemini-extension.json -Raw | ConvertFrom-Json | Out-Null
 
 # Repo checks
+python -m pip install -r requirements-validation.txt
 python scripts/validate_manifests.py
+python scripts/validate_skills.py
 python -m unittest discover -s tests -v
 git diff --check
 ```

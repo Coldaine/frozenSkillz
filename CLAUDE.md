@@ -46,7 +46,9 @@ Use `external-skill-intake` and `docs/workflows/external-skill-intake.md` before
 ```powershell
 Get-Content .claude-plugin/marketplace.json -Raw | ConvertFrom-Json | Out-Null
 Get-Content plugins/frozen-skills/.claude-plugin/plugin.json -Raw | ConvertFrom-Json | Out-Null
+python -m pip install -r requirements-validation.txt
 python scripts/validate_manifests.py
+python scripts/validate_skills.py
 python -m unittest discover -s tests -v
 git diff --check
 ```
