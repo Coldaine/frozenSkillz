@@ -1,12 +1,15 @@
-# External Skill Intake
+---
+name: external-skill-intake
+description: Evaluate external skill, plugin, agent, command, hook, configuration, template, evaluation, or documentation-pattern repositories for possible frozenSkillz adoption. Use for external source intake, inventory, scoring, live evaluation, and packaging decisions before promotion.
+---
 
-Use this skill when evaluating an external skill, plugin, agent, command, hook, config, template, eval, or documentation-pattern repo for possible frozenSkillz adoption.
+# External Skill Intake
 
 Do not use this for ordinary local skill authoring, direct promotion of already-reviewed repo content, or generic documentation cleanup that does not involve external source intake.
 
 ## Rules
 
-- Follow `docs/workflows/external-skill-intake.md` in order.
+- Follow `references/intake-workflow.md` in order.
 - Keep external source read-only under `_incubator/scout/<YYYY-MM-DD>-<repo>/source/`.
 - Inventory before scoring.
 - Score scoped artifacts before packaging decisions.
@@ -25,6 +28,7 @@ Do not use this for ordinary local skill authoring, direct promotion of already-
 
 ## References
 
+- `references/intake-workflow.md`
 - `references/artifact-rubrics.md`
 - `references/scout-sandbox-layout.md`
 - `references/live-eval-protocol.md`
