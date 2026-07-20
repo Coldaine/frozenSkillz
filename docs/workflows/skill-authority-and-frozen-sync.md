@@ -33,6 +33,7 @@ The live personal copy is authoritative for this lane. `_incubator/` is review m
 |---|---|
 | `plugins/frozen-skills/skills` | Reviewed source for active distributed skills. |
 | Four `plugins/frozen-skills` manifests | Exact allowlist and version contract for the active distribution. |
+| `profiles/*.json` | Reviewed named subsets of the aligned active distribution for dedicated deployment targets. |
 | `~/.agents/skills` | Managed runtime destination for active skills; authoring source for personal/gated skills. |
 | `_incubator/personal-skills` | Durable review mirror for tracked personal/gated skills; never installed. |
 | Client plugin/cache directories | Client-managed runtime state, when a client has its own installer. |
@@ -65,6 +66,28 @@ python scripts/sync_frozen_skills.py --apply --destination "C:\path\to\skills"
 On macOS or Linux, the same Python command works with POSIX paths.
 
 The destination must be disjoint from the repository. The synchronizer rejects a destination inside the checkout and a destination that contains the checkout. It never reverse-synchronizes installed content into reviewed active source.
+
+## Materialize a Deployment Profile
+
+A deployment profile under `profiles/<name>.json` selects an ordered subset of skills that are already active in all four manifests. A profile cannot promote or install incubator content. The authority direction remains one way:
+
+```text
+aligned active manifests + profiles/<name>.json
+                     -> dedicated managed output directory
+```
+
+Use an explicit destination and `--prune` for both check and apply:
+
+```powershell
+python scripts/sync_frozen_skills.py --check --profile hermes-ops --destination /srv/hermes/skill-sets/hermes-ops --prune
+python scripts/sync_frozen_skills.py --apply --profile hermes-ops --destination /srv/hermes/skill-sets/hermes-ops --prune
+```
+
+`--prune` is mandatory in profile mode so removing a profile member is visible during `--check` and converges during `--apply`. An unchanged retired managed skill is removed; a locally modified retired skill is a conflict and remains untouched unless the operator separately reviews and authorizes `--force`.
+
+The management record assigns each destination to the full distribution or exactly one profile. A destination with an existing record cannot be claimed by another owner, even when its managed skill map is empty. Use a separate destination for a different profile. Deleting the record is an explicit release action outside the synchronizer; it does not remove old skill directories, so it is not a shortcut for safely switching a live consumer in place.
+
+The synchronizer only materializes the reviewed files. Consumer-specific mounts, search paths, restarts, and rollout evidence belong to the consumer's operational repository. A profile is not a native Hermes bundle.
 
 ## Personal/Gated Skill Sync
 

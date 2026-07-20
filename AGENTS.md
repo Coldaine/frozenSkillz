@@ -21,6 +21,7 @@ If documents disagree, follow the highest applicable source above and fix the st
 | Promote a gated skill | `docs/skill-review/tracker.md` and the relevant plugin manifests |
 | Update installable frozen-skills content | `plugins/frozen-skills/.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, `.cursor-plugin/plugin.json`, `gemini-extension.json` |
 | Synchronize active skills to a computer | `docs/workflows/skill-authority-and-frozen-sync.md`, then `scripts/sync_frozen_skills.py` |
+| Add or change a deployment profile | `profiles/<name>.json`, then `docs/workflows/skill-authority-and-frozen-sync.md` |
 | Reconcile a local edit with frozenSkillz | `docs/workflows/skill-authority-and-frozen-sync.md`, then `docs/skill-review/tracker.md` if promotion is needed |
 | Rewrite / fix a personal or gated skill | `docs/workflows/skill-authority-and-frozen-sync.md` (Completion Contract + personal/gated sync), then the skill under `_incubator/` or `plugins/`; update tracker; **commit and push** |
 | Update marketplace catalog metadata | `.claude-plugin/marketplace.json`, `.codex-plugin/marketplace.json`, `.cursor-plugin/marketplace.json`, `gemini-marketplace.json` |
@@ -33,6 +34,8 @@ If documents disagree, follow the highest applicable source above and fix the st
 - Keep active `SKILL.md` files lean and route heavy detail to `references/` or `templates/`.
 - Treat manifest-listed content under `plugins/frozen-skills/skills` as the source for active distributed skills.
 - Treat synchronized copies under `~/.agents/skills` as managed runtime output; protect local changes as conflicts rather than silently reversing the authority flow.
+- Keep every deployment profile a named subset of the active skill list aligned across all four manifests.
+- Synchronize profiles only with an explicit dedicated destination and `--prune`; never reuse a profile-managed destination for the full distribution or another profile.
 - Treat `~/.agents/skills` as the authoring source only for personal or gated skills; mirror those into `_incubator/` for durable review.
 - **Skill rewrite done means committed+pushed in this repo** (incubator or plugins path). “Stay gated” ≠ “skip git.” See Completion Contract in `docs/workflows/skill-authority-and-frozen-sync.md`.
 - Update all four plugin manifests when adding or removing active frozen-skills skills.

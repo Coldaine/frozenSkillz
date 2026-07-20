@@ -38,6 +38,19 @@ The destination must be disjoint from the repository: it cannot be inside the fr
 
 After pulling a new revision on any computer, `--check` exits nonzero when that computer needs synchronization; `--apply` converges it to the reviewed distribution.
 
+## Deployment Profiles
+
+Files under `profiles/*.json` define named deployment subsets of the same manifest-approved active distribution. A profile can select active skills; it cannot activate `_incubator/` content or bypass the four-manifest agreement.
+
+Profile synchronization requires a dedicated explicit destination and `--prune` for both planning and application:
+
+```powershell
+python scripts/sync_frozen_skills.py --check --profile hermes-ops --destination /srv/hermes/skill-sets/hermes-ops --prune
+python scripts/sync_frozen_skills.py --apply --profile hermes-ops --destination /srv/hermes/skill-sets/hermes-ops --prune
+```
+
+The management record binds a destination to either the full distribution or one named profile. The synchronizer refuses to reuse that destination for another owner; use a separate destination instead. Profile synchronization materializes an exact managed subset in a directory. It is not a native Hermes skill bundle and does not configure a consumer's mounts, skill search path, or reload behavior.
+
 ## Client-managed Plugin Install
 
 Claude Code can instead let its marketplace manage a client-specific plugin copy:

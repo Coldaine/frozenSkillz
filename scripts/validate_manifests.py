@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import sync_frozen_skills
+
 
 PLUGIN_MANIFESTS = [
     ".claude-plugin/plugin.json",
@@ -68,12 +70,32 @@ def discover_manifests():
     return manifests
 
 
+def validate_profiles(repo_root):
+    profile_paths = sorted((repo_root / "profiles").glob("*.json"))
+    if not profile_paths:
+        return True, 0
+    try:
+        _, _, sources = sync_frozen_skills.load_distribution(repo_root)
+        for profile_path in profile_paths:
+            print(f"Validating {profile_path}...")
+            sync_frozen_skills.load_profile(repo_root, profile_path.stem, sources)
+            print("  PASSED")
+        return True, len(profile_paths)
+    except sync_frozen_skills.SyncError as exc:
+        print(f"  FAILED: {exc}")
+        return False, len(profile_paths)
+
+
 def main():
     manifests = discover_manifests()
     results = [validate_manifest(manifest) for manifest in manifests]
+    profiles_valid, profile_count = validate_profiles(Path.cwd().resolve())
 
-    if manifests and all(results):
-        print(f"\nAll {len(manifests)} manifests validated successfully.")
+    if manifests and all(results) and profiles_valid:
+        print(
+            f"\nAll {len(manifests)} manifests and {profile_count} profiles "
+            "validated successfully."
+        )
         return
 
     print(f"\nValidation failed. Found {len(manifests)} manifests.")

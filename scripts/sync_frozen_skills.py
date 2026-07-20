@@ -24,6 +24,7 @@ MANIFEST_PATHS = (
 )
 STATE_FILE = ".frozen-skills-sync.json"
 STATE_SCHEMA = 1
+PROFILE_SCHEMA = 1
 IGNORED_NAMES = {".DS_Store", "Thumbs.db", "__pycache__"}
 IGNORED_SUFFIXES = {".pyc", ".pyo"}
 SKILL_NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
@@ -219,6 +220,48 @@ def load_distribution(repo_root: Path) -> tuple[Path, str, tuple[SkillSource, ..
     return plugin_root, version, tuple(sources)
 
 
+def load_profile(
+    repo_root: Path,
+    profile_name: str,
+    sources: tuple[SkillSource, ...],
+) -> tuple[SkillSource, ...]:
+    """Load a validated deployment profile as an ordered active-skill subset."""
+
+    _validate_skill_name(profile_name, repo_root / "profiles")
+    profile_path = repo_root / "profiles" / f"{profile_name}.json"
+    if not profile_path.is_file():
+        raise SyncError(f"Skill profile is missing: {profile_path}")
+    data = _load_json(profile_path)
+    if data.get("schema") != PROFILE_SCHEMA:
+        raise SyncError(f"Unsupported profile schema in {profile_path}")
+    if data.get("name") != profile_name:
+        raise SyncError(f"Profile name does not match its filename: {profile_path}")
+    description = data.get("description")
+    if not isinstance(description, str) or not description.strip():
+        raise SyncError(f"Profile has no description: {profile_path}")
+    names = data.get("skills")
+    if not isinstance(names, list) or not names:
+        raise SyncError(f"Profile has no skills: {profile_path}")
+
+    source_by_name = {source.name: source for source in sources}
+    selected: list[SkillSource] = []
+    seen: set[str] = set()
+    for name in names:
+        if not isinstance(name, str):
+            raise SyncError(f"Profile contains a non-string skill name: {profile_path}")
+        _validate_skill_name(name, profile_path)
+        if name in seen:
+            raise SyncError(f"Profile contains duplicate skill {name!r}: {profile_path}")
+        source = source_by_name.get(name)
+        if source is None:
+            raise SyncError(
+                f"Profile skill {name!r} is not active in every frozen-skills manifest"
+            )
+        seen.add(name)
+        selected.append(source)
+    return tuple(selected)
+
+
 def _empty_state() -> dict:
     """Return a new empty synchronization management record."""
 
@@ -236,6 +279,11 @@ def load_state(destination: Path) -> dict:
         raise SyncError(f"Unsupported or unrelated sync state: {path}")
     if not isinstance(data.get("skills"), dict):
         raise SyncError(f"Invalid skills state in {path}")
+    profile = data.get("profile")
+    if profile is not None:
+        if not isinstance(profile, str):
+            raise SyncError(f"Invalid profile in {path}")
+        _validate_skill_name(profile, path)
     for name, entry in data["skills"].items():
         if not isinstance(name, str):
             raise SyncError(f"Invalid skill name in {path}")
@@ -321,7 +369,7 @@ def plan_sync(
                     Action(
                         "remove",
                         name,
-                        "no longer listed in active manifests",
+                        "no longer selected by the active distribution",
                         current_digest,
                     )
                 )
@@ -423,14 +471,29 @@ def sync(
     apply: bool,
     prune: bool,
     force: bool,
+    profile: str | None = None,
 ) -> SyncResult:
     """Check or apply the reviewed distribution to one local skill root."""
 
     repo_root = repo_root.resolve()
     destination = destination.resolve()
     _validate_direction(repo_root, destination)
+    if profile is not None and not prune:
+        raise SyncError(
+            "Profile synchronization requires --prune so the destination "
+            "converges to the exact profile"
+        )
     plugin_root, version, sources = load_distribution(repo_root)
+    if profile is not None:
+        sources = load_profile(repo_root, profile, sources)
+    state_exists = (destination / STATE_FILE).exists()
     state = load_state(destination)
+    recorded_profile = state.get("profile")
+    if state_exists and recorded_profile != profile:
+        raise SyncError(
+            "Destination is managed by a different skill profile; use a separate "
+            "destination or deliberately remove the existing managed state"
+        )
     actions = list(plan_sync(sources, destination, state, prune=prune, force=force))
     if state["skills"] and state.get("plugin_version") != version:
         actions.append(
@@ -549,6 +612,8 @@ def sync(
         "plugin_version": version,
         "skills": next_skills,
     }
+    if profile is not None:
+        next_state["profile"] = profile
     _write_state(destination, next_state)
     return result
 
@@ -574,8 +639,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--destination",
         type=_expanded_path,
-        default=_expanded_path("~/.agents/skills"),
+        default=None,
         help="local skill root (default: ~/.agents/skills)",
+    )
+    parser.add_argument(
+        "--profile",
+        help=(
+            "named profile under profiles/<name>.json; requires explicit "
+            "--destination and --prune"
+        ),
     )
     parser.add_argument(
         "--repo-root",
@@ -586,7 +658,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--prune",
         action="store_true",
-        help="remove previously managed skills no longer listed in the manifests",
+        help=(
+            "remove previously managed skills no longer selected by the active "
+            "distribution or profile"
+        ),
     )
     parser.add_argument(
         "--force",
@@ -600,6 +675,11 @@ def main(argv: list[str] | None = None) -> int:
     """Run the synchronizer and return its documented process status."""
 
     args = build_parser().parse_args(argv)
+    if args.destination is None:
+        if args.profile is not None:
+            print("ERROR: --profile requires an explicit --destination", file=sys.stderr)
+            return 2
+        args.destination = _expanded_path("~/.agents/skills")
     try:
         result = sync(
             args.repo_root,
@@ -607,6 +687,7 @@ def main(argv: list[str] | None = None) -> int:
             apply=args.apply,
             prune=args.prune,
             force=args.force,
+            profile=args.profile,
         )
     except SyncError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
