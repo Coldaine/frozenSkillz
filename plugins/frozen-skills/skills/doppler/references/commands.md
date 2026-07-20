@@ -19,9 +19,7 @@ Local developer auth is saved in the Doppler config directory. CI and production
 doppler setup
 doppler setup -p my-project -c dev
 doppler setup --no-interactive
-doppler configure
-doppler configure --all
-doppler configure debug
+doppler configure get project config --plain
 doppler configure unset project config --scope /path/to/project
 ```
 
@@ -123,7 +121,8 @@ Doppler-provided child-process variables include:
 Wrong or missing secret:
 
 ```shell
-doppler configure debug
+doppler configure get project config --plain
+doppler me
 doppler secrets --only-names
 doppler run -- sh -c 'test -n "$MY_SECRET" && echo MY_SECRET=set || echo MY_SECRET=missing'
 ```

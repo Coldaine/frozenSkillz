@@ -20,7 +20,6 @@ ALLOWED_FIELDS = {
     "name",
     "description",
     "license",
-    "compatibility",
     "metadata",
     "allowed-tools",
 }

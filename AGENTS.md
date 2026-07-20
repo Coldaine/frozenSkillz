@@ -40,7 +40,8 @@ If documents disagree, follow the highest applicable source above and fix the st
 - **Skill rewrite done means committed+pushed in this repo** (incubator or plugins path). “Stay gated” ≠ “skip git.” See Completion Contract in `docs/workflows/skill-authority-and-frozen-sync.md`.
 - Update all four plugin manifests when adding or removing active frozen-skills skills.
 - Bump aligned plugin and marketplace versions when public plugin metadata changes.
-- Validate changed JSON and every manifest `skills[].path` before publishing.
+- Validate changed JSON, every manifest `skills[].path`, required `SKILL.md` metadata, bundled
+  references, and optional `agents/openai.yaml` metadata before publishing.
 
 ## Commands
 

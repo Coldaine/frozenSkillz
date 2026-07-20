@@ -127,7 +127,9 @@ python -m unittest discover -s tests -v
 git diff --check
 ```
 
-For skill additions, verify every manifest `skills[].path` exists under the plugin directory.
+For skill additions, verify every manifest `skills[].path` exists under the plugin directory. The
+validators enforce loadable `SKILL.md` metadata and bundled references plus the current Codex UI
+contract whenever optional `agents/openai.yaml` metadata is present.
 
 ## Contribution Rules
 

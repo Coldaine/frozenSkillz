@@ -11,6 +11,17 @@ except ImportError as exc:
         "python -m pip install -r requirements-validation.txt"
     ) from exc
 
+try:
+    from scripts.openai_validation import (
+        OpenAiMetadataError,
+        validate_openai_metadata,
+    )
+    from scripts.skill_validation import SkillMetadataError, validate_skill_metadata
+except ModuleNotFoundError:  # Direct execution: python scripts/validate_skills.py
+    from openai_validation import OpenAiMetadataError, validate_openai_metadata
+    from skill_validation import SkillMetadataError, validate_skill_metadata
+
+
 def main() -> None:
     """Validate plugin allowlists rather than gated or scout snapshots."""
 
@@ -41,7 +52,12 @@ def main() -> None:
     for skill_path, skill_name in sorted(
         skill_paths.items(), key=lambda item: item[0].as_posix()
     ):
-        problems = validate(skill_path)
+        problems = list(validate(skill_path))
+        try:
+            validate_skill_metadata(skill_path / "SKILL.md", skill_name)
+            validate_openai_metadata(skill_path, skill_name)
+        except (OpenAiMetadataError, SkillMetadataError) as exc:
+            problems.append(str(exc))
         if problems:
             failures += 1
             print(f"FAILED {skill_name}")
