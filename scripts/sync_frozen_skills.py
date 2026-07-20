@@ -32,7 +32,9 @@ STATE_SCHEMA = 1
 PROFILE_SCHEMA = 1
 IGNORED_NAMES = {".DS_Store", "Thumbs.db", "__pycache__"}
 IGNORED_SUFFIXES = {".pyc", ".pyo"}
-SKILL_NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+# Deliberately narrower than the upstream specification for portable paths across
+# Windows and every supported client manifest.
+SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 DIGEST_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 

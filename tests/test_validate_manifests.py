@@ -48,6 +48,19 @@ class ValidateManifestsTests(unittest.TestCase):
 
         self.assertFalse(validate_module.validate_manifest(self.manifest))
 
+    def test_directory_name_must_match_manifest_name(self):
+        other_skill = self.plugin / "skills/beta"
+        other_skill.mkdir()
+        (other_skill / "SKILL.md").write_text(
+            "---\nname: alpha\ndescription: Test skill.\n---\n",
+            encoding="utf-8",
+        )
+        data = json.loads(self.manifest.read_text(encoding="utf-8"))
+        data["skills"][0]["path"] = "skills/beta"
+        self.manifest.write_text(json.dumps(data), encoding="utf-8")
+
+        self.assertFalse(validate_module.validate_manifest(self.manifest))
+
 
 if __name__ == "__main__":
     unittest.main()

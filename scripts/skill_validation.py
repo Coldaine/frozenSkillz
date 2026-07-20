@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 
 SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -20,6 +21,7 @@ ALLOWED_FIELDS = {
     "name",
     "description",
     "license",
+    "compatibility",
     "metadata",
     "allowed-tools",
 }
@@ -39,7 +41,7 @@ def _plain_scalar(value: str) -> str:
 
 
 def validate_skill_metadata(skill_md: Path, expected_name: str) -> None:
-    """Validate required frontmatter and its identity against the manifest."""
+    """Validate frozenSkillz's portable metadata subset against the manifest."""
 
     try:
         content = skill_md.read_text(encoding="utf-8")
@@ -66,6 +68,12 @@ def validate_skill_metadata(skill_md: Path, expected_name: str) -> None:
         if key in fields:
             raise SkillMetadataError(f"duplicate {key!r} frontmatter field")
         fields[key] = value or ""
+
+    for required_field in ("name", "description"):
+        if fields.get(required_field, "").strip().startswith((">", "|")):
+            raise SkillMetadataError(
+                f"block scalars are not supported for {required_field!r} metadata"
+            )
 
     name = _plain_scalar(fields.get("name", ""))
     description = _plain_scalar(fields.get("description", ""))
@@ -96,7 +104,8 @@ def validate_skill_metadata(skill_md: Path, expected_name: str) -> None:
     skill_root = skill_md.parent.resolve()
     for match in RESOURCE_REFERENCE_PATTERN.finditer(content):
         reference = match.group(1) or match.group(2)
-        candidate = (skill_root / reference).resolve()
+        resource_path = unquote(urlsplit(reference).path)
+        candidate = (skill_root / resource_path).resolve()
         try:
             candidate.relative_to(skill_root)
         except ValueError as exc:

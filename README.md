@@ -131,6 +131,10 @@ For skill additions, verify every manifest `skills[].path` exists under the plug
 validators enforce loadable `SKILL.md` metadata and bundled references plus the current Codex UI
 contract whenever optional `agents/openai.yaml` metadata is present.
 
+Active frozenSkillz identities deliberately use lowercase ASCII kebab-case. The upstream Agent
+Skills specification permits broader Unicode names, but this repository keeps one portable name
+across Windows paths and all four client manifests.
+
 ## Contribution Rules
 
 - Add shared active skills under `plugins/frozen-skills/skills/<name>/SKILL.md` only after passing the review gate.

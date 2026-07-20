@@ -205,6 +205,35 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         with self.assertRaisesRegex(sync_module.SyncError, "does not exist"):
             self._sync()
 
+    def test_anchored_bundled_resource_is_accepted(self):
+        references = self.plugin / "skills/alpha/references"
+        references.mkdir()
+        (references / "guide.md").write_text("# Intro\n", encoding="utf-8")
+        (self.plugin / "skills/alpha/SKILL.md").write_text(
+            "---\nname: alpha\ndescription: Test.\n---\n\n"
+            "Read [the guide](references/guide.md#intro).\n",
+            encoding="utf-8",
+        )
+
+        result = self._sync()
+
+        self.assertEqual([action.kind for action in result.actions], ["install"])
+
+    def test_required_metadata_block_scalar_is_rejected(self):
+        (self.plugin / "skills/alpha/SKILL.md").write_text(
+            "---\nname: alpha\ndescription: |\n---\n\n# Alpha\n",
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(sync_module.SyncError, "block scalars"):
+            self._sync()
+
+    def test_distribution_name_must_use_portable_ascii_kebab_case(self):
+        self._write_manifests(["技能"])
+
+        with self.assertRaisesRegex(sync_module.SyncError, "Unsafe skill name"):
+            self._sync()
+
     def test_cli_exit_codes_distinguish_drift_current_and_conflict(self):
         common = [
             "--repo-root",

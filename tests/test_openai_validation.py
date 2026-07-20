@@ -57,6 +57,15 @@ class OpenAiMetadataTests(unittest.TestCase):
         with self.assertRaisesRegex(OpenAiMetadataError, "does not resolve"):
             validate_openai_metadata(self.skill, "alpha")
 
+    def test_dependency_tools_must_be_mappings(self):
+        self._write_metadata(
+            "A valid short description",
+            extra="dependencies:\n  tools:\n    - 42\n",
+        )
+
+        with self.assertRaisesRegex(OpenAiMetadataError, "must be a mapping"):
+            validate_openai_metadata(self.skill, "alpha")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,7 +1,10 @@
 import json
 from pathlib import Path
 
-import sync_frozen_skills
+try:
+    import sync_frozen_skills
+except ModuleNotFoundError:  # Direct execution: python scripts/validate_manifests.py
+    from scripts import sync_frozen_skills
 
 try:
     from scripts.skill_validation import SkillMetadataError, validate_skill_metadata
@@ -58,6 +61,12 @@ def validate_manifest(filepath):
 
             if not resolved_skill_path.exists():
                 print(f"  FAILED: Missing skill path {resolved_skill_path}")
+                return False
+            if resolved_skill_path.name != skill_name:
+                print(
+                    "  FAILED: Skill directory name does not match manifest name: "
+                    f"{resolved_skill_path.name!r} != {skill_name!r}"
+                )
                 return False
 
             skill_md = resolved_skill_path / "SKILL.md"

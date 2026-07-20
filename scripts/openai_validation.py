@@ -107,6 +107,12 @@ def validate_openai_metadata(skill_root: Path, expected_name: str) -> None:
         tools = dependencies.get("tools")
         if tools is not None and not isinstance(tools, list):
             raise OpenAiMetadataError("dependencies.tools must be a list")
+        if tools is not None:
+            for index, tool in enumerate(tools):
+                if not isinstance(tool, dict):
+                    raise OpenAiMetadataError(
+                        f"dependencies.tools[{index}] must be a mapping"
+                    )
 
     policy = document.get("policy")
     if policy is not None:

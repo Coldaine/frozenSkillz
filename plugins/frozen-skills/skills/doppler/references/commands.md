@@ -136,7 +136,7 @@ doppler run -- powershell -NoProfile -Command "if ($env:MY_SECRET) { 'MY_SECRET=
 Wrong directory scope:
 
 ```shell
-doppler configure --all
+doppler configure get project config --plain --scope /path/to/wrong/scope
 doppler configure unset project config --scope /path/to/wrong/scope
 ```
 
