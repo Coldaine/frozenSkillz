@@ -5,8 +5,9 @@
 > skills are limited to reviewed, installable workflows.
 
 **Established:** 2026-05-28
-**Gate decision:** strict — `doppler`, `external-skill-intake`, and `omc-reference` are active and on the
-marketplace menu; older reference/workflow skills remain gated pending review.
+**Gate decision:** strict — `doppler`, `external-skill-intake`, `omc-reference`, and
+`pdm-cli-operations` are active and on the marketplace menu; older reference/workflow skills remain
+gated pending review.
 **Holding location:** `_incubator/` (in-repo, easy to promote back; not installable).
 **Linear:** planning lives in Linear — project **frozenSkillz** (under the *ClaudeReconfigurations*
 initiative, team Moosegoose/MOO), parent intake [MOO-561](https://linear.app/moosegoose/issue/MOO-561)
@@ -45,7 +46,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `doppler` | A | — (done) | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/doppler` | None — reference standard. |
 | `external-skill-intake` | A | — | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/external-skill-intake` | Workflow for sandboxing, scoring, evaluating, and packaging external inspiration repos before promotion. |
 | `omc-reference` | A | — | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/omc-reference` | Maintains the separate Oh My ClaudeCode installation; verified against the local OMC 4.14.4 source and explicitly excluded from ordinary Codex delegation, Git, commit, and unrelated-skill routing. |
-| `pdm-cli-operations` | A | — | 🛑 gated · **live evaluation** | `_incubator/frozen-skills/skills/pdm-cli-operations` | Install the current same-major official client on the operator host; execute the eval cases against a live PDM; revise from traces; then promote. |
+| `pdm-cli-operations` | A | — | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/pdm-cli-operations` | None — official client 1.1.6 discovery, TLS failure, direct mutation, and Windows-bridge mutation paths were exercised live. |
 | `plugin-authoring-guide` ("skill guide") | A | MOO-562 | 🛑 gated · **rework** | `_incubator/frozen-skills/skills/` | **Rework** (user directive). |
 | `mcp-deployment-guide` ("MCP guide") | A | MOO-563 | 🛑 gated · **update** | `_incubator/frozen-skills/skills/` | **Update** (user directive). |
 | `agent-config-megaref` | A | MOO-564 | 🛑 gated · **light update** | `_incubator/frozen-skills/skills/` | Light update **+ confer/cross-reference with the LLM archiver project** (user directive). |
@@ -91,15 +92,26 @@ The live and frozen copies were verified against the local OMC 4.14.4 checkout. 
 active installed OMC sources instead of preserving a copied command or agent catalog, and it does not govern normal
 Codex delegation, Git, commits, pull requests, or unrelated skill use.
 
-### `pdm-cli-operations` — GATED, LIVE EVALUATION
+### `pdm-cli-operations` — ACTIVE
 
 Small shared process-interface skill for Codex, Hermes, and human operators using the official
 `proxmox-datacenter-manager-client`. The design keeps endpoint, fingerprint, auth ID, and fleet identities in each
-environment's owning operational repository, uses JSON output and `--password-command`, follows asynchronous tasks
-to terminal state, and preserves native PVE/PBS as break-glass rather than introducing another standing control
-plane. On 2026-07-20, the official PDM no-subscription amd64 index offered client 1.1.6, matching the documented
-homelab PDM version. Promotion remains blocked until the client is installed on the Hermes operator VM and the
-bundled live evaluation cases pass without credential disclosure.
+environment's owning operational repository, uses explicit login, proves terminal task success, and preserves native
+PVE/PBS as break-glass rather than introducing another standing control plane.
+
+The 2026-07-20 live qualification used official client and PDM 1.1.6. Discovery returned four remotes and four
+resource groups; a wrong disposable TLS cache pin failed closed. Direct `hermes-pdm` and the bundled Windows SSH
+bridge both created and deleted uniquely named snapshots on stopped disposable VM 9900 `pxe-agent-unattended-test`
+on remote `evo`, node `pve-evo-x2`. All four tasks reached `Stopped` with `exitstatus=OK`; each created snapshot was
+observed before deletion, the final snapshot list contained only `current`, the guest remained stopped, and its active
+configuration digest returned to `d2299e678647bb0e1ff6f3b312068ecf27b9ae2a`. The direct proof used task types
+`qmsnapshot` and `qmdelsnapshot`; the bridge proof independently exercised the same two task families.
+
+That trace corrected several non-obvious client contracts: ordinary commands require a cached login ticket;
+`resources` has no `list` subcommand; API-token IDs are rejected by the 1.1.6 `--user` schema; noninteractive
+`--fingerprint` does not seed the verifier cache; mutation output is a non-JSON terminal `TaskStatus` even when JSON
+was requested; and later task lookup requires the complete `pve:<remote>!UPID:...` value rather than only the inner
+UPID. Exact power, snapshot, migration, and task commands are in the shipped reference.
 
 ### `plugin-authoring-guide` ("skill guide") — REWORK
 - **User directive:** needs to be reworked.

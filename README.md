@@ -10,7 +10,7 @@ This repository is not a dumping ground for local client caches, raw external re
 
 | Plugin | Category | Status | Purpose |
 |---|---|---|---|
-| `frozen-skills` | reference | active | Installable package for reviewed skills. Installs `doppler`, `external-skill-intake`, and `omc-reference`. |
+| `frozen-skills` | reference | active | Installable package for reviewed skills. Installs `doppler`, `external-skill-intake`, `omc-reference`, and `pdm-cli-operations`. |
 | `skill-injector` | development | experimental, untested | UserPromptSubmit hook and subagent prompt quality gate for LLM-assisted skill suggestions. Review/test before enabling. |
 
 Historical reference/workflow skills remain gated in `_incubator/` until they pass the quality bar in `docs/skill-review/tracker.md`.
@@ -47,7 +47,7 @@ Claude Code can instead let its marketplace manage a client-specific plugin copy
 /plugin install frozen-skills@coldaine-skills
 ```
 
-That command installs the same three manifest-listed skills into Claude Code's plugin-managed location. It does not populate `~/.agents/skills` and does not install anything from `_incubator/`.
+That command installs the same four manifest-listed skills into Claude Code's plugin-managed location. It does not populate `~/.agents/skills` and does not install anything from `_incubator/`.
 
 The Codex, Cursor, and Gemini manifests are packaging metadata and a consistency contract. Their presence alone is not an installer. Use `sync_frozen_skills.py` for a verified local installation unless a specific client provides and documents its own plugin installer.
 
@@ -58,6 +58,7 @@ The Codex, Cursor, and Gemini manifests are packaging metadata and a consistency
 - `doppler`: Doppler CLI and secret-injection workflow guidance that avoids exposing secret values.
 - `external-skill-intake`: sandbox, inventory, score, evaluate, and package external skill/plugin/agent repos before any promotion.
 - `omc-reference`: maintain Oh My ClaudeCode as a separate Claude Code plugin from Codex without importing OMC workflow rules into ordinary Codex work.
+- `pdm-cli-operations`: inspect and operate Proxmox fleets through the official PDM client, with exact target selection and terminal task proof for mutations.
 
 ## External Skill Intake
 
