@@ -150,10 +150,17 @@ That installs a Claude-managed plugin copy. It does not synchronize `~/.agents/s
 Before publishing a source or synchronization change:
 
 ```powershell
+python -m pip install -r requirements-validation.txt
 python scripts/validate_manifests.py
+python scripts/validate_skills.py
 python -m unittest discover -s tests -v
 git diff --check
 ```
+
+`validate_skills.py` runs the pinned Agent Skills reference validator against every
+manifest-listed skill in every plugin. The synchronizer also performs dependency-free checks for
+the required frontmatter delimiters, non-empty `name` and `description`, and agreement
+between the frontmatter, manifest entry, and directory name before planning any write.
 
 For JSON manifests touched in the same change, also parse them with `ConvertFrom-Json`.
 

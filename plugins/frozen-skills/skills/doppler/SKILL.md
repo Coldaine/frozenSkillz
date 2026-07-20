@@ -26,6 +26,7 @@ Use Doppler as a secrets injection layer. Prefer CLI-driven environment injectio
 - Use `doppler run --mount ...` when an application must read a secret file; prefer environment injection for normal command execution.
 - Avoid `--preserve-env` for secrets unless there is a deliberate reason to let pre-existing shell values override Doppler.
 - Use `--silent` for destructive secret-management commands where possible; some CLI versions print a secrets table after mutation.
+- Do not use bare configuration display, its `--all` variant, or the configuration debug subcommand in an agent transcript. Those views include token fields, and the debug form may reveal the saved CLI token. Query only known non-secret options explicitly.
 - For current command syntax, verify with `doppler --version` and `doppler <command> --help` before changing scripts or docs.
 
 ## Core Model
@@ -109,8 +110,8 @@ Use `--command` for shell operators, pipelines, and command strings. Use `-- ...
 Check active config:
 
 ```shell
-doppler configure
-doppler configure debug
+doppler configure get project config --plain
+doppler me
 doppler secrets --only-names
 ```
 
@@ -210,7 +211,8 @@ Load these only when needed:
 Before promoting or committing Doppler work:
 
 - `doppler --version`
-- `doppler configure debug`
+- `doppler configure get project config --plain`
+- `doppler me`
 - `doppler secrets --only-names`
 - Run the target command through `doppler run -- ...`
 - Confirm no secret values were added to files, logs, diffs, or transcripts.

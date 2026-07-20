@@ -120,12 +120,20 @@ Get-Content plugins/frozen-skills/.cursor-plugin/plugin.json -Raw | ConvertFrom-
 Get-Content plugins/frozen-skills/gemini-extension.json -Raw | ConvertFrom-Json | Out-Null
 
 # Repo checks
+python -m pip install -r requirements-validation.txt
 python scripts/validate_manifests.py
+python scripts/validate_skills.py
 python -m unittest discover -s tests -v
 git diff --check
 ```
 
-For skill additions, verify every manifest `skills[].path` exists under the plugin directory.
+For skill additions, verify every manifest `skills[].path` exists under the plugin directory. The
+validators enforce loadable `SKILL.md` metadata and bundled references plus the current Codex UI
+contract whenever optional `agents/openai.yaml` metadata is present.
+
+Active frozenSkillz identities deliberately use lowercase ASCII kebab-case. The upstream Agent
+Skills specification permits broader Unicode names, but this repository keeps one portable name
+across Windows paths and all four client manifests.
 
 ## Contribution Rules
 

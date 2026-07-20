@@ -15,6 +15,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
+try:
+    from scripts.skill_validation import SkillMetadataError, validate_skill_metadata
+except ModuleNotFoundError:  # Direct execution: python scripts/sync_frozen_skills.py
+    from skill_validation import SkillMetadataError, validate_skill_metadata
+
 
 MANIFEST_PATHS = (
     Path(".claude-plugin/plugin.json"),
@@ -27,7 +32,9 @@ STATE_SCHEMA = 1
 PROFILE_SCHEMA = 1
 IGNORED_NAMES = {".DS_Store", "Thumbs.db", "__pycache__"}
 IGNORED_SUFFIXES = {".pyc", ".pyo"}
-SKILL_NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+# Deliberately narrower than the upstream specification for portable paths across
+# Windows and every supported client manifest.
+SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 DIGEST_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -215,6 +222,10 @@ def load_distribution(repo_root: Path) -> tuple[Path, str, tuple[SkillSource, ..
             )
         if not (candidate / "SKILL.md").is_file():
             raise SyncError(f"Skill {name!r} has no SKILL.md: {candidate}")
+        try:
+            validate_skill_metadata(candidate / "SKILL.md", name)
+        except SkillMetadataError as exc:
+            raise SyncError(f"Skill {name!r} has invalid SKILL.md: {exc}") from exc
         sources.append(SkillSource(name, candidate, digest_directory(candidate)))
 
     return plugin_root, version, tuple(sources)

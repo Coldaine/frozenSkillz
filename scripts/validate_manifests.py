@@ -1,7 +1,15 @@
 import json
 from pathlib import Path
 
-import sync_frozen_skills
+try:
+    import sync_frozen_skills
+except ModuleNotFoundError:  # Direct execution: python scripts/validate_manifests.py
+    from scripts import sync_frozen_skills
+
+try:
+    from scripts.skill_validation import SkillMetadataError, validate_skill_metadata
+except ModuleNotFoundError:  # Direct execution: python scripts/validate_manifests.py
+    from skill_validation import SkillMetadataError, validate_skill_metadata
 
 
 PLUGIN_MANIFESTS = [
@@ -30,6 +38,10 @@ def validate_manifest(filepath):
         plugin_root = filepath.parent.parent if filepath.name == "plugin.json" else filepath.parent
         resolved_plugin_root = plugin_root.resolve()
         for skill in data.get("skills", []):
+            skill_name = skill.get("name")
+            if not skill_name:
+                print("  FAILED: Skill entry missing name")
+                return False
             skill_path = skill.get("path")
             if not skill_path:
                 print("  FAILED: Skill entry missing path")
@@ -50,6 +62,22 @@ def validate_manifest(filepath):
             if not resolved_skill_path.exists():
                 print(f"  FAILED: Missing skill path {resolved_skill_path}")
                 return False
+            if resolved_skill_path.name != skill_name:
+                print(
+                    "  FAILED: Skill directory name does not match manifest name: "
+                    f"{resolved_skill_path.name!r} != {skill_name!r}"
+                )
+                return False
+
+            skill_md = resolved_skill_path / "SKILL.md"
+            if not skill_md.is_file():
+                print(f"  FAILED: Missing SKILL.md {skill_md}")
+                return False
+            try:
+                validate_skill_metadata(skill_md, skill_name)
+            except SkillMetadataError as exc:
+                print(f"  FAILED: Invalid {skill_md}: {exc}")
+                return False
 
         print("  PASSED")
         return True
@@ -58,9 +86,9 @@ def validate_manifest(filepath):
         return False
 
 
-def discover_manifests():
+def discover_manifests(repo_root):
     manifests = []
-    for plugin_root in sorted(Path("plugins").iterdir()):
+    for plugin_root in sorted((repo_root / "plugins").iterdir()):
         if not plugin_root.is_dir():
             continue
         for relative_manifest in PLUGIN_MANIFESTS:
@@ -87,9 +115,10 @@ def validate_profiles(repo_root):
 
 
 def main():
-    manifests = discover_manifests()
+    repo_root = Path(__file__).resolve().parents[1]
+    manifests = discover_manifests(repo_root)
     results = [validate_manifest(manifest) for manifest in manifests]
-    profiles_valid, profile_count = validate_profiles(Path.cwd().resolve())
+    profiles_valid, profile_count = validate_profiles(repo_root)
 
     if manifests and all(results) and profiles_valid:
         print(

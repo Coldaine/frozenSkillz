@@ -31,7 +31,10 @@ class SyncFrozenSkillsTests(unittest.TestCase):
     def _write_skill(self, name, body):
         skill = self.plugin / "skills" / name
         skill.mkdir(parents=True, exist_ok=True)
-        (skill / "SKILL.md").write_text(body, encoding="utf-8")
+        content = (
+            f"---\nname: {name}\ndescription: Test {name} skill.\n---\n\n{body}"
+        )
+        (skill / "SKILL.md").write_text(content, encoding="utf-8")
 
     def _write_manifests(self, names, *, divergent_cursor=False, version="1.0.0"):
         manifest_paths = sync_module.MANIFEST_PATHS
@@ -90,7 +93,7 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         self.assertFalse(applied.conflicts)
         self.assertEqual(
             (self.destination / "alpha/SKILL.md").read_text(encoding="utf-8"),
-            "alpha v1",
+            "---\nname: alpha\ndescription: Test alpha skill.\n---\n\nalpha v1",
         )
         self.assertTrue((self.destination / sync_module.STATE_FILE).is_file())
 
@@ -107,7 +110,7 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         self._sync(apply=True)
         self.assertEqual(
             (self.destination / "alpha/SKILL.md").read_text(encoding="utf-8"),
-            "alpha v2",
+            "---\nname: alpha\ndescription: Test alpha skill.\n---\n\nalpha v2",
         )
 
     def test_local_modification_is_a_conflict_unless_forced(self):
@@ -125,14 +128,17 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         self.assertEqual([action.kind for action in forced.actions], ["update"])
         self.assertEqual(
             (self.destination / "alpha/SKILL.md").read_text(encoding="utf-8"),
-            "alpha v1",
+            "---\nname: alpha\ndescription: Test alpha skill.\n---\n\nalpha v1",
         )
 
     def test_unmanaged_matching_copy_is_adopted(self):
         self.destination.mkdir(parents=True)
         target = self.destination / "alpha"
         target.mkdir()
-        (target / "SKILL.md").write_text("alpha v1", encoding="utf-8")
+        (target / "SKILL.md").write_text(
+            "---\nname: alpha\ndescription: Test alpha skill.\n---\n\nalpha v1",
+            encoding="utf-8",
+        )
 
         result = self._sync(apply=True)
         self.assertEqual([action.kind for action in result.actions], ["adopt"])
@@ -159,6 +165,73 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         self._write_skill("different", "different")
         self._write_manifests(["alpha"], divergent_cursor=True)
         with self.assertRaises(sync_module.SyncError):
+            self._sync()
+
+    def test_skill_without_frontmatter_is_rejected_before_sync(self):
+        (self.plugin / "skills/alpha/SKILL.md").write_text(
+            "# Alpha\n", encoding="utf-8"
+        )
+
+        with self.assertRaisesRegex(
+            sync_module.SyncError, "missing YAML frontmatter"
+        ):
+            self._sync()
+
+    def test_skill_frontmatter_name_must_match_manifest(self):
+        (self.plugin / "skills/alpha/SKILL.md").write_text(
+            "---\nname: beta\ndescription: Wrong identity.\n---\n",
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(sync_module.SyncError, "does not match"):
+            self._sync()
+
+    def test_skill_with_unknown_frontmatter_field_is_rejected(self):
+        (self.plugin / "skills/alpha/SKILL.md").write_text(
+            "---\nname: alpha\ndescription: Test.\nunknown: value\n---\n",
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(sync_module.SyncError, "unexpected frontmatter"):
+            self._sync()
+
+    def test_missing_bundled_resource_is_rejected_before_sync(self):
+        (self.plugin / "skills/alpha/SKILL.md").write_text(
+            "---\nname: alpha\ndescription: Test.\n---\n\n"
+            "Read `references/missing.md`.\n",
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(sync_module.SyncError, "does not exist"):
+            self._sync()
+
+    def test_anchored_bundled_resource_is_accepted(self):
+        references = self.plugin / "skills/alpha/references"
+        references.mkdir()
+        (references / "guide.md").write_text("# Intro\n", encoding="utf-8")
+        (self.plugin / "skills/alpha/SKILL.md").write_text(
+            "---\nname: alpha\ndescription: Test.\n---\n\n"
+            "Read [the guide](references/guide.md#intro).\n",
+            encoding="utf-8",
+        )
+
+        result = self._sync()
+
+        self.assertEqual([action.kind for action in result.actions], ["install"])
+
+    def test_required_metadata_block_scalar_is_rejected(self):
+        (self.plugin / "skills/alpha/SKILL.md").write_text(
+            "---\nname: alpha\ndescription: |\n---\n\n# Alpha\n",
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(sync_module.SyncError, "block scalars"):
+            self._sync()
+
+    def test_distribution_name_must_use_portable_ascii_kebab_case(self):
+        self._write_manifests(["技能"])
+
+        with self.assertRaisesRegex(sync_module.SyncError, "Unsafe skill name"):
             self._sync()
 
     def test_cli_exit_codes_distinguish_drift_current_and_conflict(self):
