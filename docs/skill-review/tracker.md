@@ -45,6 +45,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `doppler` | A | — (done) | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/doppler` | None — reference standard. |
 | `external-skill-intake` | A | — | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/external-skill-intake` | Workflow for sandboxing, scoring, evaluating, and packaging external inspiration repos before promotion. |
 | `omc-reference` | A | — | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/omc-reference` | Maintains the separate Oh My ClaudeCode installation; verified against the local OMC 4.14.4 source and explicitly excluded from ordinary Codex delegation, Git, commit, and unrelated-skill routing. |
+| `pdm-cli-operations` | A | — | 🛑 gated · **live evaluation** | `_incubator/frozen-skills/skills/pdm-cli-operations` | Install the current same-major official client on the operator host; execute the eval cases against a live PDM; revise from traces; then promote. |
 | `plugin-authoring-guide` ("skill guide") | A | MOO-562 | 🛑 gated · **rework** | `_incubator/frozen-skills/skills/` | **Rework** (user directive). |
 | `mcp-deployment-guide` ("MCP guide") | A | MOO-563 | 🛑 gated · **update** | `_incubator/frozen-skills/skills/` | **Update** (user directive). |
 | `agent-config-megaref` | A | MOO-564 | 🛑 gated · **light update** | `_incubator/frozen-skills/skills/` | Light update **+ confer/cross-reference with the LLM archiver project** (user directive). |
@@ -89,6 +90,16 @@ Configuration and troubleshooting reference for Oh My ClaudeCode, a separate Cla
 The live and frozen copies were verified against the local OMC 4.14.4 checkout. The skill deliberately reads the
 active installed OMC sources instead of preserving a copied command or agent catalog, and it does not govern normal
 Codex delegation, Git, commits, pull requests, or unrelated skill use.
+
+### `pdm-cli-operations` — GATED, LIVE EVALUATION
+
+Small shared process-interface skill for Codex, Hermes, and human operators using the official
+`proxmox-datacenter-manager-client`. The design keeps endpoint, fingerprint, auth ID, and fleet identities in each
+environment's owning operational repository, uses JSON output and `--password-command`, follows asynchronous tasks
+to terminal state, and preserves native PVE/PBS as break-glass rather than introducing another standing control
+plane. On 2026-07-20, the official PDM no-subscription amd64 index offered client 1.1.6, matching the documented
+homelab PDM version. Promotion remains blocked until the client is installed on the Hermes operator VM and the
+bundled live evaluation cases pass without credential disclosure.
 
 ### `plugin-authoring-guide` ("skill guide") — REWORK
 - **User directive:** needs to be reworked.
