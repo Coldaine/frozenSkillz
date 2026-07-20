@@ -1,5 +1,7 @@
 import importlib.util
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -60,6 +62,17 @@ class ValidateManifestsTests(unittest.TestCase):
         self.manifest.write_text(json.dumps(data), encoding="utf-8")
 
         self.assertFalse(validate_module.validate_manifest(self.manifest))
+
+    def test_script_resolves_repository_independently_of_cwd(self):
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT)],
+            cwd=self.temporary.name,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

@@ -86,9 +86,9 @@ def validate_manifest(filepath):
         return False
 
 
-def discover_manifests():
+def discover_manifests(repo_root):
     manifests = []
-    for plugin_root in sorted(Path("plugins").iterdir()):
+    for plugin_root in sorted((repo_root / "plugins").iterdir()):
         if not plugin_root.is_dir():
             continue
         for relative_manifest in PLUGIN_MANIFESTS:
@@ -115,9 +115,10 @@ def validate_profiles(repo_root):
 
 
 def main():
-    manifests = discover_manifests()
+    repo_root = Path(__file__).resolve().parents[1]
+    manifests = discover_manifests(repo_root)
     results = [validate_manifest(manifest) for manifest in manifests]
-    profiles_valid, profile_count = validate_profiles(Path.cwd().resolve())
+    profiles_valid, profile_count = validate_profiles(repo_root)
 
     if manifests and all(results) and profiles_valid:
         print(
