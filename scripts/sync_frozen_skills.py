@@ -324,6 +324,7 @@ def plan_sync(
     *,
     prune: bool,
     force: bool,
+    exact: bool = False,
 ) -> tuple[Action, ...]:
     """Plan safe distribution changes from one observed destination snapshot."""
 
@@ -389,6 +390,18 @@ def plan_sync(
                         name,
                         "retired managed skill has local modifications",
                         current_digest,
+                    )
+                )
+
+    if exact and destination.exists():
+        known_names = active_names | set(recorded) | {STATE_FILE}
+        for entry in sorted(destination.iterdir(), key=lambda item: item.name):
+            if entry.name not in known_names:
+                actions.append(
+                    Action(
+                        "conflict",
+                        entry.name,
+                        "profile destination contains unmanaged content",
                     )
                 )
 
@@ -494,7 +507,16 @@ def sync(
             "Destination is managed by a different skill profile; use a separate "
             "destination or deliberately remove the existing managed state"
         )
-    actions = list(plan_sync(sources, destination, state, prune=prune, force=force))
+    actions = list(
+        plan_sync(
+            sources,
+            destination,
+            state,
+            prune=prune,
+            force=force,
+            exact=profile is not None,
+        )
+    )
     if state["skills"] and state.get("plugin_version") != version:
         actions.append(
             Action(

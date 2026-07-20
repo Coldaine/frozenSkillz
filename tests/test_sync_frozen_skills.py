@@ -474,7 +474,7 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         with self.assertRaises(sync_module.SyncError):
             self._sync(destination=profile_destination)
 
-    def test_profile_prune_removes_only_unchanged_managed_output(self):
+    def test_profile_rejects_unmanaged_destination_content(self):
         self._write_skill("beta", "beta v1")
         self._write_manifests(["alpha", "beta"])
         self._write_profile("hermes-ops", ["alpha", "beta"])
@@ -484,9 +484,15 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         (unrelated / "SKILL.md").write_text("local", encoding="utf-8")
 
         self._write_profile("hermes-ops", ["alpha"])
-        self._sync(apply=True, prune=True, profile="hermes-ops")
+        result = self._sync(
+            apply=True, prune=True, force=True, profile="hermes-ops"
+        )
 
-        self.assertFalse((self.destination / "beta").exists())
+        self.assertEqual(
+            [action.kind for action in result.actions],
+            ["current", "remove", "conflict"],
+        )
+        self.assertTrue((self.destination / "beta").is_dir())
         self.assertTrue(unrelated.is_dir())
 
     def test_profile_cli_requires_explicit_destination(self):

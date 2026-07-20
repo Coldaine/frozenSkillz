@@ -49,7 +49,7 @@ python scripts/sync_frozen_skills.py --check --profile hermes-ops --destination 
 python scripts/sync_frozen_skills.py --apply --profile hermes-ops --destination /srv/hermes/skill-sets/hermes-ops --prune
 ```
 
-The management record binds a destination to either the full distribution or one named profile. The synchronizer refuses to reuse that destination for another owner; use a separate destination instead. Profile synchronization materializes an exact managed subset in a directory. It is not a native Hermes skill bundle and does not configure a consumer's mounts, skill search path, or reload behavior.
+The management record binds a destination to either the full distribution or one named profile. The synchronizer refuses to reuse that destination for another owner and treats any unmanaged top-level content in a profile destination as a conflict; use a fresh dedicated destination instead. Profile synchronization materializes an exact managed subset in a directory. It is not a native Hermes skill bundle and does not configure a consumer's mounts, skill search path, or reload behavior.
 
 ## Client-managed Plugin Install
 

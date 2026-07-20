@@ -85,7 +85,7 @@ python scripts/sync_frozen_skills.py --apply --profile hermes-ops --destination 
 
 `--prune` is mandatory in profile mode so removing a profile member is visible during `--check` and converges during `--apply`. An unchanged retired managed skill is removed; a locally modified retired skill is a conflict and remains untouched unless the operator separately reviews and authorizes `--force`.
 
-The management record assigns each destination to the full distribution or exactly one profile. A destination with an existing record cannot be claimed by another owner, even when its managed skill map is empty. Use a separate destination for a different profile. Deleting the record is an explicit release action outside the synchronizer; it does not remove old skill directories, so it is not a shortcut for safely switching a live consumer in place.
+The management record assigns each destination to the full distribution or exactly one profile. A destination with an existing record cannot be claimed by another owner, even when its managed skill map is empty. Profile mode also rejects top-level content that is neither selected nor recorded as managed; even `--force` does not delete unknown content. Use a fresh separate destination for a different profile. Deleting the record is an explicit release action outside the synchronizer; it does not remove old skill directories, so it is not a shortcut for safely switching a live consumer in place.
 
 The synchronizer only materializes the reviewed files. Consumer-specific mounts, search paths, restarts, and rollout evidence belong to the consumer's operational repository. A profile is not a native Hermes bundle.
 
