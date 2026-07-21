@@ -55,8 +55,8 @@ If a step fails, stop at that boundary. Do not open a second control plane to �
 
 Only after repeated real intents (Hermes/Codex/Cursor logs or AgentsView search) show the same gap. Prefer:
 
-1. Intent-table row or failure-routing row  
-2. Eval negative  
-3. Sibling skill (break-glass PVE) — not MCP inside this package  
+1. Intent-table row or failure-routing row
+2. Eval negative
+3. Sibling skill (break-glass PVE) — not MCP inside this package
 
 See also [related-work.md](related-work.md) for adjacent repos and the enhancement policy.
