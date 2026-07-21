@@ -1,0 +1,4 @@
+interface:
+  display_name: "PDM CLI Operations"
+  short_description: "Operate Proxmox fleets through the official PDM client"
+  default_prompt: "Use $pdm-cli-operations to inspect and safely operate the Proxmox fleet through PDM."

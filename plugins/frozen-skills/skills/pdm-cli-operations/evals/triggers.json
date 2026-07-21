@@ -1,0 +1,98 @@
+{
+  "skill": "pdm-cli-operations",
+  "notes": "Labeled trigger prompts for description routing. Split ~60/40 train/validation. Run each query 3x in a fresh session; pass if trigger rate >= 0.5 when should_trigger, < 0.5 when not. Do not optimize description against validation. Negatives emphasize native break-glass, WSL/MCP shortcuts, skip-evidence, and generic infra.",
+  "train": [
+    {
+      "query": "List Proxmox remotes through PDM and show JSON inventory",
+      "should_trigger": true
+    },
+    {
+      "query": "Create a snapshot on VM 101 via the official PDM client",
+      "should_trigger": true
+    },
+    {
+      "query": "Migrate a QEMU guest between nodes using proxmox-datacenter-manager-client",
+      "should_trigger": true
+    },
+    {
+      "query": "PDM task returned a UPID — confirm it actually finished OK",
+      "should_trigger": true
+    },
+    {
+      "query": "From Windows, call the PDM skill SSH bridge to remote list",
+      "should_trigger": true
+    },
+    {
+      "query": "Troubleshoot PDM login TLS fingerprint / ticket cache",
+      "should_trigger": true
+    },
+    {
+      "query": "Shut down a guest through Datacenter Manager, not direct node SSH",
+      "should_trigger": true
+    },
+    {
+      "query": "SSH to the PVE node and run qm snapshot directly",
+      "should_trigger": false
+    },
+    {
+      "query": "Install WSL just so we can run the PDM client on this laptop",
+      "should_trigger": false
+    },
+    {
+      "query": "Use the Proxmox MCP server instead of the PDM client for this fleet change",
+      "should_trigger": false
+    },
+    {
+      "query": "Add a DEBUG=true flag to our Node config",
+      "should_trigger": false
+    },
+    {
+      "query": "Write a Terraform module for an AWS ALB",
+      "should_trigger": false
+    },
+    {
+      "query": "Explain how Kubernetes ConfigMaps differ from Secrets",
+      "should_trigger": false
+    }
+  ],
+  "validation": [
+    {
+      "query": "Use PDM to list PBS datastores and recent backup tasks",
+      "should_trigger": true
+    },
+    {
+      "query": "Roll back a QEMU snapshot through the PDM CLI and verify post-state",
+      "should_trigger": true
+    },
+    {
+      "query": "Wire the Windows pdm.ps1 bridge with PDM_CLI_SSH_TARGET for fleet ops",
+      "should_trigger": true
+    },
+    {
+      "query": "PDM is down — use native pvesh on the node as break-glass",
+      "should_trigger": false
+    },
+    {
+      "query": "Spin up a local Docker container solely to hold the PDM client",
+      "should_trigger": false
+    },
+    {
+      "query": "Just submit the PDM mutate and move on when you get a UPID back",
+      "should_trigger": false
+    },
+    {
+      "query": "Refactor how the app reads PORT from process.env",
+      "should_trigger": false
+    }
+  ],
+  "held_out": [
+    {
+      "query": "Cross-remote migrate a stopped disposable VM through PDM with map-bridge and map-storage",
+      "should_trigger": true
+    },
+    {
+      "query": "Change the compose file to pass NODE_ENV from the host",
+      "should_trigger": false
+    }
+  ]
+}
