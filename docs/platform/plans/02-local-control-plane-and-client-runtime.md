@@ -1,6 +1,10 @@
 # Plan 2: Local Control Plane and Client Runtime
 
-> **Status:** draft and blocked on Plan 1 approval.
+> **Status:** draft / **v1 backlog**. Critical path for agent-config persistence is
+> [REFINED-V1.md](../REFINED-V1.md) deliverables D2–D3 (project native files +
+> existing `sync_frozen_skills.py`), not this full control plane.
+>
+> Original status: draft and blocked on Plan 1 approval.
 
 ## Outcome
 

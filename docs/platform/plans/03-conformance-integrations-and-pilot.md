@@ -1,6 +1,11 @@
 # Plan 3: Conformance, Integrations, and Pilot
 
-> **Status:** draft and blocked on Plan 2 completion.
+> **Status:** draft / **deferred for v1**. Observation sinks (including Obot),
+> cross-repo update automation, and multi-client pilot are explicitly out of
+> [REFINED-V1.md](../REFINED-V1.md). Revisit only after a measured multi-machine
+> drift problem.
+>
+> Original status: draft and blocked on Plan 2 completion.
 
 ## Outcome
 

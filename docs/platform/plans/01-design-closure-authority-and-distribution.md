@@ -1,7 +1,12 @@
 # Plan 1: Design Closure, Authority, and Distribution
 
-> **Status:** draft plan. Evidence capture is substantially complete; authority and
-> product decisions are not yet approved.
+> **Status:** draft / **superseded for v1 critical path** by
+> [REFINED-V1.md](../REFINED-V1.md) (2026-07-21). Keep this file as the long-form
+> decision checklist and backlog; do not treat completing every section as a gate
+> before shipping project-native config persistence.
+>
+> Original status: draft plan. Evidence capture is substantially complete; authority
+> and product decisions are not yet approved.
 
 ## Outcome
 
