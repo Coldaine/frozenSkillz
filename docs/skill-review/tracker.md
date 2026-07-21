@@ -67,6 +67,13 @@ Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental �
 | Intake | Status | Location | Required work |
 |---|---|---|---|
 | `coldaine-infra/skills/frozen` submodule snapshot (`c2868ee2c0b49eaecdbd365bc00ffec0685487fe`) | scout · incubated | `_incubator/scout/2026-06-16-coldaine-infra-skills-frozen-submodule/` | Compare against current `_incubator/` and `plugins/skill-injector/`; frozen-rules + `gh-common-workflows` matched current incubator files in the 2026-06-16 audit, but `agent-config-megaref`, `mcp-deployment-guide`, `plugin-authoring-guide`, and old `skill-classifier` hook/script/test files have deltas that need review before promotion or deletion. |
+| `fluxcd/agent-skills` → `gitops-repo-audit` (`200` stars, 2026-07-21) | scout · evaluation pending | _(not snapshotted)_ | Open `_incubator/scout/` via `external-skill-intake`: read-only repo audit / validate / report — best external anti-typist match. Pair with Coldaine P0 gates; do not promote live-apply paths. |
+| `LukasNiessen/kubernetes-skill` (`324` stars, 2026-07-21) | scout · evaluation pending | _(not snapshotted)_ | Snapshot failure-mode / anti-hallucination manifest workflow; adapt progressive `references/`; reject any kubectl-first shortcuts if present. |
+| `siderolabs/docs` `public/skill.md` (`11` stars, 2026-07-21) | scout · evaluation pending | _(not snapshotted)_ | Canonical Talos agent contract; concept-borrow wcygan read-only talosctl guardrails (`wcygan/dotfiles`, `192` stars). |
+| Coldaine `k8s-platform-operator` (author) + CAPMOX seed | gated · design pending | _(not authored)_ | Home-grown thin skill: prove → diff → P0 → intentional apply → live verify. Seed CAPMOX from [ionos-cloud/cluster-api-provider-proxmox `AGENTS.md`](https://github.com/ionos-cloud/cluster-api-provider-proxmox/blob/main/AGENTS.md) (`463` stars) — no public CAPMOX `SKILL.md` exists. Concept-mine faberlens `kubernetes-hardened` SAFETY (`24` stars) and helmfile official skill diff/doctor only (`helmfile/helmfile`, `5161` stars). |
+| Reject queue (do not scout as default mutate skills) | discarded · noted 2026-07-21 | — | Generic kubectl wrappers; flux `gitops-cluster-debug` (MCP live cluster); popular gitops-workflow skills teaching `kubectl apply` / `argocd sync --force`; Omni+Proxmox skills as CAPMOX substitutes; AWS EKS create/deploy dumps. |
+
+Scout ranking distilled 2026-07-21 from AgentsView k8s-typist lessons plus intake passes (GitOps safety + Talos/CAPMOX). No external skill fully matches Helmfile + P0 + propose-only `cluster-status`; adapt, don’t promote wholesale.
 
 ---
 
