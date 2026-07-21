@@ -15,7 +15,7 @@
     {
       "name": "frozen-skills",
       "source": "./plugins/frozen-skills",
-      "description": "Installs reviewed Doppler, external-intake, OMC maintenance, and official PDM operations skills. Content under _incubator is not included.",
+      "description": "Installs reviewed Doppler, external-skill-intake, OMC maintenance, and official PDM operations skills. Content under _incubator is not included.",
       "version": "2.3.0",
       "category": "reference",
       "author": {

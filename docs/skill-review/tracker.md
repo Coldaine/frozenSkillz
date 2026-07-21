@@ -46,7 +46,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `doppler` | A | — (done) | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/doppler` | None — reference standard. |
 | `external-skill-intake` | A | — | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/external-skill-intake` | Workflow for sandboxing, scoring, evaluating, and packaging external inspiration repos before promotion. |
 | `omc-reference` | A | — | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/omc-reference` | Maintains the separate Oh My ClaudeCode installation; verified against the local OMC 4.14.4 source and explicitly excluded from ordinary Codex delegation, Git, commit, and unrelated-skill routing. |
-| `pdm-cli-operations` | A | — | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/pdm-cli-operations` | None — official client 1.1.6 discovery, TLS failure, direct mutation, and Windows-bridge mutation paths were exercised live. |
+| `pdm-cli-operations` | A | — | ✅ **ACTIVE** (on menu) | `plugins/frozen-skills/skills/pdm-cli-operations` | Portable client contract + optional Windows bridge; env bindings gated; evals present. Live 1.1.6 qualification on 2026-07-20. |
 | `plugin-authoring-guide` ("skill guide") | A | MOO-562 | 🛑 gated · **rework** | `_incubator/frozen-skills/skills/` | **Rework** (user directive). |
 | `mcp-deployment-guide` ("MCP guide") | A | MOO-563 | 🛑 gated · **update** | `_incubator/frozen-skills/skills/` | **Update** (user directive). |
 | `agent-config-megaref` | A | MOO-564 | 🛑 gated · **light update** | `_incubator/frozen-skills/skills/` | Light update **+ confer/cross-reference with the LLM archiver project** (user directive). |
@@ -94,18 +94,21 @@ Codex delegation, Git, commits, pull requests, or unrelated skill use.
 
 ### `pdm-cli-operations` — ACTIVE
 
-Small shared process-interface skill for Codex, Hermes, and human operators using the official
-`proxmox-datacenter-manager-client`. The design keeps endpoint, fingerprint, auth ID, and fleet identities in each
-environment's owning operational repository, uses explicit login, proves terminal task success, and preserves native
-PVE/PBS as break-glass rather than introducing another standing control plane.
+Portable process-interface skill for the official `proxmox-datacenter-manager-client`: lean `SKILL.md`
+(contract + intent table + workflow), progressive `references/commands.md`, gated
+`references/env-notes.md` for environment launcher/SSH bindings only, optional Windows bridge
+`scripts/pdm.ps1` (requires `PDM_CLI_SSH_TARGET` + `PDM_CLI_REMOTE_PROGRAM`; no Hermes default; refuses
+password flags; `BatchMode=yes`), and `evals/triggers.json` for description routing. Fleet inventory and
+credentials stay in the owning ops repository / secrets skill.
 
 The 2026-07-20 live qualification used official client and PDM 1.1.6. Discovery returned four remotes and four
-resource groups; a wrong disposable TLS cache pin failed closed. Direct `hermes-pdm` and the bundled Windows SSH
-bridge both created and deleted uniquely named snapshots on stopped disposable VM 9900 `pxe-agent-unattended-test`
-on remote `evo`, node `pve-evo-x2`. All four tasks reached `Stopped` with `exitstatus=OK`; each created snapshot was
-observed before deletion, the final snapshot list contained only `current`, the guest remained stopped, and its active
-configuration digest returned to `d2299e678647bb0e1ff6f3b312068ecf27b9ae2a`. The direct proof used task types
-`qmsnapshot` and `qmdelsnapshot`; the bridge proof independently exercised the same two task families.
+resource groups; a wrong disposable TLS cache pin failed closed. Direct environment launcher and the bundled
+Windows SSH bridge both created and deleted uniquely named snapshots on stopped disposable VM 9900
+`pxe-agent-unattended-test` on remote `evo`, node `pve-evo-x2`. All four tasks reached `Stopped` with
+`exitstatus=OK`; each created snapshot was observed before deletion, the final snapshot list contained only
+`current`, the guest remained stopped, and its active configuration digest returned to
+`d2299e678647bb0e1ff6f3b312068ecf27b9ae2a`. The direct proof used task types `qmsnapshot` and `qmdelsnapshot`;
+the bridge proof independently exercised the same two task families.
 
 That trace corrected several non-obvious client contracts: ordinary commands require a cached login ticket;
 `resources` has no `list` subcommand; API-token IDs are rejected by the 1.1.6 `--user` schema; noninteractive

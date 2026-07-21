@@ -32,11 +32,11 @@ Proxmox does not publish a native Windows build. On Windows, use the bundled Pow
 
 ## Environment launcher
 
-Prefer an environment launcher such as `hermes-pdm` when the owning repository provides one:
+Prefer an environment-owned launcher when the owning repository provides one. Keep concrete launcher names and SSH runner hosts in [env-notes.md](env-notes.md); do not treat those names as part of this portable contract.
 
 ```sh
-hermes-pdm --output-format json remote list
-hermes-pdm --output-format json resources
+<launcher> --output-format json remote list
+<launcher> --output-format json resources
 ```
 
 The launcher contract is:
@@ -48,14 +48,29 @@ The launcher contract is:
 - preserve stdout, stderr, and the client exit code; and
 - impose no hidden read-only policy on an identity whose declared role is execution.
 
-On Windows, set the SSH runner and call the bundled bridge:
+### Optional Windows SSH bridge
+
+Proxmox does not ship a native Windows client. The bundled adapter `scripts/pdm.ps1` forwards already-authenticated runner commands over SSH. It is optional and is not the skill itself.
+
+Required environment:
+
+| Variable | Meaning |
+|---|---|
+| `PDM_CLI_SSH_TARGET` | `user@host` for the authorized runner (DNS or IPv4). Put non-default ports in `~/.ssh/config`. |
+| `PDM_CLI_REMOTE_PROGRAM` | Bare launcher/client name on the runner PATH, or an absolute POSIX path. No relative paths. |
 
 ```powershell
 $env:PDM_CLI_SSH_TARGET = 'operator@pdm-client-runner'
-& "$HOME/.agents/skills/pdm-cli-operations/scripts/pdm.ps1" --output-format json remote list
+$env:PDM_CLI_REMOTE_PROGRAM = 'proxmox-datacenter-manager-client'  # or the env launcher name
+# Resolve the bridge from the installed skill root (sync, plugin, or checkout) — not a hard-coded ~/.agents path.
+& "<skill-root>/scripts/pdm.ps1" --output-format json remote list
 ```
 
-`PDM_CLI_REMOTE_PROGRAM` defaults to `hermes-pdm` and may name another single executable or absolute POSIX path. The bridge rejects option-like SSH targets and shell syntax in the remote program.
+Bridge rules:
+
+- rejects option-like SSH targets and relative/`..` remote programs;
+- refuses `--password`, `--password-file`, and `--password-command` (login with secrets happens only on the runner);
+- uses `ssh -o BatchMode=yes` so missing host keys or interactive auth fail closed instead of hanging.
 
 ## Raw client login
 
