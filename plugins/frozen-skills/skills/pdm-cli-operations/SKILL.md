@@ -27,7 +27,7 @@ The official client currently requires a compatible amd64 Debian environment, ne
 - Request `--output-format json` for agent work. Preserve the original output when evidence matters; some client versions emit a non-JSON terminal `TaskStatus` for mutations even when JSON was requested.
 - Start with `remote list`, then select the exact remote, node, and guest. A VMID is not globally meaningful without its remote.
 - Read current state immediately before a mutation. Stay within the task's authority while diagnosing and resolving proven dependencies needed to complete it.
-- Treat an accepted request or returned UPID as started, not completed. Require terminal `stopped` plus `exitstatus=OK`, then read state again.
+- Treat an accepted request or returned UPID as started, not completed. Require terminal `stopped` plus `exitstatus=OK`, then read state again. Status means applied (and verified), not merely authored or accepted.
 - Distinguish client/authentication failure, PDM unavailability, remote unavailability, and an unsuccessful remote task. Report the actual boundary.
 - PDM is the normal fleet surface. Native PVE or PBS access remains the explicit break-glass path when PDM is unavailable; do not deploy a parallel control plane as a workaround.
 
@@ -42,6 +42,7 @@ The official client currently requires a compatible amd64 Debian environment, ne
 | Follow a task | remote-prefixed UPID via `pve`/`pbs task status`; never treat UPID alone as done |
 | Windows without a local client | optional bridge `scripts/pdm.ps1` with `PDM_CLI_SSH_TARGET` + `PDM_CLI_REMOTE_PROGRAM` set; no password flags |
 | PDM down / break-glass | native PVE/PBS only when explicitly required; do not invent a parallel control plane |
+| “Just use MCP / qm / node SSH instead” | refuse as the default path; that recreates the typist failure mode — see [references/operator-lessons.md](references/operator-lessons.md) only if debating skill shape |
 
 `<pdm>` means the environment launcher or the raw client plus its global connection options.
 
@@ -62,5 +63,6 @@ Load these only when needed:
 - [references/commands.md](references/commands.md): installation boundary, launcher contract, login, discovery, mutations, task follow-through, failure routing.
 - [references/env-notes.md](references/env-notes.md): **only** when binding this skill to a specific environment's launcher name, SSH runner, or sync-install path.
 - [references/related-work.md](references/related-work.md): **only** when evaluating adjacent Proxmox agent skills/MCP toolkits as future enhancement or sibling-skill candidates (not for normal PDM operations).
+- [references/operator-lessons.md](references/operator-lessons.md): **only** when hardening this skill against prior Cursor/Claude/Codex k8s typist failures (maps Homelab lessons → PDM contract).
 
 Verify live syntax with `help --verbose` before using a command that is not covered in the reference.

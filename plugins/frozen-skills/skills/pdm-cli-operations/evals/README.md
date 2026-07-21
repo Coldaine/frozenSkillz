@@ -13,4 +13,6 @@ Labeled prompts for description routing. See `triggers.json`.
 
 - Native PVE/PBS break-glass (`qm`, `pvesh`, node SSH) when the user did not ask for PDM.
 - Installing WSL or a container only to obtain the PDM client.
+- Proxmox MCP / direct API as a substitute for the official PDM client.
+- Treating a returned UPID as completion without terminal task + post-state evidence.
 - Ordinary app config / cloud infra unrelated to the standing PDM API.
