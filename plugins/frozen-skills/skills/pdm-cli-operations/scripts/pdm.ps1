@@ -5,7 +5,7 @@ param(
 )
 
 # Optional Windows adapter: forwards argv to an environment-owned Linux runner.
-# Login/secrets stay on the runner — this script must never carry password flags.
+# Login/secrets stay on the runner - this script must never carry password flags.
 
 $target = $env:PDM_CLI_SSH_TARGET
 if ([string]::IsNullOrWhiteSpace($target)) {
@@ -43,14 +43,10 @@ if (-not $CommandArgs -or $CommandArgs.Count -eq 0) {
 }
 
 # Credentials belong on the runner. Forwarding these would expose them on the Windows ssh argv.
-$blockedPasswordFlags = [System.Collections.Generic.HashSet[string]]::new(
-    [string[]]@('--password', '--password-file', '--password-command'),
-    [StringComparer]::OrdinalIgnoreCase
-)
-for ($i = 0; $i -lt $CommandArgs.Count; $i++) {
-    $arg = $CommandArgs[$i]
+$blockedPasswordFlags = @('--password', '--password-file', '--password-command')
+foreach ($arg in $CommandArgs) {
     $flag = ($arg -split '=', 2)[0]
-    if ($blockedPasswordFlags.Contains($flag)) {
+    if ($flag -in $blockedPasswordFlags) {
         throw 'Refuse password-related flags on the Windows bridge. Perform login with secrets only on the SSH runner (environment launcher or raw client there).'
     }
 }
