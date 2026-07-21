@@ -67,17 +67,16 @@ Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental �
 | Intake | Status | Location | Required work |
 |---|---|---|---|
 | coldaine-infra/skills/frozen submodule snapshot (c2868ee2c0b49eaecdbd365bc00ffec0685487fe) | scout · incubated | _incubator/scout/2026-06-16-coldaine-infra-skills-frozen-submodule/ | Compare against current _incubator/ and plugins/skill-injector/; frozen-rules + gh-common-workflows matched current incubator files in the 2026-06-16 audit, but gent-config-megaref, mcp-deployment-guide, plugin-authoring-guide, and old skill-classifier hook/script/test files have deltas that need review before promotion or deletion. |
-| **Adopt shortlist (2026-07-21)** — three targets only | decision · pending confirm | — | Do **not** intake whole skill repos. Confirmed candidates below; open scoped _incubator/scout/ sandboxes after user OK. |
-| 1.
-luxcd/agent-skills → **gitops-repo-audit only** (200 stars) | adopt · adapt | _(not snapshotted)_ | Static repo audit / validate / report. Skip gitops-cluster-debug and the rest of the Flux package. Wire Coldaine P0 / intentional apply afterward. |
-| 2. LukasNiessen/kubernetes-skill → **core workflow + failure-mode refs** (324 stars) | adopt · adapt | _(not snapshotted)_ | Manifest prove-before-mutate layer. Drop cloud CRR dumps (EKS/GKE/AKS) unless a real intent appears; keep gitops-controllers conditional only if adapted. |
-| 3. Coldaine **k8s-platform-operator** (author) + CAPMOX seed | author · design | _(not authored)_ | Thin glue skill: prove → diff → P0 → intentional apply → live verify. Seed CAPMOX from [ionos-cloud/cluster-api-provider-proxmox AGENTS.md](https://github.com/ionos-cloud/cluster-api-provider-proxmox/blob/main/AGENTS.md) (463 stars). Not an external install. |
-| Concept-mine only (no scout package) | deferred | — | [siderolabs/docs](https://github.com/siderolabs/docs) public/skill.md (11 stars): no-SSH / talosctl facts (strip Omni defaults). [helmfile/helmfile](https://github.com/helmfile/helmfile) skills/helmfile (5162 stars): diff/doctor language only — do not adopt the full cookbook. ConfigHub ApplyGates wording (2 stars). wcygan read-only talosctl guardrails (192 stars). |
-| Parked / do not adopt as skills | discarded · noted 2026-07-21 | — | Whole [Aidas-dev/k8s-agent-skills](https://github.com/Aidas-dev/k8s-agent-skills) dump (1 star) — mine CNPG CRD table later if needed; Talos skill is apply-typist.
-lux router + gitops-cluster-debug.
-ohitg00/kubectl-mcp-server skills; clouddrove/Jeffallan/sickn33/wshobson mutate cookbooks; Omni-as-CAPMOX; kagent apply-after-generate. |
+| **Adopt shortlist (2026-07-21)** — three targets; stack = Helmfile not Flux | decision · pending confirm | — | Do **not** intake whole skill repos. coldaine-k8cluster apply path is helmfile apply (IcePanel landscape + k8cluster docs). Drop Flux package intake. |
+| 1. helmfile/helmfile → **skills/helmfile scoped** (5162 stars) | adopt · adapt | _(not snapshotted)_ | Mine diff/doctor / intentional-apply language only. Strip cookbook sync defaults that encourage blind apply. Align with Coldaine P0 + wave discipline. |
+| 2. LukasNiessen/kubernetes-skill → **core workflow + failure-mode refs** (324 stars) | adopt · adapt | _(not snapshotted)_ | Manifest prove-before-mutate layer before Helmfile commit/apply. Drop cloud CRR dumps (EKS/GKE/AKS) unless a real intent appears. |
+| 3. Coldaine **k8s-platform-operator** (author) + CAPMOX seed | author · design | _(not authored)_ | Thin glue skill: prove → helmfile diff → P0 → intentional apply → live verify. Seed CAPMOX from [ionos-cloud/cluster-api-provider-proxmox AGENTS.md](https://github.com/ionos-cloud/cluster-api-provider-proxmox/blob/main/AGENTS.md) (463 stars). Not an external install. |
+| Concept-mine only (no scout package) | deferred | — | [siderolabs/docs](https://github.com/siderolabs/docs) public/skill.md (11 stars): no-SSH / talosctl facts (strip Omni). wcygan read-only talosctl guardrails (192 stars). ConfigHub ApplyGates wording (2 stars). Optional: CNPG CRD table from Aidas later. |
+| Parked / do not adopt | discarded · noted 2026-07-21 | — | **Flux skills** (
+luxcd/agent-skills, Aidas
+lux router, gitops-cluster-debug) — wrong reconciler for coldaine-k8cluster. Whole Aidas dump; kubectl-MCP packs; clouddrove/Jeffallan/sickn33/wshobson mutate cookbooks; Omni-as-CAPMOX; kagent apply-after-generate. |
 
-Scout ranking distilled 2026-07-21 from AgentsView k8s-typist lessons plus intake passes. No external skill fully matches Helmfile + P0 + propose-only cluster-status; adapt, don’t promote wholesale.
+Scout note: earlier Flux gitops-repo-audit ranking was a stack mismatch. Authored-vs-applied still matters; implement it for Helmfile, not Flux CRDs.
 
 ---
 
