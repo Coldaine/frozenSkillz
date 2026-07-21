@@ -61,5 +61,6 @@ Load these only when needed:
 
 - [references/commands.md](references/commands.md): installation boundary, launcher contract, login, discovery, mutations, task follow-through, failure routing.
 - [references/env-notes.md](references/env-notes.md): **only** when binding this skill to a specific environment's launcher name, SSH runner, or sync-install path.
+- [references/related-work.md](references/related-work.md): **only** when evaluating adjacent Proxmox agent skills/MCP toolkits as future enhancement or sibling-skill candidates (not for normal PDM operations).
 
 Verify live syntax with `help --verbose` before using a command that is not covered in the reference.

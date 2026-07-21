@@ -96,10 +96,11 @@ Codex delegation, Git, commits, pull requests, or unrelated skill use.
 
 Portable process-interface skill for the official `proxmox-datacenter-manager-client`: lean `SKILL.md`
 (contract + intent table + workflow), progressive `references/commands.md`, gated
-`references/env-notes.md` for environment launcher/SSH bindings only, optional Windows bridge
-`scripts/pdm.ps1` (requires `PDM_CLI_SSH_TARGET` + `PDM_CLI_REMOTE_PROGRAM`; no Hermes default; refuses
-password flags; `BatchMode=yes`), and `evals/triggers.json` for description routing. Fleet inventory and
-credentials stay in the owning ops repository / secrets skill.
+`references/env-notes.md` for environment launcher/SSH bindings only, gated
+`references/related-work.md` for adjacent PVE/MCP skill candidates (future enhancement only),
+optional Windows bridge `scripts/pdm.ps1` (requires `PDM_CLI_SSH_TARGET` + `PDM_CLI_REMOTE_PROGRAM`;
+no Hermes default; refuses password flags; `BatchMode=yes`), and `evals/triggers.json` for
+description routing. Fleet inventory and credentials stay in the owning ops repository / secrets skill.
 
 The 2026-07-20 live qualification used official client and PDM 1.1.6. Discovery returned four remotes and four
 resource groups; a wrong disposable TLS cache pin failed closed. Direct environment launcher and the bundled
