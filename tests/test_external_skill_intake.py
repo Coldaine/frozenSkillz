@@ -7,6 +7,18 @@ SKILL_ROOT = REPO_ROOT / "plugins" / "frozen-skills" / "skills" / "external-skil
 
 
 class ExternalSkillIntakeContractTests(unittest.TestCase):
+    def test_superpowers_snapshot_includes_archive_excluded_files(self):
+        source_root = (
+            REPO_ROOT / "_incubator" / "scout" / "2026-07-23-obra-superpowers" / "source"
+        )
+        source_files = [path for path in source_root.rglob("*") if path.is_file()]
+
+        self.assertEqual(172, len(source_files))
+        self.assertTrue((source_root / ".opencode" / "INSTALL.md").is_file())
+        self.assertTrue(
+            (source_root / ".opencode" / "plugins" / "superpowers.js").is_file()
+        )
+
     def test_supports_live_or_forensic_evaluations(self):
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         workflow = (REPO_ROOT / "docs" / "workflows" / "external-skill-intake.md").read_text(
