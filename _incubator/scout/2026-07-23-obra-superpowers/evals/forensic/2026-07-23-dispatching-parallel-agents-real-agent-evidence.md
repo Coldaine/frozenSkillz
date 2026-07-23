@@ -54,12 +54,24 @@ The evaluation does not infer speedup from overlap alone. It records concurrency
 policy, parent review, conflicts, integrated verification, lifecycle handling, and outcome as
 separate observations.
 
+The search and lineage inspection can be repeated with the documented CLI surface:
+
+```powershell
+agentsview session search 'dispatching-parallel-agents' --agent codex `
+  --include-children --include-automated --include-one-shot --limit 500 --json
+agentsview session get <session-id> --json
+agentsview session tool-calls <session-id> --json
+agentsview session messages <session-id> --from 0 --limit 500 --json
+```
+
 ## Assessment
 
-- Status: unresolved. Direct Codex transcripts now prove that the independence pattern can create
-  real overlap, useful synthesis, defect discovery, and successful integration. Activation,
-  pre-dispatch authority checks, context isolation, dispatch grouping, resource isolation, and
-  worker lifecycle remain inconsistent or harness-dependent.
+- Status: unresolved. Direct attributable Codex transcripts prove that the independence pattern can
+  create real overlap and useful synthesis. A separately labeled implicit match corroborates defect
+  discovery and successful integration for the broader pattern, but does not establish that this
+  skill caused those outcomes. Activation, pre-dispatch authority checks, context isolation,
+  dispatch grouping, resource isolation, and worker lifecycle remain inconsistent or
+  harness-dependent.
 - Corroborating evidence: pinned source, code history, open fixes, direct Codex transcripts with
   AgentsView child lineage and timestamps, real-agent issue reports, and maintainer triage.
 - Contradicting evidence: successful local fan-outs show the workflow has substantial practical

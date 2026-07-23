@@ -17,7 +17,7 @@ response, and unresolved risk. Confidence describes the evidence base supporting
 | Artifact | Type | Rubric average | Letter grade | Confidence | Recommendation |
 |---|---|---:|---:|---|---|
 | `skills/brainstorming/` | skill | 4.0/5 | B- | moderate | Incubate; mine patterns only after the full review |
-| `skills/dispatching-parallel-agents/` | skill | 3.7/5 | B- | strong for observed Codex behavior; moderate cross-harness | Prioritize adaptation; retain the independence gate and add explicit preflight, isolation, and lifecycle contracts |
+| `skills/dispatching-parallel-agents/` | skill | 3.6/5 | B- | strong for observed Codex behavior; moderate cross-harness | Prioritize adaptation; retain the independence gate and add explicit preflight, isolation, and lifecycle contracts |
 
 ## `brainstorming`
 
@@ -120,8 +120,8 @@ come from the separate `using-superpowers` harness references.
 | Reuse value | 5 | Independent investigation and research fan-out are broadly reusable |
 | Progressive disclosure or structure | 3 | Self-contained, but 185 lines repeat negative triggers, benefits, and the same example |
 | Safety/security risk | 3 | Rejects shared state, but lacks capability, authorization, resource-isolation, and cleanup gates |
-| Portability | 3 | AgentsView transcripts prove real Codex concurrency in old and current tool surfaces, but isolation, dispatch grouping, discovery, and lifecycle remain version-sensitive |
-| Testability/evaluability | 4 | AgentsView can reconstruct skill reads, tool calls, child lineage, overlap, context-fork settings, synthesis, and verification from durable Codex transcripts; upstream still ships no linked behavior result |
+| Portability | 2 | Harness-neutral prose depends on adapters whose Codex discovery, isolation, dispatch-grouping, and lifecycle mappings remain incomplete or version-sensitive |
+| Testability/evaluability | 3 | External transcript tooling makes the behavior manually inspectable, but the candidate ships no linked, repeatable behavior-eval result |
 | Maintenance burden | 3 | One file is simple, but tool semantics and per-harness lifecycle behavior drift underneath it |
 | Fit with frozenSkillz scope | 5 | Directly addresses reusable multi-agent coordination |
 | Trigger clarity | 3 | Independence is clear; the 2-versus-3 threshold is not |
@@ -129,11 +129,12 @@ come from the separate `using-superpowers` harness references.
 | Reference and template routing | 2 | No local routing points to harness capability, isolation, or cleanup guidance |
 | Gate quality before action | 4 | Independence and interference gates are strong, but capability and operating-surface checks are absent |
 
-Average: **3.7/5**. The revised letter grade is **B-**. Direct Codex transcripts show that the core
+Average: **3.6/5**. The revised letter grade is **B-**. Direct Codex transcripts show that the core
 pattern produces real concurrent work and useful synthesis, while also exposing missing preflight,
 context, dispatch-grouping, and lifecycle contracts. This is an editorial grade, not a measured
 comparison with sequential work. The workflow's importance in this environment is higher than the
-grade of the current written artifact.
+artifact-only rubric average: observed utility raises the editorial grade without crediting the
+candidate for evaluator infrastructure that it does not ship.
 
 ### Forensic Findings
 
@@ -175,13 +176,14 @@ The strongest reusable idea is the pre-dispatch independence test. The focused p
 post-integration full-suite check are also worth retaining. Those elements make the skill materially
 better than an undisciplined “spawn several agents” instruction.
 
-The direct transcript evidence moves this into the B range: concurrent child work, useful synthesis,
-reviewer value, and successful integration are observable rather than anecdotal. The current file
-still stays at B- because it contradicts itself on activation, asserts isolation without a portable
-mechanism, omits a shared authority/capability preflight, relies on version-sensitive discovery and
-lifecycle behavior, and presents an unlinked upstream recap as evidence of speed and conflict-free
-integration. Agent Teams are not counted against it: peer coordination is a different workflow,
-tracked separately upstream.
+The combined transcript evidence moves the editorial grade into the B range. Direct attributable
+runs demonstrate concurrent child work and useful synthesis. Separately, an implicit behavioral
+match demonstrates reviewer value and successful integration for the broader pattern, but is not
+credited causally to this skill. The current file stays at B- because it contradicts itself on
+activation, asserts isolation without a portable mechanism, omits a shared authority/capability
+preflight, relies on version-sensitive discovery and lifecycle behavior, and presents an unlinked
+upstream recap as evidence of speed and conflict-free integration. Agent Teams are not counted
+against it: peer coordination is a different workflow, tracked separately upstream.
 
 ## Summary Recommendation
 
