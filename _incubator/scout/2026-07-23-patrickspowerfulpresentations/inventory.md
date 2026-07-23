@@ -2,7 +2,7 @@
 
 ## Provenance
 
-- Source URL: local package `C:\Users\pmacl\Downloads\patrickspowerfulpresentations.skill` (ZIP handoff; no public git URL in package)
+- Source URL: local package `local Downloads/patrickspowerfulpresentations.skill` (ZIP handoff; no public git URL in package)
 - Commit or version: package SHA256 `89F0CF6AC9F2A305B337BFDC6F303B4AAE7FB075D6BDFB2452FBBBBBF1165097`; internal CHANGELOG present (v9-shaped router)
 - Import date: 2026-07-23
 - License: undeclared
@@ -19,7 +19,7 @@
 | hook | 0 | — |
 | config | 0 | — |
 | template | 0 | intermediates schemas live in refs (not separate templates/) |
-| eval-case | 0 | package ships `references/evaluation.md` (audit doctrine), not frozenSkillz eval cases |
+| eval-case | 1 | `evals/cases/visual-deliverable-route.md` (scout-authored; package `references/evaluation.md` stays documentation-pattern) |
 | documentation-pattern | 1 | lean router + `references/domains/*` + `references/techniques/*` progressive disclosure; CHANGELOG/ROADMAP for skill evolution |
 
 ## Useful / Risky / Project-Specific

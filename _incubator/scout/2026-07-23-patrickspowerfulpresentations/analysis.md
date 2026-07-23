@@ -10,7 +10,7 @@
 
 | Artifact | Type | Average | Recommendation |
 |---|---|---:|---|
-| `source/patrickspowerfulpresentations/` (whole skill) | skill | 4.2 | Incubate personal / stay gated |
+| `source/patrickspowerfulpresentations/` (whole skill) | skill | 4.43 | Incubate personal / stay gated |
 
 ## Detailed Notes
 
@@ -33,7 +33,7 @@
 | Artifact-specific: Reference and template routing | 5 | Read-path table with precedence (evidence > route > style-brief) |
 | Artifact-specific: Gate quality before action | 5 | No layout before dossier; verification must name satisfying elements |
 
-**Average:** (5+5+5+4+5+4+4+4+3+3+5+5+5+5) / 14 = **4.21** → band 3.5–4.4 (useful; cleanup/eval before any active packaging)
+**Average:** (5+5+5+4+5+4+4+4+3+3+5+5+5+5) / 14 = **4.43** → band 3.5–4.4 (useful; cleanup/eval before any active packaging)
 
 ## Summary Recommendation
 

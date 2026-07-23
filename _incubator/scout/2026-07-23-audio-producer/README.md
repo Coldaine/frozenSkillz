@@ -6,7 +6,7 @@ Unity SFX production skill packaged as a `.skill` ZIP handoff. Broadside-named a
 
 | Field | Value |
 |---|---|
-| Source package | `C:\Users\pmacl\Downloads\audio-producer.skill` |
+| Source package | `local Downloads/audio-producer.skill` |
 | Transport | ZIP renamed to `.skill` (single skill folder + refs + assets) |
 | Package size | 26607 bytes |
 | SHA256 | `FF25FF85760E3474BE9B978C0E218B3BCCD5049A8C87B5861AF965A4A62A53FC` |
@@ -31,5 +31,5 @@ source/audio-producer/   # read-only evidence
 ## Lane
 
 Personal / gated — same lane as `project-docs` / `rich-visual-responses`. Explicitly **not** `_incubator/frozen-skills/` marketplace-candidate lane.
-Live authoring root after landing: `C:\Users\pmacl\.agents\skills\audio-producer\`.
+Live authoring root after landing: `~/.agents/skills/audio-producer/`.
 Incubator mirror: `_incubator/personal-skills/audio-producer/`.

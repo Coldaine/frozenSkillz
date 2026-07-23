@@ -6,7 +6,7 @@ Personal visual-deliverable skill packaged as a `.skill` ZIP handoff.
 
 | Field | Value |
 |---|---|
-| Source package | `C:\Users\pmacl\Downloads\patrickspowerfulpresentations.skill` |
+| Source package | `local Downloads/patrickspowerfulpresentations.skill` |
 | Transport | ZIP renamed to `.skill` (single skill folder + refs) |
 | Package size | 40568 bytes |
 | SHA256 | `89F0CF6AC9F2A305B337BFDC6F303B4AAE7FB075D6BDFB2452FBBBBBF1165097` |
@@ -31,5 +31,5 @@ source/patrickspowerfulpresentations/   # read-only evidence
 ## Lane
 
 Personal / gated — not a marketplace or `plugins/frozen-skills` candidate this pass.
-Live authoring root after landing: `C:\Users\pmacl\.agents\skills\patrickspowerfulpresentations\`.
+Live authoring root after landing: `~/.agents/skills/patrickspowerfulpresentations/`.
 Incubator mirror: `_incubator/personal-skills/patrickspowerfulpresentations/`.

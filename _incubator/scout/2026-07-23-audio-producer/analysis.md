@@ -10,7 +10,7 @@
 
 | Artifact | Type | Average | Recommendation |
 |---|---|---:|---|
-| `source/audio-producer/` (whole skill) | skill | 4.0 | Incubate personal / stay gated |
+| `source/audio-producer/` (whole skill) | skill | 4.36 | Incubate personal / stay gated |
 
 ## Detailed Notes
 
@@ -33,7 +33,7 @@
 | Artifact-specific: Reference and template routing | 5 | Table maps phases → refs/assets |
 | Artifact-specific: Gate quality before action | 5 | Incomplete six-field → checklist only, never generate |
 
-**Average:** (5+5+5+4+5+4+3+3+3+4+5+5+5+5) / 14 = **4.00** → band 3.5–4.4
+**Average:** (5+5+5+4+5+4+3+3+3+4+5+5+5+5) / 14 = **4.36** → band 3.5–4.4
 
 ### Broadside examples (worked evidence note)
 

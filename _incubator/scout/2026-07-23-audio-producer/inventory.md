@@ -2,7 +2,7 @@
 
 ## Provenance
 
-- Source URL: local package `C:\Users\pmacl\Downloads\audio-producer.skill` (ZIP handoff; no public git URL in package)
+- Source URL: local package `local Downloads/audio-producer.skill` (ZIP handoff; no public git URL in package)
 - Commit or version: package SHA256 `FF25FF85760E3474BE9B978C0E218B3BCCD5049A8C87B5861AF965A4A62A53FC`
 - Import date: 2026-07-23
 - License: undeclared
@@ -19,7 +19,7 @@
 | hook | 0 | — |
 | config | 0 | expects project `docs/audio/PROFILE.md`, `Sound_Design.md`, Master Log |
 | template | 2 | `assets/master-log-entry.md`, `assets/review-checklist-entry.md` |
-| eval-case | 0 | — |
+| eval-case | 1 | `evals/cases/moment-reasoning-gate.md` |
 | documentation-pattern | 1 | phase loop + reference routing; Broadside worked examples in `assets/` |
 
 ## Useful / Risky / Project-Specific

@@ -8,15 +8,15 @@
 - Outcome: **incubate for later** — specifically **incubate personal / stay gated** (not marketplace incubate)
 - Affected frozenSkillz paths:
   - Scout: `_incubator/scout/2026-07-23-patrickspowerfulpresentations/`
-  - Live: `C:\Users\pmacl\.agents\skills\patrickspowerfulpresentations\`
-  - Mirror: `_incubator/personal-skills/patrickspowerfulpresentations\`
+  - Live: `~/.agents/skills/patrickspowerfulpresentations/`
+  - Mirror: `_incubator/personal-skills/patrickspowerfulpresentations/`
   - Tracker: `docs/skill-review/tracker.md` (scout row + personal-skills row)
   - **Not affected:** any `plugins/` or marketplace JSON
 
 ## Evidence
 
 - Inventory summary: one skill; seven domain routes + techniques; undeclared license; no secrets
-- Rubric score summary: whole-skill average **4.2** (band: useful, needs focused cleanup/eval before active packaging)
+- Rubric score summary: whole-skill average **4.43** (band: useful, needs focused cleanup/eval before active packaging)
 - Eval run paths: optional case only — `evals/cases/visual-deliverable-route.md` (no three-way promotion run)
 - Safety notes: overbuild risk mitigated by Phase 0 + negative triggers; no credential surface in package
 - Maintenance notes: style-brief size and CHANGELOG/ROADMAP imply ongoing personal evolution
