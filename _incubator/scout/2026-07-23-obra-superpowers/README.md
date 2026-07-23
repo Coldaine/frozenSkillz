@@ -17,7 +17,8 @@ is evidence only; do not edit or promote files directly from `source/`.
 The snapshot was produced from `v6.1.1` with `git archive`; the two paths excluded by upstream
 archive rules (`.opencode/INSTALL.md` and `.opencode/plugins/superpowers.js`) were restored from
 the same tag. All 172 path modes and blob IDs were then compared with the tag, so local
-plugin-cache changes and `.git` metadata are excluded.
+plugin-cache changes and `.git` metadata are excluded. `source-tree.tsv` persists the expected Git
+mode and blob ID for every source path and is checked by the repository test suite.
 
 ## Evaluation Mode
 

@@ -1,3 +1,8 @@
+---
+name: external-skill-intake
+description: Evaluate external skill, plugin, agent, command, hook, configuration, template, evaluation, or documentation-pattern repositories for possible frozenSkillz adoption using live or forensic evidence before promotion.
+---
+
 # External Skill Intake
 
 Use this skill when evaluating an external skill, plugin, agent, command, hook, config, template, eval, or documentation-pattern repo for possible frozenSkillz adoption.
@@ -6,7 +11,8 @@ Do not use this for ordinary local skill authoring, direct promotion of already-
 
 ## Rules
 
-- Follow `docs/workflows/external-skill-intake.md` in order.
+- Follow the bundled workflow below in order; repo-local documentation may add placement or
+  governance constraints when it is available.
 - Keep external source read-only under `_incubator/scout/<YYYY-MM-DD>-<repo>/source/`.
 - Inventory before scoring.
 - Score scoped artifacts before packaging decisions.

@@ -8,15 +8,12 @@
 
 ## Evidence
 
-| Field | Value |
-|---|---|
-| Source URL or path |  |
-| Source type | transcript, issue, commit, test, release note, or other |
-| Captured | YYYY-MM-DD |
-| Version or revision |  |
-| Harness, model, and OS |  |
-| Observed behavior |  |
-| Reproduction details |  |
+Add one row for every source. Use `unknown` rather than omitting context that the source does not
+identify.
+
+| Source URL or path | Type | Captured | Version or revision | Harness, model, and OS | Status | Observed behavior and reproduction details |
+|---|---|---|---|---|---|---|
+|  | transcript, issue, commit, test, release note, or other | YYYY-MM-DD | unknown | unknown | current, fixed, historical, unresolved, or unclear |  |
 
 ## Assessment
 

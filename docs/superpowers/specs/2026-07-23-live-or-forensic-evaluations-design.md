@@ -16,7 +16,7 @@ The mode must be named explicitly. Neither mode may be presented as the other.
 ## Evidence Contract
 
 Every material finding records its source, affected version and harness when known, status
-(`current`, `fixed`, `historical`, or `unresolved`), and confidence. Forensic evaluation ranks
+(`current`, `fixed`, `historical`, `unresolved`, or `unclear`), and confidence. Forensic evaluation ranks
 direct transcripts and reproducible artifacts above corroborated issue reports, and ranks isolated
 anecdotes below both. Absence of a live run does not invalidate a well-supported forensic finding.
 
