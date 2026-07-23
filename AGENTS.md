@@ -17,6 +17,7 @@ If documents disagree, follow the highest applicable source above and fix the st
 | Task | Read first |
 |---|---|
 | Evaluate an external skill/plugin/agent repo | `plugins/frozen-skills/skills/external-skill-intake/SKILL.md`, then `docs/workflows/external-skill-intake.md` |
+| Land scout/intake into `_incubator` (files + tracker) | `docs/workflows/external-skill-intake.md` (repo landing), then Completion Contract in `docs/workflows/skill-authority-and-frozen-sync.md`; **commit, push, PR** |
 | Check whether a skill is active or gated | `docs/skill-review/tracker.md` |
 | Promote a gated skill | `docs/skill-review/tracker.md` and the relevant plugin manifests |
 | Update installable frozen-skills content | `plugins/frozen-skills/.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, `.cursor-plugin/plugin.json`, `gemini-extension.json` |
@@ -34,7 +35,7 @@ If documents disagree, follow the highest applicable source above and fix the st
 - Treat manifest-listed content under `plugins/frozen-skills/skills` as the source for active distributed skills.
 - Treat synchronized copies under `~/.agents/skills` as managed runtime output; protect local changes as conflicts rather than silently reversing the authority flow.
 - Treat `~/.agents/skills` as the authoring source only for personal or gated skills; mirror those into `_incubator/` for durable review.
-- **Skill rewrite done means committed+pushed in this repo** (incubator or plugins path). “Stay gated” ≠ “skip git.” See Completion Contract in `docs/workflows/skill-authority-and-frozen-sync.md`.
+- **Repo landing done means committed+pushed in this repo** (scout/intake under `_incubator/`, personal/gated mirrors, or `plugins/`). Tracker updates without git are incomplete. “Stay gated” ≠ “skip git.” See Completion Contract in `docs/workflows/skill-authority-and-frozen-sync.md`.
 - Update all four plugin manifests when adding or removing active frozen-skills skills.
 - Bump aligned plugin and marketplace versions when public plugin metadata changes.
 - Validate changed JSON and every manifest `skills[].path` before publishing.

@@ -14,6 +14,7 @@ The goal is to learn from external work without turning active marketplace conte
 6. Run at least one sandboxed live eval before recommending any large pattern for promotion.
 7. Record packaging decisions with rationale and affected paths.
 8. Promote only adapted, reviewed output into `plugins/`, `docs/`, or another active location.
+9. Land `_incubator/` and tracker changes with commit + push + PR in the same session unless the operator said live-only. Files and tracker rows alone are incomplete; see Completion Contract in `docs/workflows/skill-authority-and-frozen-sync.md`.
 
 ## Non-Negotiables
 

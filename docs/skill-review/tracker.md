@@ -72,6 +72,8 @@ Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental �
 | 2. LukasNiessen/kubernetes-skill → **core workflow + failure-mode refs** (324 stars) | adopt · adapt | _(not snapshotted)_ | Manifest prove-before-mutate layer before Helmfile commit/apply. Drop cloud CRR dumps (EKS/GKE/AKS) unless a real intent appears. |
 | 3. Coldaine **k8s-platform-operator** (author) + CAPMOX seed | author · design | _(not authored)_ | Thin glue skill: prove → helmfile diff → P0 → intentional apply → live verify. Seed CAPMOX from [ionos-cloud/cluster-api-provider-proxmox AGENTS.md](https://github.com/ionos-cloud/cluster-api-provider-proxmox/blob/main/AGENTS.md) (463 stars). Not an external install. |
 | Concept-mine only (no scout package) | deferred | — | [siderolabs/docs](https://github.com/siderolabs/docs) public/skill.md (11 stars): no-SSH / talosctl facts (strip Omni). wcygan read-only talosctl guardrails (192 stars). ConfigHub ApplyGates wording (2 stars). Optional: CNPG CRD table from Aidas later. |
+| patrickspowerfulpresentations `.skill` ZIP (SHA256 `89F0CF6A…165097`) | scout · incubating personal (2026-07-23) | `_incubator/scout/2026-07-23-patrickspowerfulpresentations/` | Whole-skill rubric ~4.43 → **incubate personal / stay gated**. Live `~/.agents/skills/patrickspowerfulpresentations/` + mirror `_incubator/personal-skills/patrickspowerfulpresentations/`. No plugins/manifests. Optional case `evals/cases/visual-deliverable-route.md`. |
+| audio-producer `.skill` ZIP (SHA256 `FF25FF85…2A53FC`) | scout · incubating personal (2026-07-23) | `_incubator/scout/2026-07-23-audio-producer/` | Whole-skill rubric ~4.36 → **incubate personal / stay gated** (not `_incubator/frozen-skills/` marketplace lane). Broadside `assets/example-*-broadside.md` = worked evidence. Live + `_incubator/personal-skills/audio-producer/`. Optional case `evals/cases/moment-reasoning-gate.md`. |
 | Parked / do not adopt | discarded · noted 2026-07-21 | — | **Flux skills** (
 luxcd/agent-skills, Aidas
 lux router, gitops-cluster-debug) — wrong reconciler for coldaine-k8cluster. Whole Aidas dump; kubectl-MCP packs; clouddrove/Jeffallan/sickn33/wshobson mutate cookbooks; Omni-as-CAPMOX; kagent apply-after-generate. |
@@ -237,8 +239,30 @@ marketplace-promoted — not “leave uncommitted.” Full contract: `docs/workf
 | `skill-finder` | **provenance unconfirmed** | 🛑 gated · confirm origin | Confirm authored vs downloaded. |
 | `context7-mcp` | **provenance unconfirmed** | 🛑 gated · thin/redundant? | Likely overlaps global `~/.claude/rules/context7.md` — decide keep/drop. |
 | `google-stitch-ui-designer` | **provenance unconfirmed** | 🛑 gated · confirm origin | External-tool guide; confirm authored vs downloaded. |
+| `patrickspowerfulpresentations` | `.skill` ZIP intake 2026-07-23 (Downloads; scout `2026-07-23-patrickspowerfulpresentations`; SHA256 `89F0CF6A…165097`) | 🛑 gated · **incubating** (2026-07-23) | Stay personal/gated. Optional live visual-deliverable eval. De-brand + ~300-char description only if later considering broader reuse. Stay out of marketplace manifests and `_incubator/frozen-skills/`. |
+| `audio-producer` | `.skill` ZIP intake 2026-07-23 (Downloads; scout `2026-07-23-audio-producer`; SHA256 `FF25FF85…2A53FC`); Broadside examples = worked evidence | 🛑 gated · **incubating** (2026-07-23) | Stay personal/gated. Live Unity+ElevenLabs sound-pass later. Keep Broadside `assets/example-*-broadside.md` as worked evidence. De-personalize / second-project proof only if considering broader reuse. Do **not** move to `_incubator/frozen-skills/`. |
 
 Next pass: confirm provenance on the 5 unconfirmed, fix `insight-extractor` frontmatter, then decide which earn promotion toward active (each needs de-personalization + manifest entries + version bump per the promotion bar).
+
+
+### `patrickspowerfulpresentations` — incubating (`.skill` intake, 2026-07-23)
+
+- **Source:** local package `local Downloads/patrickspowerfulpresentations.skill` (ZIP handoff; 40568 bytes). SHA256 `89F0CF6AC9F2A305B337BFDC6F303B4AAE7FB075D6BDFB2452FBBBBBF1165097`. License undeclared. No public git URL in package.
+- **Scout:** `_incubator/scout/2026-07-23-patrickspowerfulpresentations/` — inventory, whole-skill rubric, decision log, optional case `evals/cases/visual-deliverable-route.md` (no three-way promotion eval).
+- **Rubric:** whole-skill average **~4.43** (band 3.5–4.4: useful; cleanup/eval before any active packaging). Strong triggers, Phase 0 decline path, progressive disclosure; brand name + large style-brief argue against marketplace.
+- **Packaging decision:** **incubate personal / stay gated**. Landed identical trees at live `~/.agents/skills/patrickspowerfulpresentations/` and `_incubator/personal-skills/patrickspowerfulpresentations/`. **Not** `_incubator/frozen-skills/`; no plugin/marketplace manifests.
+- **Stay-gated rationale:** personal visual-deliverable workflow (branded title, web-toolchain preferences, maintenance surface). Operator evaluation ownership in frozenSkillz without catalog promotion.
+- **Required before any promotion attempt:** live visual-deliverable case; de-brand; trim description to ~300-char bar; three-way eval if considering active packaging.
+
+### `audio-producer` — incubating (`.skill` intake, 2026-07-23)
+
+- **Source:** local package `local Downloads/audio-producer.skill` (ZIP handoff; 26607 bytes). SHA256 `FF25FF85760E3474BE9B978C0E218B3BCCD5049A8C87B5861AF965A4A62A53FC`. License undeclared.
+- **Scout:** `_incubator/scout/2026-07-23-audio-producer/` — inventory, whole-skill rubric, decision log, optional case `evals/cases/moment-reasoning-gate.md` (no three-way promotion eval).
+- **Rubric:** whole-skill average **~4.36**. High gate quality (six-field reasoning before generate; Master Log + Review Checklist); honestly Unity + ElevenLabs MCP locked.
+- **Broadside evidence:** `assets/example-walk-broadside.md`, `example-profile-broadside.md`, and `example-sound-design-broadside.md` are **worked evidence** from Project Broadside (same operator pattern as `unity-editor-mcp`), not portable defaults to strip this pass.
+- **Packaging decision:** **incubate personal / stay gated**. Live `~/.agents/skills/audio-producer/` + `_incubator/personal-skills/audio-producer/`. Explicitly **not** the `_incubator/frozen-skills/` marketplace-candidate lane; no manifests; do not run `sync_frozen_skills.py` for this skill.
+- **Stay-gated rationale:** MCP/tool lock + Broadside-coupled examples make catalog promotion premature; personal lane matches authority model for gated skills under evaluation.
+- **Required before any broader-reuse attempt:** live Unity+ElevenLabs sound-pass; second-project proof before de-personalization; keep Broadside examples labeled as evidence.
 
 ### PR #35 review findings (routed 2026-07-06)
 
