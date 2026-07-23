@@ -14,8 +14,10 @@ is evidence only; do not edit or promote files directly from `source/`.
 - Reviewer: Codex with operator review
 - Installed Codex used for local inspection: `codex-cli 0.145.0`
 
-The snapshot was produced with `git archive v6.1.1`, so local plugin-cache changes and `.git`
-metadata are excluded.
+The snapshot was produced from `v6.1.1` with `git archive`; the two paths excluded by upstream
+archive rules (`.opencode/INSTALL.md` and `.opencode/plugins/superpowers.js`) were restored from
+the same tag. All 172 path modes and blob IDs were then compared with the tag, so local
+plugin-cache changes and `.git` metadata are excluded.
 
 ## Evaluation Mode
 
