@@ -79,7 +79,7 @@ A GitHub issue alone is not the durable rewrite. Uncommitted incubator files are
 
 ## Completion Contract
 
-When the operator asks to rewrite, fix, or sync a skill that this repository tracks, the work is incomplete until the applicable authority lane is durable:
+When the operator asks to rewrite, fix, sync, or land tracked skill material into this repository (including scout/intake under `_incubator/` and related tracker updates), the work is incomplete until the applicable authority lane is durable:
 
 | Required | Not sufficient |
 |---|---|
@@ -162,7 +162,7 @@ For an active distribution change, report:
 - destination conflicts intentionally left unresolved; and
 - the repository revision synchronized to each computer when deployment is in scope.
 
-For a personal/gated change, report:
+For a personal/gated or incubator/scout landing change, report:
 
 - the live path compared and incubator path changed;
 - tracker or promotion status changes;
