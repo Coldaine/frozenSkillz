@@ -32,7 +32,7 @@ Each decision must include:
 - Decision option.
 - Evidence from inventory.
 - Rubric score summary.
-- Eval evidence, if applicable.
+- Evaluation evidence and mode, if applicable.
 - Safety and maintenance notes.
 - Affected frozenSkillz paths.
 - Follow-up owner or `none`.

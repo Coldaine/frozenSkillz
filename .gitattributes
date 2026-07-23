@@ -2,3 +2,5 @@
 # Default: LF for all text files
 * text=auto eol=lf
 
+# Preserve external scout evidence verbatim; do not lint upstream whitespace as repo-authored text.
+_incubator/scout/2026-07-23-obra-superpowers/source/** -whitespace
