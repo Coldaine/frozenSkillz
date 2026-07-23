@@ -56,6 +56,9 @@ separate observations.
 
 The search and lineage inspection can be repeated with the documented CLI surface:
 
+On the reviewed Windows installation, replace `agentsview` below with
+`C:\Users\pmacl\AppData\Local\AgentsView\agentsview.exe` because the executable is not on `PATH`.
+
 ```powershell
 agentsview session search 'dispatching-parallel-agents' --agent codex `
   --include-children --include-automated --include-one-shot --limit 500 --json
