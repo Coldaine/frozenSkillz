@@ -77,28 +77,37 @@ class ExternalSkillIntakeContractTests(unittest.TestCase):
         self.assertEqual(172, len(expected))
         self.assertEqual(expected, actual)
 
-    def test_completed_forensic_record_uses_canonical_statuses(self):
-        record = (
+    def test_completed_forensic_records_use_canonical_statuses(self):
+        forensic_root = (
             REPO_ROOT
             / "_incubator"
             / "scout"
             / "2026-07-23-obra-superpowers"
             / "evals"
             / "forensic"
-            / "2026-07-23-brainstorming-real-agent-evidence.md"
-        ).read_text(encoding="utf-8")
+        )
+        record_paths = sorted(forensic_root.glob("*-real-agent-evidence.md"))
         allowed = {"current", "fixed", "historical", "unresolved", "unclear"}
-        evidence_rows = [line for line in record.splitlines() if line.startswith("| [")]
 
-        self.assertEqual(10, len(evidence_rows))
-        for row in evidence_rows:
-            columns = [column.strip() for column in row.strip("|").split("|")]
-            self.assertRegex(columns[2], r"^\d{4}-\d{2}-\d{2}$")
-            self.assertIn(columns[4], allowed)
+        self.assertEqual(
+            {
+                "2026-07-23-brainstorming-real-agent-evidence.md",
+                "2026-07-23-dispatching-parallel-agents-real-agent-evidence.md",
+            },
+            {path.name for path in record_paths},
+        )
+        for record_path in record_paths:
+            record = record_path.read_text(encoding="utf-8")
+            evidence_rows = [line for line in record.splitlines() if line.startswith("| [")]
+            self.assertTrue(evidence_rows, record_path)
+            for row in evidence_rows:
+                columns = [column.strip() for column in row.strip("|").split("|")]
+                self.assertRegex(columns[2], r"^\d{4}-\d{2}-\d{2}$")
+                self.assertIn(columns[4], allowed)
 
-        aggregate_status = re.search(r"(?m)^- Status: ([a-z]+)[.;]", record)
-        self.assertIsNotNone(aggregate_status)
-        self.assertIn(aggregate_status.group(1), allowed)
+            aggregate_status = re.search(r"(?m)^- Status: ([a-z]+)[.;]", record)
+            self.assertIsNotNone(aggregate_status, record_path)
+            self.assertIn(aggregate_status.group(1), allowed)
 
         design = (
             REPO_ROOT

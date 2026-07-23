@@ -35,7 +35,8 @@ transcript or corroborating artifact remains useful but receives lower confidenc
 | Skill | Status | Grade |
 |---|---|---|
 | `brainstorming` | reviewed 2026-07-23 | B- (moderate confidence) |
-| Remaining 13 skills | pending one-at-a-time review | not graded |
+| `dispatching-parallel-agents` | reviewed 2026-07-23 | C+ (moderate confidence) |
+| Remaining 12 skills | pending one-at-a-time review | not graded |
 
 See `inventory.md` for the complete doctree, `analysis.md` for grades and rationale,
 `evals/forensic/` for source-level findings, and `decisions.md` for packaging status.

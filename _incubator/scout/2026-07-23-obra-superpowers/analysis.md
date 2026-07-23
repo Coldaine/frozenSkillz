@@ -2,9 +2,9 @@
 
 ## Scope
 
-- Selected artifact: `skills/brainstorming/`.
+- Selected artifacts: `skills/brainstorming/` and `skills/dispatching-parallel-agents/`.
 - Reason: the operator requested a one-at-a-time doctree, intent, evidence, and letter-grade review.
-- Out of scope for this pass: grades for the remaining 13 skills and any repo-wide adoption claim.
+- Out of scope for this pass: grades for the remaining 12 skills and any repo-wide adoption claim.
 
 ## Grade Meaning
 
@@ -17,6 +17,7 @@ response, and unresolved risk. Confidence describes the evidence base supporting
 | Artifact | Type | Rubric average | Letter grade | Confidence | Recommendation |
 |---|---|---:|---:|---|---|
 | `skills/brainstorming/` | skill | 4.0/5 | B- | moderate | Incubate; mine patterns only after the full review |
+| `skills/dispatching-parallel-agents/` | skill | 3.6/5 | C+ | moderate | Incubate; adapt the independence gate, not the current operational contract |
 
 ## `brainstorming`
 
@@ -92,10 +93,93 @@ commits before isolation decisions, gives a concrete output path more salience t
 authority, and does not require an evidence basis before recommending an option. The optional
 companion is substantially hardened but materially raises complexity and maintenance cost.
 
+## `dispatching-parallel-agents`
+
+### Intent and Doctree
+
+The skill teaches a controller to identify genuinely independent problem domains, give each worker
+a narrow and self-contained brief, launch the workers concurrently, and integrate their results
+under a full-suite verification gate. It is intentionally a fan-out/fan-in pattern, not a
+coordinated agent-team workflow.
+
+```text
+dispatching-parallel-agents/
+└── SKILL.md
+```
+
+There are no bundled references, templates, scripts, or tests. Platform behavior is expected to
+come from the separate `using-superpowers` harness references.
+
+### Rubric Scores
+
+| Dimension | Score | Rationale |
+|---|---:|---|
+| Purpose clarity | 5 | The independent-domain fan-out/fan-in purpose is explicit |
+| Activation or invocation clarity | 3 | Frontmatter says 2+ tasks while the body says 3+ failing files |
+| Output contract | 4 | Requires a root-cause/change summary and integration checks, but no lifecycle/status record |
+| Reuse value | 5 | Independent investigation and research fan-out are broadly reusable |
+| Progressive disclosure or structure | 3 | Self-contained, but 185 lines repeat negative triggers, benefits, and the same example |
+| Safety/security risk | 3 | Rejects shared state, but lacks capability, authorization, resource-isolation, and cleanup gates |
+| Portability | 2 | Harness-neutral prose depends on adapters whose Codex discovery, isolation, and lifecycle mappings are incomplete or version-sensitive |
+| Testability/evaluability | 3 | A dated success narrative and historical trigger case exist, but no shipped behavior-eval result supports the outcome claims |
+| Maintenance burden | 3 | One file is simple, but tool semantics and per-harness lifecycle behavior drift underneath it |
+| Fit with frozenSkillz scope | 5 | Directly addresses reusable multi-agent coordination |
+| Trigger clarity | 3 | Independence is clear; the 2-versus-3 threshold is not |
+| Negative triggers | 5 | Related failures, exploration, full-context work, and shared state are explicitly excluded |
+| Reference and template routing | 2 | No local routing points to harness capability, isolation, or cleanup guidance |
+| Gate quality before action | 4 | Independence and interference gates are strong, but capability and operating-surface checks are absent |
+
+Average: **3.6/5**. The letter grade is **C+** because the core reasoning pattern is useful, but
+normal operation still depends on unstated or stale harness behavior. This is an editorial grade,
+not a measured comparison with sequential work.
+
+### Forensic Findings
+
+| Finding | Status | Confidence | Evidence |
+|---|---|---|---|
+| The 2+ frontmatter trigger conflicts with the 3+ body threshold | unresolved | strong | Current v6.1.1 source and open [#948](https://github.com/obra/superpowers/pull/948) agree on the one-line defect |
+| Models dispatched nominally parallel work across sequential turns | fixed | moderate | [#1470](https://github.com/obra/superpowers/pull/1470) records a real sequential session; v6.1.1 now says dispatches must share one response |
+| Context isolation is required but not operationally mapped for Codex history/fork controls | current | strong | Current skill and Codex adapter contain the guarantee but no history-control mapping |
+| Codex capability discovery guidance can falsely conclude that subagents are unavailable | unresolved | moderate | [#1633](https://github.com/obra/superpowers/issues/1633) was closed after ambiguity, while open [#1662](https://github.com/obra/superpowers/pull/1662) records deferred discovery in Codex Desktop |
+| Completed Codex agents can retain concurrency slots after result consumption on some runtime versions | unresolved | strong | [#1927](https://github.com/obra/superpowers/issues/1927) cites Codex v1 source and open [#1982](https://github.com/obra/superpowers/pull/1982) adds a neutral release step; Codex v2 may expose no close operation |
+| Parallel work can collide on worktree-local ports, databases, or files | current | moderate | [#597](https://github.com/obra/superpowers/issues/597) confirms the collision class; maintainers assign environment isolation to project instructions |
+| Development workers sometimes stopped to ask permission despite being dispatched to implement | unclear | limited | [#473](https://github.com/obra/superpowers/issues/473) reports one paired real-world example; maintainer attributes it to harness behavior and no transcript is preserved |
+| The dated “time of one” and zero-conflict success story is not auditable in the release | current | strong | v6.1.1 and current `main` contain no linked transcript or run artifact; merged-to-`dev` [#1934](https://github.com/obra/superpowers/pull/1934) removes the social-proof recap but is not yet released |
+
+### Codex Fit and Settings
+
+The v6.1.1 Codex reference explicitly recommends:
+
+```toml
+[features]
+multi_agent = true
+```
+
+That setting is already enabled on the reviewed Codex installation, so this skill review recommends
+**no additional Codex setting change**. Do not treat the setting alone as proof that dispatch is
+available: newer Codex surfaces may expose agents by default or through deferred tool discovery,
+and the current session's actual tool surface remains authoritative.
+
+The more important adaptation is behavioral: request explicit subagent authority, choose a
+history/fork policy instead of assuming isolation, preserve file and resource boundaries, consume
+results, and release workers only when the active harness provides and requires that lifecycle.
+
+### Assessment
+
+The strongest reusable idea is the pre-dispatch independence test. The focused prompt structure and
+post-integration full-suite check are also worth retaining. Those elements make the skill materially
+better than an undisciplined “spawn several agents” instruction.
+
+The current file does not earn a B-range grade because it converts a sound principle into a brittle
+cross-harness contract. It contradicts itself on activation, asserts isolation without a portable
+mechanism, relies on an adapter with current Codex discovery and lifecycle disputes, and presents an
+unlinked session recap as evidence of speed and conflict-free integration. Agent Teams are not
+counted against it: peer coordination is a different workflow, tracked separately upstream.
+
 ## Summary Recommendation
 
 - Recommended outcome: incubate for later; do not import wholesale.
 - Potential concepts to adapt: evidence-aware design gates, incremental user approval, and explicit
   separation between design and implementation planning.
-- Open questions: review the remaining skills and determine whether the methodology works better as
+- Open questions: review the remaining 12 skills and determine whether the methodology works better as
   selected independent skills or as a tightly coupled suite.
