@@ -98,12 +98,19 @@ class ExternalSkillIntakeContractTests(unittest.TestCase):
         )
         for record_path in record_paths:
             record = record_path.read_text(encoding="utf-8")
+            self.assertIn(
+                "| Source | Type | Captured | Version or revision | Harness, model, and OS | Status | Result |",
+                record,
+            )
             evidence_rows = [line for line in record.splitlines() if line.startswith("| [")]
             self.assertTrue(evidence_rows, record_path)
             for row in evidence_rows:
                 columns = [column.strip() for column in row.strip("|").split("|")]
+                self.assertEqual(7, len(columns), row)
                 self.assertRegex(columns[2], r"^\d{4}-\d{2}-\d{2}$")
-                self.assertIn(columns[4], allowed)
+                self.assertTrue(columns[3], row)
+                self.assertTrue(columns[4], row)
+                self.assertIn(columns[5], allowed)
 
             aggregate_status = re.search(r"(?m)^- Status: ([a-z]+)[.;]", record)
             self.assertIsNotNone(aggregate_status, record_path)

@@ -138,7 +138,7 @@ not a measured comparison with sequential work.
 | Finding | Status | Confidence | Evidence |
 |---|---|---|---|
 | The 2+ frontmatter trigger conflicts with the 3+ body threshold | unresolved | strong | Current v6.1.1 source and open [#948](https://github.com/obra/superpowers/pull/948) agree on the one-line defect |
-| Models dispatched nominally parallel work across sequential turns | fixed | moderate | [#1470](https://github.com/obra/superpowers/pull/1470) records a real sequential session; v6.1.1 now says dispatches must share one response |
+| The skill omitted the same-response mechanic needed for parallel tool dispatch | fixed | moderate | [#1470](https://github.com/obra/superpowers/pull/1470) records a real sequential session; v6.1.1 adds the missing instruction, but no post-change compliance run is persisted |
 | Context isolation is required but not operationally mapped for Codex history/fork controls | current | strong | Current skill and Codex adapter contain the guarantee but no history-control mapping |
 | Codex capability discovery guidance can falsely conclude that subagents are unavailable | unresolved | moderate | [#1633](https://github.com/obra/superpowers/issues/1633) was closed after ambiguity, while open [#1662](https://github.com/obra/superpowers/pull/1662) records deferred discovery in Codex Desktop |
 | Completed Codex agents can retain concurrency slots after result consumption on some runtime versions | unresolved | strong | [#1927](https://github.com/obra/superpowers/issues/1927) cites Codex v1 source and open [#1982](https://github.com/obra/superpowers/pull/1982) adds a neutral release step; Codex v2 may expose no close operation |
