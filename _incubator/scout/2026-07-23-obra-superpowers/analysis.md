@@ -17,7 +17,7 @@ response, and unresolved risk. Confidence describes the evidence base supporting
 | Artifact | Type | Rubric average | Letter grade | Confidence | Recommendation |
 |---|---|---:|---:|---|---|
 | `skills/brainstorming/` | skill | 4.0/5 | B- | moderate | Incubate; mine patterns only after the full review |
-| `skills/dispatching-parallel-agents/` | skill | 3.6/5 | C+ | moderate | Incubate; adapt the independence gate, not the current operational contract |
+| `skills/dispatching-parallel-agents/` | skill | 3.7/5 | B- | strong for observed Codex behavior; moderate cross-harness | Prioritize adaptation; retain the independence gate and add explicit preflight, isolation, and lifecycle contracts |
 
 ## `brainstorming`
 
@@ -120,8 +120,8 @@ come from the separate `using-superpowers` harness references.
 | Reuse value | 5 | Independent investigation and research fan-out are broadly reusable |
 | Progressive disclosure or structure | 3 | Self-contained, but 185 lines repeat negative triggers, benefits, and the same example |
 | Safety/security risk | 3 | Rejects shared state, but lacks capability, authorization, resource-isolation, and cleanup gates |
-| Portability | 2 | Harness-neutral prose depends on adapters whose Codex discovery, isolation, and lifecycle mappings are incomplete or version-sensitive |
-| Testability/evaluability | 3 | A dated success narrative and historical trigger case exist, but no shipped behavior-eval result supports the outcome claims |
+| Portability | 3 | AgentsView transcripts prove real Codex concurrency in old and current tool surfaces, but isolation, dispatch grouping, discovery, and lifecycle remain version-sensitive |
+| Testability/evaluability | 4 | AgentsView can reconstruct skill reads, tool calls, child lineage, overlap, context-fork settings, synthesis, and verification from durable Codex transcripts; upstream still ships no linked behavior result |
 | Maintenance burden | 3 | One file is simple, but tool semantics and per-harness lifecycle behavior drift underneath it |
 | Fit with frozenSkillz scope | 5 | Directly addresses reusable multi-agent coordination |
 | Trigger clarity | 3 | Independence is clear; the 2-versus-3 threshold is not |
@@ -129,16 +129,21 @@ come from the separate `using-superpowers` harness references.
 | Reference and template routing | 2 | No local routing points to harness capability, isolation, or cleanup guidance |
 | Gate quality before action | 4 | Independence and interference gates are strong, but capability and operating-surface checks are absent |
 
-Average: **3.6/5**. The letter grade is **C+** because the core reasoning pattern is useful, but
-normal operation still depends on unstated or stale harness behavior. This is an editorial grade,
-not a measured comparison with sequential work.
+Average: **3.7/5**. The revised letter grade is **B-**. Direct Codex transcripts show that the core
+pattern produces real concurrent work and useful synthesis, while also exposing missing preflight,
+context, dispatch-grouping, and lifecycle contracts. This is an editorial grade, not a measured
+comparison with sequential work. The workflow's importance in this environment is higher than the
+grade of the current written artifact.
 
 ### Forensic Findings
 
 | Finding | Status | Confidence | Evidence |
 |---|---|---|---|
 | The 2+ frontmatter trigger conflicts with the 3+ body threshold | unresolved | strong | Current v6.1.1 source and open [#948](https://github.com/obra/superpowers/pull/948) agree on the one-line defect |
-| The skill omitted the same-response mechanic needed for parallel tool dispatch | fixed | moderate | [#1470](https://github.com/obra/superpowers/pull/1470) records a real sequential session; v6.1.1 adds the missing instruction, but no post-change compliance run is persisted |
+| The skill omitted the same-response mechanic needed for parallel tool dispatch | unresolved | strong for Codex | [#1470](https://github.com/obra/superpowers/pull/1470) records a sequential session and v6.1.1 adds the instruction; a current local Codex v6.1.1 transcript still serialized three spawns across separate call results, although the children genuinely overlapped |
+| An older direct Codex use produced successful two-agent and four-agent fan-outs | historical | strong | AgentsView session `codex:019d800f-ad35-79f1-9fcf-c458d77fa2d0`: the skill was read at ordinal 309; two children overlapped for 63.768 seconds and four later children overlapped for 53.059 seconds; the parent synthesized both batches into concrete outputs |
+| A current v6.1.1 Codex use achieved concurrency but dispatched before a shared authority preflight | current | strong | AgentsView session `codex:019f8eb1-4e84-7652-a5ae-c4262784973b`: three `fork_turns: none` workers overlapped for 30.828 seconds, then all were interrupted after the parent discovered a repository governance gate that should have been checked before fan-out |
+| High-value Codex workflows repeatedly succeed with the same pattern even without attributable skill invocation | current | strong for behavior; limited for causality | AgentsView session `codex:019f8cf4-aab6-7693-9ecb-7ded9e04b1c1` used independent research, allowlisted implementation, and reviewer lanes; the reviewer found a high-severity state-machine defect, the parent corrected it, expanded passing tests, performed live verification, and published PR #93 |
 | Context isolation is required but not operationally mapped for Codex history/fork controls | current | strong | Current skill and Codex adapter contain the guarantee but no history-control mapping |
 | Codex capability discovery guidance can falsely conclude that subagents are unavailable | unresolved | moderate | [#1633](https://github.com/obra/superpowers/issues/1633) was closed after ambiguity, while open [#1662](https://github.com/obra/superpowers/pull/1662) records deferred discovery in Codex Desktop |
 | Completed Codex agents can retain concurrency slots after result consumption on some runtime versions | unresolved | strong | [#1927](https://github.com/obra/superpowers/issues/1927) cites Codex v1 source and open [#1982](https://github.com/obra/superpowers/pull/1982) adds a neutral release step; Codex v2 may expose no close operation |
@@ -170,16 +175,19 @@ The strongest reusable idea is the pre-dispatch independence test. The focused p
 post-integration full-suite check are also worth retaining. Those elements make the skill materially
 better than an undisciplined “spawn several agents” instruction.
 
-The current file does not earn a B-range grade because it converts a sound principle into a brittle
-cross-harness contract. It contradicts itself on activation, asserts isolation without a portable
-mechanism, relies on an adapter with current Codex discovery and lifecycle disputes, and presents an
-unlinked session recap as evidence of speed and conflict-free integration. Agent Teams are not
-counted against it: peer coordination is a different workflow, tracked separately upstream.
+The direct transcript evidence moves this into the B range: concurrent child work, useful synthesis,
+reviewer value, and successful integration are observable rather than anecdotal. The current file
+still stays at B- because it contradicts itself on activation, asserts isolation without a portable
+mechanism, omits a shared authority/capability preflight, relies on version-sensitive discovery and
+lifecycle behavior, and presents an unlinked upstream recap as evidence of speed and conflict-free
+integration. Agent Teams are not counted against it: peer coordination is a different workflow,
+tracked separately upstream.
 
 ## Summary Recommendation
 
-- Recommended outcome: incubate for later; do not import wholesale.
-- Potential concepts to adapt: evidence-aware design gates, incremental user approval, and explicit
-  separation between design and implementation planning.
+- Recommended outcome: prioritize an adapted Codex-oriented version after the suite review; do not import wholesale.
+- Potential concepts to adapt: evidence-aware design gates, incremental user approval, explicit
+  separation between design and implementation planning, independent-domain fan-out, focused
+  worker briefs, controller-owned synthesis, and integrated verification.
 - Open questions: review the remaining 12 skills and determine whether the methodology works better as
   selected independent skills or as a tightly coupled suite.
