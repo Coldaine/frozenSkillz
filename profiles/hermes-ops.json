@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "name": "hermes-ops",
+  "description": "Reviewed shared skills exposed to the standing Hermes operations runtime.",
+  "skills": [
+    "doppler",
+    "pdm-cli-operations"
+  ]
+}

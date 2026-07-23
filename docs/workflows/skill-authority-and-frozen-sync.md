@@ -66,6 +66,35 @@ On macOS or Linux, the same Python command works with POSIX paths.
 
 The destination must be disjoint from the repository. The synchronizer rejects a destination inside the checkout and a destination that contains the checkout. It never reverse-synchronizes installed content into reviewed active source.
 
+## Named Profile Deployments
+
+A profile is a named subset of the active distribution for a destination that must not receive every reviewed skill — for example, a standing runtime like Hermes. Profiles are defined at `profiles/<name>.json`:
+
+```json
+{
+  "schema": 1,
+  "name": "hermes-ops",
+  "description": "Reviewed shared skills exposed to the standing Hermes operations runtime.",
+  "skills": ["doppler", "pdm-cli-operations"]
+}
+```
+
+Every skill listed in a profile must already be active in all four aligned manifests; a profile cannot select a skill the active distribution does not carry.
+
+```powershell
+python scripts/sync_frozen_skills.py --check --profile hermes-ops --destination /srv/hermes/skill-sets/hermes-ops --prune
+python scripts/sync_frozen_skills.py --apply --profile hermes-ops --destination /srv/hermes/skill-sets/hermes-ops --prune
+```
+
+Rules specific to profile mode:
+
+- `--profile` requires an explicit `--destination` and mandatory `--prune`; there is no default profile destination.
+- A destination is owned by exactly one profile (or by the full, unprofiled distribution) for its lifetime. Reusing a destination under a different profile, or under the full distribution, is a conflict.
+- Pruning is exact: any top-level destination content that is neither an active profile skill nor a still-recorded retired one is reported as a conflict, not silently ignored.
+- `python scripts/validate_manifests.py` validates every file under `profiles/` against the active distribution as part of ordinary manifest validation.
+
+A production consumer (deploy script, service unit, etc.) that pins a specific frozenSkillz commit for its profile sync must pin a commit reachable from `main` — never an unmerged or abandoned branch. A pin that only resolves on a branch is not reviewed distribution.
+
 ## Personal/Gated Skill Sync
 
 After a deliberate rewrite or material fix of a personal skill that already has an incubator row:
