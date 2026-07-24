@@ -49,13 +49,37 @@ class SyncFrozenSkillsTests(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(json.dumps(data), encoding="utf-8")
 
-    def _sync(self, *, apply=False, prune=False, force=False):
+    def _write_profile(self, name, skills, *, schema=1, document_name=None):
+        profile = self.repo / "profiles" / f"{name}.json"
+        profile.parent.mkdir(parents=True, exist_ok=True)
+        profile.write_text(
+            json.dumps(
+                {
+                    "schema": schema,
+                    "name": document_name if document_name is not None else name,
+                    "description": "test deployment profile",
+                    "skills": skills,
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    def _sync(
+        self,
+        *,
+        apply=False,
+        prune=False,
+        force=False,
+        profile=None,
+        destination=None,
+    ):
         return sync_module.sync(
             self.repo,
-            self.destination,
+            destination or self.destination,
             apply=apply,
             prune=prune,
             force=force,
+            profile=profile,
         )
 
     def test_fresh_install_then_check_is_current(self):
@@ -332,6 +356,192 @@ class SyncFrozenSkillsTests(unittest.TestCase):
 
         with self.assertRaises(sync_module.SyncError):
             self._sync()
+
+    def test_profile_installs_only_selected_active_skills(self):
+        self._write_skill("beta", "beta v1")
+        self._write_manifests(["alpha", "beta"])
+        self._write_profile("hermes-ops", ["beta"])
+
+        result = self._sync(apply=True, prune=True, profile="hermes-ops")
+
+        self.assertFalse(result.conflicts)
+        self.assertFalse((self.destination / "alpha").exists())
+        self.assertTrue((self.destination / "beta/SKILL.md").is_file())
+        state = json.loads(
+            (self.destination / sync_module.STATE_FILE).read_text(encoding="utf-8")
+        )
+        self.assertEqual(state["profile"], "hermes-ops")
+        self.assertEqual(set(state["skills"]), {"beta"})
+
+    def test_profile_rejects_unpromoted_and_duplicate_skills(self):
+        self._write_profile("unknown", ["alpha", "not-active"])
+        with self.assertRaises(sync_module.SyncError):
+            self._sync(prune=True, profile="unknown")
+
+        self._write_profile("duplicate", ["alpha", "alpha"])
+        with self.assertRaises(sync_module.SyncError):
+            self._sync(prune=True, profile="duplicate")
+
+    def test_profile_schema_and_document_name_are_validated(self):
+        self._write_profile("bad-schema", ["alpha"], schema=2)
+        with self.assertRaises(sync_module.SyncError):
+            self._sync(prune=True, profile="bad-schema")
+
+        self._write_profile("wrong-name", ["alpha"], document_name="different")
+        with self.assertRaises(sync_module.SyncError):
+            self._sync(prune=True, profile="wrong-name")
+
+    def test_profile_name_cannot_escape_profiles_directory(self):
+        with self.assertRaises(sync_module.SyncError):
+            self._sync(prune=True, profile="../outside")
+
+    def test_managed_destination_refuses_a_different_profile(self):
+        self._write_profile("first", ["alpha"])
+        self._write_profile("second", ["alpha"])
+        self._sync(apply=True, prune=True, profile="first")
+
+        with self.assertRaises(sync_module.SyncError):
+            self._sync(prune=True, profile="second")
+
+    def test_profile_requires_prune_for_check_and_apply(self):
+        self._write_skill("beta", "beta v1")
+        self._write_manifests(["alpha", "beta"])
+        self._write_profile("hermes-ops", ["alpha", "beta"])
+        self._sync(apply=True, prune=True, profile="hermes-ops")
+        self._write_profile("hermes-ops", ["alpha"])
+
+        for apply in (False, True):
+            with self.subTest(apply=apply):
+                with self.assertRaises(sync_module.SyncError):
+                    self._sync(apply=apply, profile="hermes-ops")
+
+        self.assertTrue((self.destination / "beta").is_dir())
+
+    def test_profile_prune_preserves_modified_retired_skill_as_conflict(self):
+        self._write_skill("beta", "beta v1")
+        self._write_manifests(["alpha", "beta"])
+        self._write_profile("hermes-ops", ["alpha", "beta"])
+        self._sync(apply=True, prune=True, profile="hermes-ops")
+        (self.destination / "beta/SKILL.md").write_text(
+            "local beta edit", encoding="utf-8"
+        )
+        self._write_profile("hermes-ops", ["alpha"])
+
+        result = self._sync(apply=True, prune=True, profile="hermes-ops")
+
+        self.assertEqual(
+            [action.kind for action in result.actions], ["current", "conflict"]
+        )
+        self.assertEqual(
+            (self.destination / "beta/SKILL.md").read_text(encoding="utf-8"),
+            "local beta edit",
+        )
+
+    def test_empty_profile_state_refuses_a_different_profile(self):
+        self._write_profile("first", ["alpha"])
+        self._write_profile("second", ["alpha"])
+        self.destination.mkdir(parents=True)
+        (self.destination / sync_module.STATE_FILE).write_text(
+            json.dumps(
+                {
+                    "schema": 1,
+                    "plugin": "frozen-skills",
+                    "plugin_version": "1.0.0",
+                    "profile": "first",
+                    "skills": {},
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        with self.assertRaises(sync_module.SyncError):
+            self._sync(prune=True, profile="second")
+
+    def test_global_and_profile_state_cannot_reuse_each_others_destination(self):
+        self._write_profile("hermes-ops", ["alpha"])
+        self._sync(apply=True)
+
+        with self.assertRaises(sync_module.SyncError):
+            self._sync(prune=True, profile="hermes-ops")
+
+        profile_destination = self.root / "profile-skills"
+        self._sync(
+            apply=True,
+            prune=True,
+            profile="hermes-ops",
+            destination=profile_destination,
+        )
+        with self.assertRaises(sync_module.SyncError):
+            self._sync(destination=profile_destination)
+
+    def test_profile_rejects_unmanaged_destination_content(self):
+        self._write_skill("beta", "beta v1")
+        self._write_manifests(["alpha", "beta"])
+        self._write_profile("hermes-ops", ["alpha", "beta"])
+        self._sync(apply=True, prune=True, profile="hermes-ops")
+        unrelated = self.destination / "local-hermes-skill"
+        unrelated.mkdir()
+        (unrelated / "SKILL.md").write_text("local", encoding="utf-8")
+
+        self._write_profile("hermes-ops", ["alpha"])
+        result = self._sync(
+            apply=True, prune=True, force=True, profile="hermes-ops"
+        )
+
+        self.assertEqual(
+            [action.kind for action in result.actions],
+            ["current", "remove", "conflict"],
+        )
+        self.assertTrue((self.destination / "beta").is_dir())
+        self.assertTrue(unrelated.is_dir())
+
+    def test_profile_cli_requires_explicit_destination(self):
+        self._write_profile("hermes-ops", ["alpha"])
+        self.assertEqual(
+            sync_module.main(
+                [
+                    "--check",
+                    "--repo-root",
+                    str(self.repo),
+                    "--profile",
+                    "hermes-ops",
+                ]
+            ),
+            2,
+        )
+
+    def test_profile_cli_requires_prune(self):
+        self._write_profile("hermes-ops", ["alpha"])
+        self.assertEqual(
+            sync_module.main(
+                [
+                    "--check",
+                    "--repo-root",
+                    str(self.repo),
+                    "--destination",
+                    str(self.destination),
+                    "--profile",
+                    "hermes-ops",
+                ]
+            ),
+            2,
+        )
+
+    def test_unprofiled_cli_keeps_the_default_personal_destination(self):
+        expected_destination = sync_module._expanded_path("~/.agents/skills")
+        current = sync_module.SyncResult(
+            (sync_module.Action("current", "alpha", "already matches reviewed source"),)
+        )
+
+        with mock.patch.object(sync_module, "sync", return_value=current) as mocked_sync:
+            self.assertEqual(
+                sync_module.main(["--check", "--repo-root", str(self.repo)]),
+                0,
+            )
+
+        self.assertEqual(mocked_sync.call_args.args[1], expected_destination)
+        self.assertIsNone(mocked_sync.call_args.kwargs["profile"])
+        self.assertFalse(mocked_sync.call_args.kwargs["prune"])
 
 
 if __name__ == "__main__":

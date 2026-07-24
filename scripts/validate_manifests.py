@@ -1,6 +1,11 @@
 import json
 from pathlib import Path
 
+try:
+    import sync_frozen_skills
+except ModuleNotFoundError:  # Direct execution: python scripts/validate_manifests.py
+    from scripts import sync_frozen_skills
+
 
 PLUGIN_MANIFESTS = [
     ".claude-plugin/plugin.json",
@@ -68,15 +73,39 @@ def discover_manifests():
     return manifests
 
 
+def validate_profiles(repo_root):
+    profile_paths = sorted((repo_root / "profiles").glob("*.json")) if (repo_root / "profiles").is_dir() else []
+    if not profile_paths:
+        return True, 0
+    try:
+        _, _, sources = sync_frozen_skills.load_distribution(repo_root)
+        for profile_path in profile_paths:
+            print(f"Validating {profile_path}...")
+            sync_frozen_skills.load_profile(repo_root, profile_path.stem, sources)
+            print("  PASSED")
+        return True, len(profile_paths)
+    except sync_frozen_skills.SyncError as exc:
+        print(f"  FAILED: {exc}")
+        return False, len(profile_paths)
+
+
 def main():
+    repo_root = Path(__file__).resolve().parents[1]
     manifests = discover_manifests()
     results = [validate_manifest(manifest) for manifest in manifests]
+    profiles_valid, profile_count = validate_profiles(repo_root)
 
-    if manifests and all(results):
-        print(f"\nAll {len(manifests)} manifests validated successfully.")
+    if manifests and all(results) and profiles_valid:
+        print(
+            f"\nAll {len(manifests)} manifests and {profile_count} profiles "
+            "validated successfully."
+        )
         return
 
-    print(f"\nValidation failed. Found {len(manifests)} manifests.")
+    print(
+        f"\nValidation failed. Found {len(manifests)} manifests and "
+        f"{profile_count} profiles."
+    )
     raise SystemExit(1)
 
 
