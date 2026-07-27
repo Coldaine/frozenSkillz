@@ -47,7 +47,7 @@ Archive, pin, or other state changes require their own explicit scope. Authoriza
 - A fourth or fifth symbol is exceptional and must add a stable distinction. Never pad a title with decoration.
 - Keep the words specific and recognizable, normally about 5–12 words.
 - Preserve exact product, repository, issue, pull request, and artifact names when they aid recognition.
-- Enforce the native limit of 60 UTF-16 code units before mutation; prefer a lower ordinary ceiling so later edits have room.
+- Treat 60 UTF-16 code units as the empirically observed ceiling of Codex's native title operation: a verified 2026-07-20 batch found longer values persisted with a literal trailing ellipsis. Enforce that ceiling before mutation and prefer a lower ordinary target so later edits have room.
 - Use `✅` only when the scoped outcome is directly verified. An assistant saying “done” is not verification.
 
 Examples:

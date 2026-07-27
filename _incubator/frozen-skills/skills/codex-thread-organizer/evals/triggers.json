@@ -1,6 +1,6 @@
 {
   "skill": "codex-thread-organizer",
-  "notes": "Codex-only routing cases. Positives cover sidebar titles, same-repository relevance, and scheduled organization. Negatives protect other clients, generic Git cleanup, and ordinary conversation summaries.",
+  "notes": "Codex-only routing cases. Positives cover sidebar titles, same-repository relevance, and scheduled organization. Negatives protect other clients, generic Git cleanup, and ordinary conversation summaries. The held_out split is the final untouched test set, matching the repository's active-skill eval convention.",
   "train": [
     {
       "query": "Review my recent Codex tasks and propose better sidebar titles from the full conversation bodies",

@@ -60,7 +60,7 @@ If the task reached a clear non-completion final state, describe that state in w
 4. Add one work-type symbol only if it speeds recognition.
 5. Add `✅` only after the completion test above.
 6. Critique the result for ambiguity, redundancy, decoration, and truncation.
-7. Revise once and measure the final title in UTF-16 code units.
+7. Revise once and measure the final title in UTF-16 code units. Treat 60 units as an empirical Codex title-operation ceiling, observed when longer titles persisted with a literal trailing ellipsis in a verified 2026-07-20 batch, rather than as a documented API guarantee.
 
 Examples:
 

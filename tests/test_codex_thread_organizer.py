@@ -31,8 +31,15 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         ]
         for manifest in manifests:
             data = json.loads(manifest.read_text(encoding="utf-8"))
-            serialized = json.dumps(data)
-            self.assertNotIn(SKILL_NAME, serialized, manifest.as_posix())
+            active_names = {entry["name"] for entry in data["skills"]}
+            active_paths = {entry["path"] for entry in data["skills"]}
+            self.assertNotIn(SKILL_NAME, active_names, manifest.as_posix())
+            self.assertNotIn(f"skills/{SKILL_NAME}", active_paths, manifest.as_posix())
+
+        synchronizer = (ROOT / "scripts" / "sync_frozen_skills.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn(SKILL_NAME, synchronizer)
 
 
 if __name__ == "__main__":
