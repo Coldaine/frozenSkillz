@@ -1,0 +1,62 @@
+{
+  "skill": "codex-thread-organizer",
+  "notes": "Codex-only routing cases. Positives cover sidebar titles, same-repository relevance, and scheduled organization. Negatives protect other clients, generic Git cleanup, and ordinary conversation summaries.",
+  "train": [
+    {
+      "query": "Review my recent Codex tasks and propose better sidebar titles from the full conversation bodies",
+      "should_trigger": true
+    },
+    {
+      "query": "Compare all Codex conversations for this repo and tell me which older work was superseded",
+      "should_trigger": true
+    },
+    {
+      "query": "Apply the approved Codex title manifest and verify every title by reading it back",
+      "should_trigger": true
+    },
+    {
+      "query": "Create a periodic Codex automation that organizes changed tasks using our sparse emoji taxonomy",
+      "should_trigger": true
+    },
+    {
+      "query": "Rename this Git branch and clean up stale files",
+      "should_trigger": false
+    },
+    {
+      "query": "Organize my ChatGPT web conversation history",
+      "should_trigger": false
+    },
+    {
+      "query": "Add emoji names to my Claude Code sessions",
+      "should_trigger": false
+    }
+  ],
+  "validation": [
+    {
+      "query": "Use Codex task history to find duplicates and durable completed references for this repository",
+      "should_trigger": true
+    },
+    {
+      "query": "Put a verified completion check mark on the Codex titles whose outcomes were actually checked",
+      "should_trigger": true
+    },
+    {
+      "query": "Summarize this one conversation without changing or organizing my Codex sidebar",
+      "should_trigger": false
+    },
+    {
+      "query": "Archive old Gmail threads",
+      "should_trigger": false
+    }
+  ],
+  "held_out": [
+    {
+      "query": "Audit the Codex tasks for this project family; age alone must not mean obsolete",
+      "should_trigger": true
+    },
+    {
+      "query": "Build a browser extension that renames chat tabs",
+      "should_trigger": false
+    }
+  ]
+}

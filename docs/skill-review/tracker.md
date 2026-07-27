@@ -57,6 +57,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `session-skill-inferencer` | C | MOO-569 | 🛑 gated · **highest concern** | `_incubator/frozen-skills/skills/` | Fix generation quality before any promotion (see below). |
 | `skill-injector` (was skill-classifier) | C | MOO-570 | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Test end-to-end before enabling; finish internal rename (scripts/module + ADR/doc prose still say "classifier"). |
 | `icepanel-api` | A | — | 🛑 gated · **incubating** | `_incubator/frozen-skills/skills/icepanel-api/` | Live-validate diagram push on a real landscape; attach PNG/share proof to examples; run layout/push scripts; trim description to the ~300-char bar before promotion. |
+| `codex-thread-organizer` | B | — | 🛑 gated · **Codex-only** | `_incubator/frozen-skills/skills/codex-thread-organizer/` | **Manual install only; no auto-install.** Keep out of every active plugin manifest and `sync_frozen_skills.py`; qualify with live read-only and authorized-title cases before reconsidering status. |
 
 Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental · Tier A = strong reference, B = functional/narrow, C = rework.
 
@@ -192,6 +193,16 @@ UPID. Exact power, snapshot, migration, and task commands are in the shipped ref
 - **Fidelity gap (adversarial review 2026-07-16):** `schemas.md` enums/required-field lists and the response keys in
   `examples.md` (`{url,defaultUrl,shareLink}`, `.diagramExportImage.id`, `fileUrls.png`) are hand-transcribed and not
   yet diffed against the live IcePanel OpenAPI. Verify each against a real response before promotion.
+
+### `codex-thread-organizer` — gated, Codex-only
+
+- Native Codex workflow for body-derived sidebar titles, same-repository relevance review, and periodic organization.
+- Sparse prefix grammar: one to five semantic symbols, normally one to three; never pad to five. `✅` requires direct
+  completion evidence and is not inferred from an assistant's claim.
+- **Packaging decision:** gated frozen-skills candidate. Manual install only; no auto-install, no active manifest entry,
+  and no `sync_frozen_skills.py` deployment. Repository landing does not create its periodic Codex automation.
+- **Before any status change:** run trigger evals, complete one live proposal-only project-family review, and complete
+  one explicitly authorized title batch with independent read-back. Re-evaluate whether Codex-only scope should remain.
 
 ---
 
