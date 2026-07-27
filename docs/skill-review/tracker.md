@@ -57,6 +57,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `session-skill-inferencer` | C | MOO-569 | 🛑 gated · **highest concern** | `_incubator/frozen-skills/skills/` | Fix generation quality before any promotion (see below). |
 | `skill-injector` (was skill-classifier) | C | MOO-570 | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Test end-to-end before enabling; finish internal rename (scripts/module + ADR/doc prose still say "classifier"). |
 | `icepanel-api` | A | — | 🛑 gated · **incubating** | `_incubator/frozen-skills/skills/icepanel-api/` | Live-validate diagram push on a real landscape; attach PNG/share proof to examples; run layout/push scripts; trim description to the ~300-char bar before promotion. |
+| `codex-thread-organizer` | B | — | 🛑 gated · **Codex-only · title-qualified** | `_incubator/frozen-skills/skills/codex-thread-organizer/` | **Ready for gated ingestion; manual install only, no auto-install.** Native title workflow is live-qualified; exercise cross-task review and a proposal-only periodic dry run before enabling automation or reconsidering distribution. |
 
 Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental · Tier A = strong reference, B = functional/narrow, C = rework.
 
@@ -192,6 +193,21 @@ UPID. Exact power, snapshot, migration, and task commands are in the shipped ref
 - **Fidelity gap (adversarial review 2026-07-16):** `schemas.md` enums/required-field lists and the response keys in
   `examples.md` (`{url,defaultUrl,shareLink}`, `.diagramExportImage.id`, `fileUrls.png`) are hand-transcribed and not
   yet diffed against the live IcePanel OpenAPI. Verify each against a real response before promotion.
+
+### `codex-thread-organizer` — gated, Codex-only
+
+- Native Codex workflow for body-derived sidebar titles, same-repository relevance review, and periodic organization.
+- Sparse prefix grammar: one to five semantic symbols, normally one to three; never pad to five. `✅` requires direct
+  completion evidence and is not inferred from an assistant's claim.
+- **Packaging decision:** gated frozen-skills candidate. Manual install only; no auto-install, no active manifest entry,
+  and no `sync_frozen_skills.py` deployment. Repository landing does not create its periodic Codex automation.
+- **Title qualification:** a 2026-07-18 user-authorized two-task Unicode trial persisted both semantic emoji titles
+  exactly. A 2026-07-20 body-reviewed batch inspected 50 tasks, renamed 49, and independently matched 50/50 final
+  titles; it also established the empirical 60 UTF-16-unit ceiling. No archive, pin, content, or direct-store change
+  occurred. The owner confirmed satisfaction and readiness for gated ingestion on 2026-07-27.
+- **Residual before enabling periodic automation or reconsidering distribution:** run the trigger eval protocol, complete
+  one proposal-only repository-family relevance review, and complete one proposal-only periodic dry run with checkpoint
+  recovery. Keep the skill Codex-only and manually installed unless the owner explicitly changes that boundary.
 
 ---
 
