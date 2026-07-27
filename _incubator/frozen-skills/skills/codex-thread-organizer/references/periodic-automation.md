@@ -10,6 +10,8 @@ The frozenSkillz source is deliberately gated. It is not in an active plugin man
 
 Unless the automation definition contains a narrower pre-authorized mutation scope:
 
+On the first run, after checkpoint loss, or whenever no valid checkpoint exists, perform a full inventory. Keep the previous checkpoint if a run fails before its frozen manifest and audit report are successfully generated. Persist the next checkpoint only after successful report generation, and after mutation read-back when the run includes authorized writes.
+
 1. inventory tasks changed since the previous successful run;
 2. read the changed bodies and any related family members needed for context;
 3. propose sparse title or relationship updates;

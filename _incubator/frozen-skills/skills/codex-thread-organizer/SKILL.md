@@ -36,7 +36,7 @@ Archive, pin, or other state changes require their own explicit scope. Authoriza
 3. **Group only with evidence.** Attribute a repository or project family from the working directory, repository identity, transcript evidence, or an explicit user mapping. Leave uncertain tasks unassigned.
 4. **Compare related tasks when relevant.** If the scope includes relevance, age, duplication, or supersession, read the accessible bodies in the same family together. Follow [references/cross-task-review.md](references/cross-task-review.md).
 5. **Draft the semantic title.** Apply the sparse symbol grammar in [references/title-grammar.md](references/title-grammar.md), then critique and revise the title once.
-6. **Produce a frozen manifest.** Include IDs, old and proposed titles, confidence, body-derived rationale, relationship evidence, and the proposed action. Record inaccessible and ambiguous tasks.
+6. **Produce a frozen manifest.** Always include IDs, old and proposed titles, confidence, body-derived rationale, and proposed action. For cross-task reviews, include every field required by [references/cross-task-review.md](references/cross-task-review.md): repository family and attribution basis, classification, related task IDs and directed relationships, outcome and remaining work, plus inventory and coverage totals. Record inaccessible, unassigned, and ambiguous tasks.
 7. **Apply only an authorized frozen batch.** Recheck each current title immediately before mutation. Skip and report concurrent changes. Use the native Codex title operation.
 8. **Verify independently.** Re-inventory or read back every target and require an exact match before reporting success. A mutation acknowledgement is provisional.
 
