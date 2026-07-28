@@ -201,9 +201,9 @@ UPID. Exact power, snapshot, migration, and task commands are in the shipped ref
   `examples.md` (`{url,defaultUrl,shareLink}`, `.diagramExportImage.id`, `fileUrls.png`) are hand-transcribed and not
   yet diffed against the live IcePanel OpenAPI. Verify each against a real response before promotion.
 
-### `codex-thread-organizer` — active, Codex-only
+### `codex-thread-organizer` — active, Codex-app sidebar scope
 
-- Native Codex workflow for body-derived sidebar titles, same-repository relevance review, and periodic organization.
+- Native Codex-app workflow for body-derived sidebar titles, same-repository relevance review, and periodic organization. Inventory every conversation returned in the Codex sidebar, including ChatGPT conversations, then distinguish `title-mutable` targets from kinds the available native title operation cannot mutate.
 - Sparse prefix grammar: one to five semantic symbols, normally one to three; never pad to five. `✅` requires direct
   completion evidence and is not inferred from an assistant's claim.
 - **Packaging decision:** active for the Codex consumer only. Source lives in the dedicated

@@ -20,7 +20,7 @@ SYNC_SPEC.loader.exec_module(sync_module)
 
 
 class CodexThreadOrganizerPackagingTests(unittest.TestCase):
-    def test_skill_is_active_for_codex_only(self):
+    def test_skill_is_packaged_for_codex_only(self):
         skill_text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         openai_metadata = (SKILL_ROOT / "agents" / "openai.yaml").read_text(
             encoding="utf-8"
@@ -29,9 +29,9 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        self.assertIn("Codex-only", skill_text)
+        self.assertIn("Codex-app skill", skill_text)
         self.assertIn("$codex-thread-organizer", openai_metadata)
-        self.assertIn("Codex-only", tracker_text)
+        self.assertIn("Codex lane", tracker_text)
 
         manifests = {
             "claude": ROOT / "plugins" / "frozen-skills" / ".claude-plugin" / "plugin.json",
@@ -77,6 +77,26 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         self.assertIn(SKILL_NAME, selected["codex"])
         for consumer in ("claude", "cursor", "gemini"):
             self.assertNotIn(SKILL_NAME, selected[consumer])
+
+    def test_skill_inventories_all_accessible_sidebar_conversations(self):
+        skill_text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        evals = json.loads(
+            (SKILL_ROOT / "evals" / "triggers.json").read_text(encoding="utf-8")
+        )
+
+        self.assertIn("every accessible sidebar conversation", skill_text)
+        self.assertIn("title-mutable", skill_text)
+        self.assertIn("not title-mutable", skill_text)
+        self.assertIn("bounded inventory", skill_text)
+        self.assertIn("partial coverage", skill_text)
+        self.assertNotIn("Do not apply it to ChatGPT", skill_text)
+        chatgpt_case = next(
+            item
+            for item in evals["train"]
+            if item["query"]
+            == "Organize my ChatGPT web conversation history that appears in the Codex sidebar"
+        )
+        self.assertTrue(chatgpt_case["should_trigger"])
 
     def test_real_distribution_smoke_installs_organizer_only_for_codex(self):
         shared = {
