@@ -15,7 +15,8 @@ Organize the native Codex task surface from conversation evidence. Treat the ski
 
 - This is **Codex-only** at this point.
 - Do not apply it to ChatGPT web conversations, Claude Code, Cursor, Gemini, browser tabs, or another client's history.
-- Do not assume repository presence means installation. The frozenSkillz copy is gated; installation and automation creation are separate, explicit operator actions.
+- Do not assume repository presence means installation. This skill is active only in frozenSkillz's dedicated Codex package; installation and automation creation are separate, explicit operator actions.
+- When installing from frozenSkillz, select the Codex consumer. Do not place this skill in a shared cross-client skill root.
 - This is not a daemon. “Running all the time” means a periodic Codex automation invokes the skill.
 
 ## Choose the Mode

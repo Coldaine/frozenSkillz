@@ -117,7 +117,7 @@ When a candidate passes the gate:
 2. Keep active `SKILL.md` files lean and route heavy detail to `references/` and `templates/`.
 3. Update plugin manifests and versions if adding an active skill.
 4. Update `docs/skill-review/tracker.md`.
-5. Validate JSON manifests and every `skills[].path`.
+5. Validate JSON manifests, every `distribution.json` skill path, and each native manifest component path.
 6. Run `git diff --check` and any relevant repo validation.
 
 ## Related Files

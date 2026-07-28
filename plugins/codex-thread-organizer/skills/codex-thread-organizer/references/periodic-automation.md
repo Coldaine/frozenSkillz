@@ -4,7 +4,7 @@
 
 The organizer is a Codex skill. Continuous maintenance is a periodic Codex automation that explicitly invokes `$codex-thread-organizer`; it is not a background daemon inside the skill.
 
-The frozenSkillz source is deliberately gated. It is not in an active plugin manifest and must not be included by `sync_frozen_skills.py`. Repository landing alone neither installs the skill nor creates an automation.
+The frozenSkillz source is active only in its dedicated Codex plugin package. A Codex-targeted synchronization or native Codex install may install it; the package must remain absent from Claude, Cursor, and Gemini catalogs. Repository landing or installation alone does not create an automation.
 
 ## Safe Default Run
 

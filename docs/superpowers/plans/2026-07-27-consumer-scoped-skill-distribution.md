@@ -2,7 +2,7 @@
 
 **Goal:** Promote `codex-thread-organizer` only to Codex and add enforceable per-consumer skill allowlists and synchronization.
 
-**Architecture:** Keep one reviewed active source tree. Treat each client manifest as that client's exact allowlist, require a consumer on every sync, and bind each destination's state record to one consumer.
+**Architecture:** Keep shared skills in the common `frozen-skills` package, keep restricted skills in dedicated consumer packages, compose them through `plugins/distribution.json`, require a consumer on every sync, and bind each destination's state record to one consumer.
 
 **Tech Stack:** Python 3 standard library, JSON manifests, Markdown authority docs, `unittest`.
 
@@ -14,7 +14,7 @@
 - Modify: `tests/test_sync_frozen_skills.py`
 - Modify: `tests/test_codex_thread_organizer.py`
 
-1. Replace the manifest-divergence rejection test with tests proving consumer-specific lists are valid and selected independently.
+1. Replace the manifest-divergence rejection test with tests proving `distribution.json` consumer lists are valid and selected independently.
 2. Add tests requiring an explicit consumer at the CLI boundary.
 3. Add tests proving Codex has a private default destination and other consumers require an explicit destination.
 4. Add tests proving state records include the consumer and reject cross-consumer reuse.
@@ -37,14 +37,14 @@
 ### Task 3: Promote and qualify the organizer
 
 **Files:**
-- Move: `_incubator/frozen-skills/skills/codex-thread-organizer/` to `plugins/frozen-skills/skills/codex-thread-organizer/`
+- Move: `_incubator/frozen-skills/skills/codex-thread-organizer/` to `plugins/codex-thread-organizer/skills/codex-thread-organizer/`
 - Modify: `plugins/frozen-skills/.codex-plugin/plugin.json`
 - Modify: all four marketplace/plugin version surfaces
 - Modify: `docs/skill-review/tracker.md`
 
 1. Move the reviewed skill into the active source tree.
 2. Rewrite gated/manual-install wording as active Codex-only distribution wording.
-3. Add the skill only to the Codex manifest.
+3. Create its valid dedicated Codex plugin, add it only to the Codex distribution/package list, and expose it only in the Codex marketplace.
 4. Bump aligned plugin and marketplace versions.
 5. Record the promotion and remaining automation qualification boundary in the tracker.
 
@@ -55,7 +55,7 @@
 - Modify: `AGENTS.md`
 - Modify: `README.md`
 
-1. Replace the identical-manifest contract with per-consumer exact allowlists.
+1. Replace the identical-manifest contract with shared plus dedicated consumer packages and an exact distribution manifest.
 2. Document explicit `--consumer` usage, Codex's default, destination isolation, state ownership, and pruning behavior.
 3. Update promotion and reporting rules to name targeted consumers.
 4. Remove every stale claim that all consumers receive the same skills.

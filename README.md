@@ -2,7 +2,7 @@
 
 Cross-platform agent skills, rules, and plugin metadata for reusable agent workflows.
 
-`frozenSkillz` is the reviewed source repository and marketplace. `frozen-skills` is the active distribution inside it. The four aligned plugin manifests define the distribution: only their entries under `plugins/frozen-skills/skills/` are synchronized or packaged. Content under `_incubator/` is stored for review and is never installed.
+`frozenSkillz` is the reviewed source repository and marketplace. `frozen-skills` is the shared active package. Consumer-restricted skills live in dedicated plugin packages, and `plugins/distribution.json` composes the exact synchronizer allowlist for Claude, Codex, Cursor, or Gemini. Dedicated packages appear only in approved consumer catalogs. Content under `_incubator/` is stored for review and is never installed.
 
 This repository is not a dumping ground for local client caches, raw external repos, or unreviewed experimental skill copies.
 
@@ -10,7 +10,8 @@ This repository is not a dumping ground for local client caches, raw external re
 
 | Plugin | Category | Status | Purpose |
 |---|---|---|---|
-| `frozen-skills` | reference | active | Installable package for reviewed skills. Installs `doppler`, `external-skill-intake`, `omc-reference`, and `pdm-cli-operations`. |
+| `frozen-skills` | reference | active | Shared package for reviewed cross-consumer skills. |
+| `codex-thread-organizer` | productivity | active, Codex-only | Dedicated Codex package for task-history organization; absent from other consumer catalogs. |
 | `skill-injector` | development | experimental, untested | UserPromptSubmit hook and subagent prompt quality gate for LLM-assisted skill suggestions. Review/test before enabling. |
 
 Historical reference/workflow skills remain gated in `_incubator/` until they pass the quality bar in `docs/skill-review/tracker.md`.
@@ -20,23 +21,24 @@ Historical reference/workflow skills remain gated in `_incubator/` until they pa
 Clone or update this repository on each computer, then run the cross-platform synchronizer:
 
 ```powershell
-python scripts/sync_frozen_skills.py --check
-python scripts/sync_frozen_skills.py --apply
+python scripts/sync_frozen_skills.py --consumer codex --check
+python scripts/sync_frozen_skills.py --consumer codex --apply
 ```
 
-The default destination is `~/.agents/skills`, the shared personal skill root used by Codex and other clients that discover Agent Skills. The synchronizer:
+The consumer is required. Codex defaults to its private `~/.codex/skills` root; Claude, Cursor, and Gemini require an explicit `--destination` until a consumer-private default is qualified. The synchronizer:
 
-- validates that the Claude, Codex, Cursor, and Gemini manifests have the same version and active skill list;
-- installs or updates only those manifest-listed skills;
+- validates that the Claude, Codex, Cursor, and Gemini manifests have the same plugin identity and version;
+- installs or updates the shared package plus only dedicated packages in the selected consumer's distribution;
 - leaves unrelated personal skills alone;
-- records managed content in `~/.agents/skills/.frozen-skills-sync.json`;
+- records the selected consumer and managed content in `.frozen-skills-sync.json`;
+- rejects a destination already managed for another consumer;
 - refuses to overwrite an unmanaged or locally modified destination skill.
 
-Use `--destination <path>` for another local skill root. Use `--prune` to remove unchanged, previously managed skills that have left the active manifests. `--force` overwrites local conflicts and should be used only after reviewing the reported plan.
+Use `--destination <path>` for another local skill root. Use `--prune` to remove unchanged, previously managed skills that have left the selected distribution. `--force` overwrites local conflicts and should be used only after reviewing the reported plan.
 
 The destination must be disjoint from the repository: it cannot be inside the frozenSkillz checkout or contain that checkout. This enforces outward-only deployment and prevents reverse synchronization into reviewed source.
 
-After pulling a new revision on any computer, `--check` exits nonzero when that computer needs synchronization; `--apply` converges it to the reviewed distribution.
+Do not use the shared `~/.agents/skills` root as an implicit target for a consumer-restricted skill. An explicit destination is still allowed for controlled migrations or tests. After pulling a new revision on any computer, `--check` exits nonzero when that consumer needs synchronization; `--apply` converges it to the selected allowlist.
 
 ## Client-managed Plugin Install
 
@@ -47,9 +49,9 @@ Claude Code can instead let its marketplace manage a client-specific plugin copy
 /plugin install frozen-skills@coldaine-skills
 ```
 
-That command installs the same four manifest-listed skills into Claude Code's plugin-managed location. It does not populate `~/.agents/skills` and does not install anything from `_incubator/`.
+That command auto-discovers the four shared skills in the `frozen-skills` package. It does not install the physically separate `codex-thread-organizer` package, populate a Codex skill root, or install anything from `_incubator/`.
 
-The Codex, Cursor, and Gemini manifests are packaging metadata and a consistency contract. Their presence alone is not an installer. Use `sync_frozen_skills.py` for a verified local installation unless a specific client provides and documents its own plugin installer.
+The Codex marketplace separately exposes the valid `codex-thread-organizer` plugin package. Cursor and Gemini remain separately validated packaging surfaces. Manifest presence alone is not an installer; use `sync_frozen_skills.py --consumer <name>` for a verified local installation unless a specific client provides and documents its own plugin installer.
 
 ## Active Skills
 
@@ -59,6 +61,7 @@ The Codex, Cursor, and Gemini manifests are packaging metadata and a consistency
 - `external-skill-intake`: sandbox, inventory, score, evaluate, and package external skill/plugin/agent repos before any promotion.
 - `omc-reference`: maintain Oh My ClaudeCode as a separate Claude Code plugin from Codex without importing OMC workflow rules into ordinary Codex work.
 - `pdm-cli-operations`: inspect and operate Proxmox fleets through the official PDM client, with exact target selection and terminal task proof for mutations.
+- `codex-thread-organizer` **(Codex only)**: review Codex task bodies, propose sparse semantic titles, compare related tasks for supersession, and support periodic Codex organization runs.
 
 ## External Skill Intake
 
@@ -78,7 +81,11 @@ Candidate source stays read-only under `source/`; mined ideas go to scout analys
 .cursor-plugin/                  Cursor-facing marketplace metadata
 gemini-marketplace.json          Gemini-facing marketplace metadata
 plugins/
-  frozen-skills/                 Active installable skill plugin
+  frozen-skills/                 Active consumer-scoped skill plugin
+    skills/                      Shared active skills
+  codex-thread-organizer/        Dedicated Codex-only plugin package
+    skills/                      Codex-only skill source
+  distribution.json             Exact shared/consumer package composition
   skill-injector/                Experimental hook plugin
 scripts/
   sync_frozen_skills.py          Manifest-driven local synchronizer
@@ -112,13 +119,13 @@ python -m unittest discover -s tests -v
 git diff --check
 ```
 
-For skill additions, verify every manifest `skills[].path` exists under the plugin directory.
+For skill additions, verify every `plugins/distribution.json` path exists in the correct shared or dedicated package and every native manifest component path resolves inside its package.
 
 ## Contribution Rules
 
-- Add shared active skills under `plugins/frozen-skills/skills/<name>/SKILL.md` only after passing the review gate.
-- Treat `plugins/frozen-skills/skills` as the source for active distributed skills. Make reviewed changes here, then synchronize them outward to local computers.
+- Add a cross-consumer skill under `plugins/frozen-skills/skills/<name>/SKILL.md` only after passing the review gate. Add a restricted skill only in a dedicated plugin package.
+- Register every active skill and consumer package in `plugins/distribution.json`; make reviewed changes in its physical package, then synchronize outward.
 - Treat managed copies under `~/.agents/skills` as runtime outputs. Do not silently copy local edits back into the reviewed source.
 - Keep external scout snapshots under `_incubator/scout/` and never edit scout `source/` after import.
-- Keep plugin manifests and marketplace versions aligned when adding public skills.
+- Keep `plugins/distribution.json`, native plugin metadata, marketplace membership, and release versions aligned. Never place a restricted skill in the shared auto-discovery package.
 - Do not commit secret values, client runtime caches, or local installed-skill copies.
