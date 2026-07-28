@@ -115,6 +115,14 @@ def discover_manifests():
 
 def validate_frozen_consumer_contract():
     print("Validating frozen-skills consumer contract...")
+    try:
+        return _validate_frozen_consumer_contract()
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"  FAILED: cannot read consumer contract JSON: {exc}")
+        return False
+
+
+def _validate_frozen_consumer_contract():
     loaded = {
         consumer: load_json(path)
         for consumer, path in FROZEN_CONSUMER_MANIFESTS.items()

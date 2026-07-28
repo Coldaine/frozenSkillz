@@ -184,6 +184,18 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         with self.assertRaisesRegex(sync_module.SyncError, "missing"):
             self._sync(consumer="codex")
 
+    def test_invalid_consumer_packages_error_describes_the_full_contract(self):
+        distribution_path = self.repo / "plugins" / sync_module.DISTRIBUTION_PATH
+        distribution = json.loads(distribution_path.read_text(encoding="utf-8"))
+        distribution["consumer_packages"]["codex"] = ["../unsafe"]
+        distribution_path.write_text(json.dumps(distribution), encoding="utf-8")
+
+        with self.assertRaisesRegex(
+            sync_module.SyncError,
+            "unique safe package-name lists",
+        ):
+            self._sync(consumer="codex")
+
     def test_cli_exit_codes_distinguish_drift_current_and_conflict(self):
         common = [
             "--consumer",

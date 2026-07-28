@@ -255,7 +255,8 @@ def load_distribution(
         )
     ):
         raise SyncError(
-            f"Distribution consumer_packages must name exactly {sorted(MANIFEST_PATHS)}"
+            "Distribution consumer_packages must map exactly "
+            f"{sorted(MANIFEST_PATHS)} to unique safe package-name lists"
         )
 
     shared_skills = _skill_entry_set(
