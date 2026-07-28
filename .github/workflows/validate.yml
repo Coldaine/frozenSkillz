@@ -42,5 +42,5 @@ jobs:
       - name: Smoke-test a fresh local skill root
         run: |
           target="${RUNNER_TEMP}/frozen-skills-smoke"
-          python scripts/sync_frozen_skills.py --apply --destination "$target"
-          python scripts/sync_frozen_skills.py --check --destination "$target"
+          python scripts/sync_frozen_skills.py --consumer codex --apply --destination "$target"
+          python scripts/sync_frozen_skills.py --consumer codex --check --destination "$target"
