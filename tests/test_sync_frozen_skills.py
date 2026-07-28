@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import shutil
 import sys
 import tempfile
 import unittest
@@ -34,34 +35,55 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         (skill / "SKILL.md").write_text(body, encoding="utf-8")
 
     def _write_manifests(self, skills_by_consumer, *, version="1.0.0"):
+        shared_names = set.intersection(
+            *(set(names) for names in skills_by_consumer.values())
+        )
         for consumer, relative in sync_module.MANIFEST_PATHS.items():
-            names_for_manifest = skills_by_consumer[consumer]
             data = {
                 "name": "frozen-skills",
                 "version": version,
                 "description": "test",
                 "skills": [
-                    {"name": name, "path": f"skills/{name}"} for name in names_for_manifest
+                    {"name": name, "path": f"skills/{name}"}
+                    for name in sorted(shared_names)
                 ],
             }
             path = self.plugin / relative
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(json.dumps(data), encoding="utf-8")
+
+        consumer_packages = {}
+        consumer_skills = {}
+        for consumer, names in skills_by_consumer.items():
+            restricted_names = sorted(set(names) - shared_names)
+            package = f"test-{consumer}"
+            consumer_packages[consumer] = [package] if restricted_names else []
+            consumer_skills[consumer] = [
+                {
+                    "name": name,
+                    "path": f"{package}/skills/{name}",
+                }
+                for name in restricted_names
+            ]
+            for name in restricted_names:
+                source = self.plugin / "skills" / name
+                if source.is_dir():
+                    shutil.copytree(
+                        source,
+                        self.repo / "plugins" / package / "skills" / name,
+                        dirs_exist_ok=True,
+                    )
+
         distribution = {
             "schema": 1,
             "plugin": "frozen-skills",
             "version": version,
-            "shared": [],
-            "consumer_packages": {
-                consumer: ["frozen-skills"] for consumer in skills_by_consumer
-            },
-            "consumers": {
-                consumer: [
-                    {"name": name, "path": f"frozen-skills/skills/{name}"}
-                    for name in names
-                ]
-                for consumer, names in skills_by_consumer.items()
-            },
+            "shared": [
+                {"name": name, "path": f"frozen-skills/skills/{name}"}
+                for name in sorted(shared_names)
+            ],
+            "consumer_packages": consumer_packages,
+            "consumers": consumer_skills,
         }
         (self.repo / "plugins" / sync_module.DISTRIBUTION_PATH).write_text(
             json.dumps(distribution), encoding="utf-8"
@@ -194,6 +216,15 @@ class SyncFrozenSkillsTests(unittest.TestCase):
             sync_module.SyncError,
             "unique safe package-name lists",
         ):
+            self._sync(consumer="codex")
+
+    def test_consumer_packages_cannot_claim_the_shared_package(self):
+        distribution_path = self.repo / "plugins" / sync_module.DISTRIBUTION_PATH
+        distribution = json.loads(distribution_path.read_text(encoding="utf-8"))
+        distribution["consumer_packages"]["codex"] = ["frozen-skills"]
+        distribution_path.write_text(json.dumps(distribution), encoding="utf-8")
+
+        with self.assertRaisesRegex(sync_module.SyncError, "reserved for shared skills"):
             self._sync(consumer="codex")
 
     def test_cli_exit_codes_distinguish_drift_current_and_conflict(self):

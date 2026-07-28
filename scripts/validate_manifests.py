@@ -155,6 +155,7 @@ def _validate_frozen_consumer_contract():
             or "/" in package
             or "\\" in package
             or package in {".", ".."}
+            or package == "frozen-skills"
             for packages in consumer_packages.values()
             for package in packages
         )
@@ -163,7 +164,10 @@ def _validate_frozen_consumer_contract():
             for packages in consumer_packages.values()
         )
     ):
-        print("  FAILED: consumer_packages must name exactly the four consumers")
+        print(
+            "  FAILED: consumer_packages must name exactly the four consumers with "
+            "unique safe package lists; frozen-skills is reserved for shared skills"
+        )
         return False
 
     plugin_root = FROZEN_DISTRIBUTION.parent
