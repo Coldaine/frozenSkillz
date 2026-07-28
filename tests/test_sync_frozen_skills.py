@@ -227,6 +227,18 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         with self.assertRaisesRegex(sync_module.SyncError, "reserved for shared skills"):
             self._sync(consumer="codex")
 
+    def test_distribution_escape_names_the_plugins_source_boundary(self):
+        source_root = self.repo / "plugins"
+        with self.assertRaisesRegex(
+            sync_module.SyncError,
+            "escapes plugins source root",
+        ):
+            sync_module._resolve_distribution_skill(
+                source_root,
+                "outside",
+                "../outside",
+            )
+
     def test_cli_exit_codes_distinguish_drift_current_and_conflict(self):
         common = [
             "--consumer",

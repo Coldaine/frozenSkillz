@@ -181,7 +181,9 @@ def _resolve_distribution_skill(source_root: Path, name: str, relative_path: str
     try:
         candidate.relative_to(source_root)
     except ValueError as exc:
-        raise SyncError(f"Skill path escapes plugin root: {relative_path}") from exc
+        raise SyncError(
+            f"Skill path escapes plugins source root: {relative_path}"
+        ) from exc
     if candidate.name != name:
         raise SyncError(
             f"Skill {name!r} must use a same-name directory, found {relative_path!r}"
