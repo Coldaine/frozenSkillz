@@ -23,7 +23,7 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         self.destination = self.root / "skills"
         self.plugin = self.repo / "plugins/frozen-skills"
         self._write_skill("alpha", "alpha v1")
-        self._write_manifests(["alpha"])
+        self._write_manifests({consumer: ["alpha"] for consumer in sync_module.MANIFEST_PATHS})
 
     def tearDown(self):
         self.temporary.cleanup()
@@ -33,10 +33,9 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         skill.mkdir(parents=True, exist_ok=True)
         (skill / "SKILL.md").write_text(body, encoding="utf-8")
 
-    def _write_manifests(self, names, *, divergent_cursor=False, version="1.0.0"):
-        manifest_paths = sync_module.MANIFEST_PATHS
-        for relative in manifest_paths:
-            names_for_manifest = ["different"] if divergent_cursor and "cursor" in str(relative) else names
+    def _write_manifests(self, skills_by_consumer, *, version="1.0.0"):
+        for consumer, relative in sync_module.MANIFEST_PATHS.items():
+            names_for_manifest = skills_by_consumer[consumer]
             data = {
                 "name": "frozen-skills",
                 "version": version,
@@ -48,11 +47,31 @@ class SyncFrozenSkillsTests(unittest.TestCase):
             path = self.plugin / relative
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(json.dumps(data), encoding="utf-8")
+        distribution = {
+            "schema": 1,
+            "plugin": "frozen-skills",
+            "version": version,
+            "shared": [],
+            "consumer_packages": {
+                consumer: ["frozen-skills"] for consumer in skills_by_consumer
+            },
+            "consumers": {
+                consumer: [
+                    {"name": name, "path": f"frozen-skills/skills/{name}"}
+                    for name in names
+                ]
+                for consumer, names in skills_by_consumer.items()
+            },
+        }
+        (self.repo / "plugins" / sync_module.DISTRIBUTION_PATH).write_text(
+            json.dumps(distribution), encoding="utf-8"
+        )
 
-    def _sync(self, *, apply=False, prune=False, force=False):
+    def _sync(self, *, consumer="codex", apply=False, prune=False, force=False):
         return sync_module.sync(
             self.repo,
             self.destination,
+            consumer=consumer,
             apply=apply,
             prune=prune,
             force=force,
@@ -119,10 +138,14 @@ class SyncFrozenSkillsTests(unittest.TestCase):
 
     def test_prune_only_removes_unchanged_managed_skills(self):
         self._write_skill("beta", "beta v1")
-        self._write_manifests(["alpha", "beta"])
+        self._write_manifests(
+            {consumer: ["alpha", "beta"] for consumer in sync_module.MANIFEST_PATHS}
+        )
         self._sync(apply=True)
 
-        self._write_manifests(["alpha"])
+        self._write_manifests(
+            {consumer: ["alpha"] for consumer in sync_module.MANIFEST_PATHS}
+        )
         without_prune = self._sync(apply=True)
         self.assertTrue((self.destination / "beta").is_dir())
         self.assertNotIn("remove", [action.kind for action in without_prune.actions])
@@ -131,14 +154,52 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         self.assertIn("remove", [action.kind for action in with_prune.actions])
         self.assertFalse((self.destination / "beta").exists())
 
-    def test_manifest_divergence_is_rejected(self):
+    def test_consumer_specific_distributions_are_selected_independently(self):
         self._write_skill("different", "different")
-        self._write_manifests(["alpha"], divergent_cursor=True)
-        with self.assertRaises(sync_module.SyncError):
-            self._sync()
+        self._write_manifests(
+            {
+                "claude": ["alpha"],
+                "codex": ["alpha"],
+                "cursor": ["different"],
+                "gemini": ["alpha"],
+            }
+        )
+
+        codex = self._sync(consumer="codex")
+        cursor = self._sync(consumer="cursor")
+
+        self.assertEqual([action.name for action in codex.actions], ["alpha"])
+        self.assertEqual([action.name for action in cursor.actions], ["different"])
+
+    def test_unselected_consumer_distribution_still_requires_valid_skill_paths(self):
+        self._write_manifests(
+            {
+                "claude": ["missing"],
+                "codex": ["alpha"],
+                "cursor": ["alpha"],
+                "gemini": ["alpha"],
+            }
+        )
+
+        with self.assertRaisesRegex(sync_module.SyncError, "missing"):
+            self._sync(consumer="codex")
+
+    def test_invalid_consumer_packages_error_describes_the_full_contract(self):
+        distribution_path = self.repo / "plugins" / sync_module.DISTRIBUTION_PATH
+        distribution = json.loads(distribution_path.read_text(encoding="utf-8"))
+        distribution["consumer_packages"]["codex"] = ["../unsafe"]
+        distribution_path.write_text(json.dumps(distribution), encoding="utf-8")
+
+        with self.assertRaisesRegex(
+            sync_module.SyncError,
+            "unique safe package-name lists",
+        ):
+            self._sync(consumer="codex")
 
     def test_cli_exit_codes_distinguish_drift_current_and_conflict(self):
         common = [
+            "--consumer",
+            "codex",
             "--repo-root",
             str(self.repo),
             "--destination",
@@ -154,8 +215,9 @@ class SyncFrozenSkillsTests(unittest.TestCase):
     def test_unsafe_managed_skill_name_is_rejected(self):
         self.destination.mkdir(parents=True)
         state = {
-            "schema": 1,
+            "schema": sync_module.STATE_SCHEMA,
             "plugin": "frozen-skills",
+            "consumer": "codex",
             "skills": {"../outside": {"digest": "0" * 64}},
         }
         (self.destination / sync_module.STATE_FILE).write_text(
@@ -250,7 +312,10 @@ class SyncFrozenSkillsTests(unittest.TestCase):
 
     def test_plugin_version_drift_requires_state_refresh(self):
         self._sync(apply=True)
-        self._write_manifests(["alpha"], version="2.0.0")
+        self._write_manifests(
+            {consumer: ["alpha"] for consumer in sync_module.MANIFEST_PATHS},
+            version="2.0.0",
+        )
 
         checked = self._sync()
         self.assertIn("state", [action.kind for action in checked.actions])
@@ -267,6 +332,7 @@ class SyncFrozenSkillsTests(unittest.TestCase):
             sync_module.sync(
                 self.repo,
                 self.repo / "runtime-skills",
+                consumer="codex",
                 apply=False,
                 prune=False,
                 force=False,
@@ -275,6 +341,7 @@ class SyncFrozenSkillsTests(unittest.TestCase):
             sync_module.sync(
                 self.repo,
                 self.root,
+                consumer="codex",
                 apply=False,
                 prune=False,
                 force=False,
@@ -332,6 +399,34 @@ class SyncFrozenSkillsTests(unittest.TestCase):
 
         with self.assertRaises(sync_module.SyncError):
             self._sync()
+
+    def test_state_is_bound_to_one_consumer(self):
+        self._sync(consumer="codex", apply=True)
+        state = json.loads(
+            (self.destination / sync_module.STATE_FILE).read_text(encoding="utf-8")
+        )
+        self.assertEqual(state["consumer"], "codex")
+
+        with self.assertRaisesRegex(sync_module.SyncError, "managed for consumer 'codex'"):
+            self._sync(consumer="claude")
+
+    def test_cli_requires_explicit_consumer(self):
+        with self.assertRaises(SystemExit):
+            sync_module.build_parser().parse_args(["--check"])
+
+    def test_codex_has_private_default_and_other_consumers_require_destination(self):
+        self.assertEqual(
+            sync_module.resolve_destination("codex", None),
+            sync_module._expanded_path("~/.codex/skills"),
+        )
+        with self.assertRaisesRegex(sync_module.SyncError, "--destination is required"):
+            sync_module.resolve_destination("claude", None)
+
+        explicit = self.root / "claude-skills"
+        self.assertEqual(
+            sync_module.resolve_destination("claude", explicit),
+            explicit,
+        )
 
 
 if __name__ == "__main__":
