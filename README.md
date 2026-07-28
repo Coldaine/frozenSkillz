@@ -55,13 +55,14 @@ The Codex marketplace separately exposes the valid `codex-thread-organizer` plug
 
 ## Active Skills
 
-`frozen-skills` currently registers:
+`frozen-skills` currently registers these shared skills:
 
 - `doppler`: Doppler CLI and secret-injection workflow guidance that avoids exposing secret values.
 - `external-skill-intake`: sandbox, inventory, score, evaluate, and package external skill/plugin/agent repos before any promotion.
 - `omc-reference`: maintain Oh My ClaudeCode as a separate Claude Code plugin from Codex without importing OMC workflow rules into ordinary Codex work.
 - `pdm-cli-operations`: inspect and operate Proxmox fleets through the official PDM client, with exact target selection and terminal task proof for mutations.
-- `codex-thread-organizer` **(Codex only)**: review Codex task bodies, propose sparse semantic titles, compare related tasks for supersession, and support periodic Codex organization runs.
+
+The dedicated `codex-thread-organizer` package is available to Codex only. It reviews Codex task bodies, proposes sparse semantic titles, compares related tasks for supersession, and supports periodic Codex organization runs.
 
 ## External Skill Intake
 

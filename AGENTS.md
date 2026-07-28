@@ -7,7 +7,7 @@ This repository is a marketplace and intake boundary for reusable agent skills, 
 1. `docs/skill-review/tracker.md`: active, gated, scout, and promotion status.
 2. `docs/workflows/skill-authority-and-frozen-sync.md`: distribution authority and computer synchronization contract.
 3. `docs/workflows/external-skill-intake.md`: required workflow for evaluating external repos.
-4. Active shared and consumer-specific skill files under `plugins/frozen-skills/`: installable behavior and references.
+4. Active skill files under `plugins/`: shared skills under `plugins/frozen-skills/` and restricted skills in dedicated packages.
 5. `README.md` and `CLAUDE.md`: human-facing overview and quickstart.
 
 If documents disagree, follow the highest applicable source above and fix the stale downstream doc.

@@ -60,6 +60,30 @@ class ValidateManifestsTests(unittest.TestCase):
                         )
                     self.assertIn("FAILED", output.getvalue())
 
+    def test_contract_rejects_the_shared_package_in_a_consumer_lane(self):
+        distribution = validate_module.load_json(
+            validate_module.FROZEN_DISTRIBUTION
+        )
+        distribution["consumer_packages"]["codex"] = ["frozen-skills"]
+        real_load_json = validate_module.load_json
+
+        def load_with_invalid_distribution(path):
+            if path == validate_module.FROZEN_DISTRIBUTION:
+                return distribution
+            return real_load_json(path)
+
+        output = io.StringIO()
+        with (
+            mock.patch.object(
+                validate_module,
+                "load_json",
+                side_effect=load_with_invalid_distribution,
+            ),
+            redirect_stdout(output),
+        ):
+            self.assertFalse(validate_module.validate_frozen_consumer_contract())
+        self.assertIn("reserved for shared skills", output.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

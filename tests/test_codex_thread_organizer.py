@@ -39,7 +39,7 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
             "cursor": ROOT / "plugins" / "frozen-skills" / ".cursor-plugin" / "plugin.json",
             "gemini": ROOT / "plugins" / "frozen-skills" / "gemini-extension.json",
         }
-        for consumer, manifest in manifests.items():
+        for manifest in manifests.values():
             data = json.loads(manifest.read_text(encoding="utf-8"))
             active_names = {entry["name"] for entry in data.get("skills", [])}
             self.assertNotIn(SKILL_NAME, active_names, manifest.as_posix())

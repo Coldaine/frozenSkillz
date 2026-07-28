@@ -8,7 +8,7 @@
 
 ---
 
-### Task 1: Encode the distribution contract in tests
+## Task 1: Encode the distribution contract in tests
 
 **Files:**
 - Modify: `tests/test_sync_frozen_skills.py`
@@ -21,7 +21,7 @@
 5. Change organizer packaging assertions to require an active source and Codex-only manifest membership.
 6. Run the focused tests and confirm they fail for the intended missing behavior.
 
-### Task 2: Implement consumer-aware validation and synchronization
+## Task 2: Implement consumer-aware validation and synchronization
 
 **Files:**
 - Modify: `scripts/sync_frozen_skills.py`
@@ -34,7 +34,7 @@
 5. Upgrade the state schema to record the consumer and reject mismatches.
 6. Run focused tests until green.
 
-### Task 3: Promote and qualify the organizer
+## Task 3: Promote and qualify the organizer
 
 **Files:**
 - Move: `_incubator/frozen-skills/skills/codex-thread-organizer/` to `plugins/codex-thread-organizer/skills/codex-thread-organizer/`
@@ -48,7 +48,7 @@
 4. Bump aligned plugin and marketplace versions.
 5. Record the promotion and remaining automation qualification boundary in the tracker.
 
-### Task 4: Reconcile authority and user documentation
+## Task 4: Reconcile authority and user documentation
 
 **Files:**
 - Modify: `docs/workflows/skill-authority-and-frozen-sync.md`
@@ -60,7 +60,7 @@
 3. Update promotion and reporting rules to name targeted consumers.
 4. Remove every stale claim that all consumers receive the same skills.
 
-### Task 5: Verify non-leakage and publish
+## Task 5: Verify non-leakage and publish
 
 1. Run the organizer packaging tests and complete unit suite.
 2. Run manifest validation and JSON parsing.

@@ -174,14 +174,16 @@ def digest_directory(root: Path) -> str:
     return digest.hexdigest()
 
 
-def _resolve_distribution_skill(plugin_root: Path, name: str, relative_path: str) -> Path:
+def _resolve_distribution_skill(source_root: Path, name: str, relative_path: str) -> Path:
     """Resolve and validate one distribution-listed skill source directory."""
 
-    candidate = (plugin_root / relative_path).resolve()
+    candidate = (source_root / relative_path).resolve()
     try:
-        candidate.relative_to(plugin_root)
+        candidate.relative_to(source_root)
     except ValueError as exc:
-        raise SyncError(f"Skill path escapes plugin root: {relative_path}") from exc
+        raise SyncError(
+            f"Skill path escapes plugins source root: {relative_path}"
+        ) from exc
     if candidate.name != name:
         raise SyncError(
             f"Skill {name!r} must use a same-name directory, found {relative_path!r}"
@@ -246,6 +248,7 @@ def load_distribution(
         or any(
             not isinstance(package, str)
             or not SKILL_NAME_PATTERN.fullmatch(package)
+            or package == "frozen-skills"
             for packages in consumer_packages.values()
             for package in packages
         )
@@ -256,7 +259,8 @@ def load_distribution(
     ):
         raise SyncError(
             "Distribution consumer_packages must map exactly "
-            f"{sorted(MANIFEST_PATHS)} to unique safe package-name lists"
+            f"{sorted(MANIFEST_PATHS)} to unique safe package-name lists; "
+            "'frozen-skills' is reserved for shared skills"
         )
 
     shared_skills = _skill_entry_set(
