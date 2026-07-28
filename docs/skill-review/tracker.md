@@ -55,7 +55,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `stacked-pr-workflow` | B | MOO-566 | 🛑 gated | `_incubator/frozen-skills/skills/` | Run + verify the 7 PowerShell helpers; decide if niche is worth keeping. |
 | `skill-manager` | B | MOO-567 | 🛑 gated | `_incubator/skill-manager/` | Verify scripts + registry assumptions (`skills.sh`, `~/.agents/skills`). |
 | `session-skill-inferencer` | C | MOO-569 | 🛑 gated · **highest concern** | `_incubator/frozen-skills/skills/` | Fix generation quality before any promotion (see below). |
-| `skill-injector` (was skill-classifier) | C | MOO-570 | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Test end-to-end before enabling; finish internal rename (scripts/module + ADR/doc prose still say "classifier"). |
+| `skill-injector` (was skill-classifier) | C | MOO-570 | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Revisit a Codex-native adapter now that Codex hook execution has matured; qualify it end-to-end before enabling, keep remote-model fallback opt-in, and finish the internal rename. |
 | `icepanel-api` | A | — | 🛑 gated · **incubating** | `_incubator/frozen-skills/skills/icepanel-api/` | Live-validate diagram push on a real landscape; attach PNG/share proof to examples; run layout/push scripts; trim description to the ~300-char bar before promotion. |
 | `codex-thread-organizer` | B | — | ✅ **ACTIVE · Codex-only · title-qualified** | `plugins/codex-thread-organizer/skills/codex-thread-organizer/` | Dedicated package listed only in the Codex lane/catalog; physically outside the shared auto-discovery package. Native title workflow is live-qualified; exercise cross-task review and a proposal-only periodic dry run before enabling automation. |
 
@@ -179,8 +179,15 @@ UPID. Exact power, snapshot, migration, and task commands are in the shipped ref
   `skill-injector`. Re-registered in all four marketplace catalogs, flagged `experimental` / UNTESTED.
 - **Still NOT installed or enabled** anywhere (`~/.claude/settings.json`, `~/.claude.json`, this repo — no
   `enabledPlugins`). The hooks do **not** run; it is dormant code until someone installs + enables the plugin.
-- **TODO before relying on it:** test end-to-end; then finish the rename internally — the Python scripts/module
-  (`skill_classifier.py`), the env vars (`SKILL_CLASSIFIER_*`), the ADRs, and the SKILL.md/README prose still say
+- **Owner revisit decision (2026-07-27):** Codex has recently been launching hooks reliably enough that a
+  Codex-native `skill-injector` adapter is worth reevaluating. This is future qualification work, not evidence that
+  the current Claude-oriented hook wiring works in Codex and not authorization to install or enable it yet.
+- **Codex revisit gates:** inspect the then-current Codex hook contract and payloads; implement a dedicated Codex
+  adapter instead of assuming Claude event names or `CLAUDE_PLUGIN_ROOT`; prove actual execution with prompt-routing
+  and subagent-review fixtures; keep local-only inference as the safe default and require explicit opt-in before any
+  prompt or transcript context can reach a remote model; then decide whether Codex marketplace exposure is justified.
+- **TODO before relying on it:** complete that end-to-end qualification and finish the rename internally — the Python
+  scripts/module (`skill_classifier.py`), env vars (`SKILL_CLASSIFIER_*`), ADRs, and SKILL.md/README prose still say
   "classifier". Left as-is for now to avoid breaking the untested hook wiring.
 
 ### `icepanel-api` — incubating
