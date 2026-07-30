@@ -70,4 +70,6 @@ A — 🗄️ 🌊 ✅ One-Off Verification
 
 Case 4 aborted the entire coupled transition after detecting drift on the old red task: it removed no old red, added no new red, skipped unrelated mutations, re-inventoried read-only, and required a fresh manifest before retry.
 
+Cases 5 and 6 exercised later concurrency windows. Winner drift immediately before addition left the verified zero-red state untouched. Winner drift immediately before rollback preserved the concurrent title, stopped all mutations, and escalated the unresolved two-red state for manual reconciliation instead of overwriting from stale state.
+
 The durable structured expectations are in `../semantic-cases.json`. Repository unit tests validate documentation and fixture invariants; they do not execute or score model behavior.

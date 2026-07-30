@@ -20,6 +20,14 @@
       }
     },
     {
+      "id": "incomplete-coverage-has-no-red",
+      "input": "The accessible inventory contains one urgent unfinished task, but several related current tasks are inaccessible and could outrank it.",
+      "expected": {
+        "red_count": 0,
+        "reason": "Coverage is insufficient for a credible global comparison"
+      }
+    },
+    {
       "id": "incremental-red-handoff-is-fail-safe",
       "input": "Task A currently has red, task B is the proposed new winner, and A's title changes after the manifest freezes but before mutation.",
       "expected": {
@@ -27,6 +35,26 @@
         "maximum_red_count": 1,
         "requires_final_scope_reinventory": true,
         "rollback_new_red_if_final_count_exceeds_one": true
+      }
+    },
+    {
+      "id": "winner-drift-before-red-addition",
+      "input": "Old red removal succeeded and the scope has zero red, but the proposed winner's live title changed before red could be added.",
+      "expected": {
+        "red_count": 0,
+        "add_new_red": false,
+        "overwrite_winner": false,
+        "stop_remaining_title_mutations": true
+      }
+    },
+    {
+      "id": "rollback-drift-preserves-concurrent-title",
+      "input": "Final verification finds two red tasks, but the proposed winner's live title no longer matches the exact red title applied by this transition.",
+      "expected": {
+        "do_not_overwrite_concurrent_title": true,
+        "rollback_from_stale_state": false,
+        "requires_manual_reconciliation": true,
+        "stop_remaining_title_mutations": true
       }
     },
     {
@@ -44,6 +72,15 @@
         "waiting_marker": "⏸️",
         "blocked_marker": "🚧",
         "waiting_yellow_marker": "🟡"
+      }
+    },
+    {
+      "id": "one-lifecycle-marker-maximum",
+      "input": "A task is waiting on a named external approval and cannot progress until that response arrives; it is not technically broken and is not complete.",
+      "expected": {
+        "lifecycle_marker": "⏸️",
+        "maximum_lifecycle_markers": 1,
+        "excluded_lifecycle_markers": ["🚧", "✅"]
       }
     },
     {
@@ -95,6 +132,16 @@
       "expected": {
         "title": "🌊 🧹 ✅ Crest Research Pruning",
         "symbol_count": 3
+      }
+    },
+    {
+      "id": "five-symbol-omission-precedence",
+      "input": "One task is the red winner, has a concrete owner decision, is canonical, belongs to project 🌊, is implementation work, and is waiting for approval; all six marker dimensions have evidence.",
+      "expected": {
+        "title": "🔴 🟡 📌 ⏸️ 🌊 Migration Approval",
+        "symbol_count": 5,
+        "omitted_marker": "🛠️",
+        "reason": "Work type has the lowest omission precedence"
       }
     }
   ]

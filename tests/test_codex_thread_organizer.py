@@ -15,6 +15,7 @@ TITLE_GRAMMAR = SKILL_ROOT / "references" / "title-grammar.md"
 CROSS_TASK_REVIEW = SKILL_ROOT / "references" / "cross-task-review.md"
 PERIODIC_AUTOMATION = SKILL_ROOT / "references" / "periodic-automation.md"
 SEMANTIC_CASES = SKILL_ROOT / "evals" / "semantic-cases.json"
+OPENAI_METADATA = SKILL_ROOT / "agents" / "openai.yaml"
 SYNC_SCRIPT = ROOT / "scripts" / "sync_frozen_skills.py"
 SYNC_SPEC = importlib.util.spec_from_file_location("organizer_sync", SYNC_SCRIPT)
 sync_module = importlib.util.module_from_spec(SYNC_SPEC)
@@ -29,6 +30,7 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         grammar_text = TITLE_GRAMMAR.read_text(encoding="utf-8")
         review_text = CROSS_TASK_REVIEW.read_text(encoding="utf-8")
         automation_text = PERIODIC_AUTOMATION.read_text(encoding="utf-8")
+        openai_text = OPENAI_METADATA.read_text(encoding="utf-8")
 
         for marker in ("🔴", "🟡", "⏸️", "🚧", "✅", "📌", "↪️", "🗄️"):
             self.assertIn(marker, grammar_text)
@@ -44,6 +46,11 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         self.assertIn("remove and verify", automation_text)
         self.assertIn("roll back the new red", automation_text)
         self.assertIn("archive-candidate judgments", skill_text)
+        self.assertIn("re-read the proposed winner immediately before", automation_text)
+        self.assertIn("stop all remaining title mutations", skill_text)
+        self.assertIn("duplicate", openai_text)
+        self.assertIn("canonical", openai_text)
+        self.assertIn("proposal-only", openai_text)
 
     def test_semantic_cases_cover_priority_status_and_archive_boundaries(self):
         data = json.loads(SEMANTIC_CASES.read_text(encoding="utf-8"))
@@ -57,24 +64,40 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
             {
                 "single-red-across-audited-scope",
                 "zero-red-when-no-leader",
+                "incomplete-coverage-has-no-red",
                 "incremental-red-handoff-is-fail-safe",
+                "winner-drift-before-red-addition",
+                "rollback-drift-preserves-concurrent-title",
                 "yellow-means-concrete-follow-up",
                 "waiting-and-blocked-are-distinct",
+                "one-lifecycle-marker-maximum",
                 "blocked-without-a-next-step-is-not-yellow",
                 "completed-reference-versus-archive-candidate",
                 "archive-retention-value-is-ambiguous",
                 "supersession-needs-a-named-successor",
                 "age-alone-never-archives",
                 "sparse-prefix-does-not-pad-to-five",
+                "five-symbol-omission-precedence",
             },
         )
         self.assertEqual(
             cases["single-red-across-audited-scope"]["expected"]["red_count"], 1
         )
         self.assertEqual(cases["zero-red-when-no-leader"]["expected"]["red_count"], 0)
+        self.assertEqual(
+            cases["incomplete-coverage-has-no-red"]["expected"]["red_count"], 0
+        )
         self.assertTrue(
             cases["incremental-red-handoff-is-fail-safe"]["expected"][
                 "abort_add_on_old_red_removal_failure"
+            ]
+        )
+        self.assertEqual(
+            cases["winner-drift-before-red-addition"]["expected"]["red_count"], 0
+        )
+        self.assertTrue(
+            cases["rollback-drift-preserves-concurrent-title"]["expected"][
+                "do_not_overwrite_concurrent_title"
             ]
         )
         self.assertEqual(
@@ -85,6 +108,16 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
                 "waiting_yellow_marker"
             ],
             "🟡",
+        )
+        self.assertEqual(
+            cases["one-lifecycle-marker-maximum"]["expected"][
+                "maximum_lifecycle_markers"
+            ],
+            1,
+        )
+        self.assertEqual(
+            cases["five-symbol-omission-precedence"]["expected"]["omitted_marker"],
+            "🛠️",
         )
 
     def test_skill_is_active_for_codex_only(self):

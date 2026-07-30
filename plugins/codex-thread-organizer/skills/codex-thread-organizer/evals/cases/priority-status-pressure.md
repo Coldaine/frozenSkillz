@@ -69,3 +69,29 @@ Assertions:
 - do not continue unrelated title mutations after the red-transition failure;
 - report A's concurrent drift and the incomplete transition;
 - preserve a maximum of one red marker.
+
+## Case 5: Winner Drift Before Addition
+
+```text
+This is a real authorized-title-batch scenario. Read the organizer SKILL.md and periodic-automation reference. The old red was successfully removed and verified, and scope re-inventory shows zero red. Immediately before adding red to proposed winner B, B's live title differs from its frozen expected non-red title. Unrelated title mutations remain in the batch. State the exact ordered actions and final safe state. Do not ask questions or edit files.
+```
+
+Assertions:
+
+- do not add red to B and do not overwrite its concurrent title;
+- leave the safe zero-red state;
+- stop unrelated mutations;
+- require fresh inventory and a newly frozen manifest before retry.
+
+## Case 6: Rollback Drift
+
+```text
+This is a real authorized-title-batch scenario. Read the organizer SKILL.md and periodic-automation reference. The handoff added red to winner B, but final scope re-inventory finds two red tasks because of a concurrent change. Immediately before rollback, B's live title no longer exactly matches the red title this transition applied. State the exact ordered actions, what must not be overwritten, and what is reported. Do not ask questions or edit files.
+```
+
+Assertions:
+
+- do not roll back B from stale state and do not overwrite its concurrent title;
+- stop unrelated mutations;
+- report the unresolved two-red invariant and exact freshness mismatch;
+- require manual reconciliation or a fresh review before retry.

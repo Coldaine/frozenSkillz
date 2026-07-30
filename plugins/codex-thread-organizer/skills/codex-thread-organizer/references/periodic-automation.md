@@ -28,10 +28,11 @@ Treat every red reassignment as one coupled transition:
 2. re-read all participants immediately before any write and abort the transition on drift;
 3. remove and verify every old red marker;
 4. re-inventory the declared scope and require zero red markers before adding the proposed winner;
-5. add and read back the new red title, then re-inventory and require zero or one red marker;
-6. if the final invariant fails, roll back the new red to its frozen non-red title and verify that rollback.
+5. re-read the proposed winner immediately before adding red and require an exact match with its frozen expected non-red title; if it drifted, leave the safe zero-red state and abort;
+6. add and read back the new red title, then re-inventory and require zero or one red marker;
+7. if the final invariant fails, re-read the proposed winner immediately before rollback and roll back the new red only when the live title exactly matches the red title this transition applied; restore its frozen non-red title, then verify the rollback and the scope invariant.
 
-If any old-red removal fails, do not add the new red. If the new-red addition fails after successful removals, leave the safe zero-red state and report the incomplete transition. Do not continue unrelated title mutations after a red-transition failure.
+If any old-red removal fails, do not add the new red. If the new-red addition fails after successful removals, leave the safe zero-red state and report the incomplete transition. If rollback freshness fails, do not overwrite the concurrent change; stop and report the unresolved invariant for manual reconciliation. Do not continue unrelated title mutations after a red-transition failure.
 
 Archive-candidate markers and recommendations are proposal metadata. Archive and pin changes are never implied by title authorization.
 

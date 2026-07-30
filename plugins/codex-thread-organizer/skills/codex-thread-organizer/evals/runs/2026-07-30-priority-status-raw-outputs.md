@@ -153,10 +153,11 @@ F — 🔍 One-Off Research Answer Delivered
 Do not archive yet; review retention value. “One-off” and “delivered” establish neither verified completion nor negligible reference value.
 ```
 
-## Candidate Case 2
+## Candidate Case 2 (Abbreviated Manifest Output)
 
 ```text
 manifest:
+  output_note: "Abbreviated captured output; transport-only required fields omitted as described above."
   mode: proposal-only
   inventory:
     total: 6
@@ -259,4 +260,27 @@ Notice first: I. Merely an archive candidate: A only. No archive action is autho
 3. Mutate nothing: do not remove red from A, do not add red to B, and do not apply unrelated title mutations.
 4. Re-inventory the declared scope read-only to record the actual live red-marker count. Do not repair from the stale manifest.
 5. Report A's concurrent drift, B's skipped addition, skipped unrelated mutations, zero applied mutations, the observed red count and audited scope, and the requirement for a fresh inventory and manifest before retrying.
+```
+
+## Candidate Case 5: Winner Drift Before Addition
+
+```text
+1. Re-read winner B immediately before adding red and compare its live title with the frozen expected non-red title.
+2. Detect the mismatch as concurrent drift.
+3. Do not add red to B, do not overwrite B, and do not restore the old red.
+4. Abort the coupled transition and stop all remaining title mutations.
+5. Report the drift, incomplete reassignment, and last verified scope count of zero red.
+6. Require a fresh scope inventory and frozen manifest before retrying.
+
+Final safe state: the old red remains removed, B retains its concurrent title without red, and the audited scope has zero red markers.
+```
+
+## Candidate Case 6: Rollback Drift
+
+```text
+1. Final re-inventory detects two red tasks, so the invariant fails.
+2. Re-read B immediately before rollback and compare its live title with the exact red title applied by this transition.
+3. Because they differ, do not roll back or overwrite B.
+4. Fail closed and stop every remaining title mutation.
+5. Report the final red count of two, B's freshness mismatch, skipped rollback, preserved concurrent title, and the unresolved invariant requiring manual reconciliation or fresh review.
 ```
