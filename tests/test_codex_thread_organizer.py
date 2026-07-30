@@ -48,10 +48,6 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         combined = "\n".join((skill_text, grammar_text, review_text, automation_text))
         combined_lower = combined.lower()
         self.assertIn("latest relevant user request", combined_lower)
-        self.assertIn("current owner", combined_lower)
-        self.assertIn("actual conversation bodies", combined_lower)
-        self.assertIn("routing clue", combined_lower)
-        self.assertIn("concrete required action", combined_lower)
         self.assertIn("broader project", combined_lower)
         self.assertIn("subagent", combined_lower)
         self.assertIn("use sparingly", grammar_text.lower())
@@ -60,11 +56,37 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         self.assertIn("rename", openai_text.lower())
         self.assertIn("renames codex tasks", readme_text.lower())
         self.assertIn("applied markers", review_text.lower())
-        self.assertIn("No `✅`; eligible for `↪️` and `🗄️`", review_text)
-        self.assertIn("age", automation_text.lower())
-        self.assertIn("archive candidacy", automation_text.lower())
-        self.assertIn("rename the reviewed tasks", automation_text.lower())
-        self.assertIn("read every title back", automation_text.lower())
+
+        self.assertIn(
+            "| `🟡` | Concrete follow-up | A specific required action remains "
+            "in the current owner task |",
+            grammar_text,
+        )
+        self.assertIn(
+            "| `continued-elsewhere` | The task stopped with required work "
+            "remaining, but a named newer task clearly assumed that work | "
+            "No `✅`; eligible for `↪️` and `🗄️` |",
+            review_text,
+        )
+        self.assertIn(
+            "Age helps choose what to inspect; it does not decide completion, "
+            "abandonment, or archive candidacy.",
+            automation_text,
+        )
+        for periodic_clause in (
+            "Read the actual conversation bodies for every task whose state or "
+            "title may change.",
+            "Cluster by semantic workstream, treating the working directory as a "
+            "routing clue rather than identity.",
+            "Cross-read each cluster and identify `done`, `active-remaining`, "
+            "`continued-elsewhere`, and `parked-unclear` tasks plus the current "
+            "owner of each unfinished workstream.",
+            "Rename the reviewed tasks through native Codex operations and read "
+            "every title back.",
+            "the main automation reconciles the classifications before applying "
+            "titles.",
+        ):
+            self.assertIn(periodic_clause, automation_text)
 
         positive_queries = [
             case["query"]
