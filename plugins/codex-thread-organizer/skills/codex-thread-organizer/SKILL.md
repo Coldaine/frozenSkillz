@@ -1,94 +1,67 @@
 ---
 name: codex-thread-organizer
 description: >-
-  Use when reviewing or maintaining Codex task history: inventorying related tasks,
-  proposing body-derived sidebar titles, surfacing important unfinished work,
-  assessing supersession or archive candidates, or running a periodic organization
-  pass. Codex-only; do not use for ChatGPT web conversations or other agent clients.
+  Use when Codex task titles are unclear, recent related tasks need completion or
+  supersession review, important unfinished work is hard to find, or a periodic
+  Codex task-organization pass is requested. Codex-only; do not use for ChatGPT
+  web conversations or other agent clients.
 ---
 
 # Codex Thread Organizer
 
-Organize the native Codex task surface from conversation evidence. Treat the skill as the decision workflow; an on-demand request or periodic Codex automation invokes it.
+Organize native Codex tasks from their actual conversation bodies. When this skill is invoked, review the selected task surface, rename the tasks through native Codex operations, read the resulting titles back, and summarize the important unfinished work.
 
-## Platform and Packaging Boundary
+## Boundary
 
-- This is **Codex-only** at this point.
-- Do not apply it to ChatGPT web conversations, Claude Code, Cursor, Gemini, browser tabs, or another client's history.
-- Do not assume repository presence means installation. This skill is active only in frozenSkillz's dedicated Codex package; installation and automation creation are separate, explicit operator actions.
-- When installing from frozenSkillz, select the Codex consumer. Do not place this skill in a shared cross-client skill root.
-- This is not a daemon. “Running all the time” means a periodic Codex automation invokes the skill.
-
-## Choose the Mode
-
-| Mode | Use when | Allowed effects |
-|---|---|---|
-| Proposal | The user asks to review, organize, classify, or preview changes | Read tasks and produce a manifest only |
-| Authorized title batch | The user approves a batch or explicitly asks to rename the scoped tasks | Set titles, then read them back |
-| Cross-task relevance review | The user asks whether older work is still relevant or was superseded | Propose classifications, relationships, attention/status markers, retention and archive-candidate judgments; make no mutations |
-| Periodic run | A Codex automation invokes this skill | Follow the automation's explicit mutation boundary; otherwise remain proposal-only |
-
-Archive, pin, or other state changes require their own explicit scope. Authorization to rename is not authorization to archive.
+- This skill is Codex-only at this point.
+- Its source lives in frozenSkillz's dedicated Codex package and is not auto-installed with every skill.
+- A periodic Codex automation is the mechanism for recurring organization; the skill is not a background daemon.
 
 ## Workflow
 
-1. **Inventory the accessible scope.** Use native Codex task operations. Record task ID, host ID, current title, timestamps, working directory, and other routing metadata.
-2. **Read the actual work.** Read enough of each body to understand the opening request, later changes of direction, substantive outcome, remaining work, and references to later tasks or durable artifacts. A title, preview, or first message is not enough.
-3. **Group only with evidence.** Attribute a repository or project family from the working directory, repository identity, transcript evidence, or an explicit user mapping. Leave uncertain tasks unassigned.
-4. **Compare related tasks when relevant.** If the scope includes relevance, age, duplication, or supersession, read the accessible bodies in the same family together. Follow [references/cross-task-review.md](references/cross-task-review.md).
-5. **Draft the semantic base.** Apply the project, work-type, and lifecycle grammar in [references/title-grammar.md](references/title-grammar.md), then critique the wording once.
-6. **Assign cross-task markers.** After the related inventory is classified, add evidence-backed relationship, retention, and global attention markers. The frozen audited scope may contain exactly zero or one `🔴`; `🟡` may appear only where the rationale names a concrete remaining action.
-7. **Produce a frozen manifest.** Always include IDs, old and proposed titles, confidence, body-derived rationale, remaining action, markers and their evidence, and proposed action. For cross-task reviews, include every field required by [references/cross-task-review.md](references/cross-task-review.md): repository family and attribution basis, classification, related task IDs and directed relationships, outcome and remaining work, archive-candidate basis, plus inventory and coverage totals. Record inaccessible, unassigned, and ambiguous tasks.
-8. **Apply only an authorized frozen batch.** Recheck each current title immediately before mutation. Skip and report concurrent changes. Use the native Codex title operation. A red-winner change is one coupled transition: if old-red removal or verification fails, do not add the new red, stop all remaining title mutations, and require a zero-red re-inventory plus a fresh manifest before retrying.
-9. **Verify independently.** Re-inventory or read back every target and require an exact match before reporting success. A mutation acknowledgement is provisional.
+1. **Inventory recent tasks.** Record task ID, host ID, current title, update time, working directory, project ID, and summary or preview.
+2. **Form tentative workstream clusters.** Use repository identity, project, branch, pull request, issue, artifact, and semantic goal. A working directory is a routing clue, not proof that tasks belong together.
+3. **Read the actual conversation bodies.** For every task being classified or renamed, identify the opening request, later changes of scope, delivered outcome, concrete required action, user acceptance or dispute, and references to successor tasks or durable artifacts.
+4. **Cross-read related tasks.** Compare every recent relevant task in the workstream before deciding which task owns unfinished work. Follow [references/cross-task-review.md](references/cross-task-review.md).
+5. **Classify and title.** Determine whether each task is `done`, `active-remaining`, `continued-elsewhere`, or `parked-unclear`, then apply [references/title-grammar.md](references/title-grammar.md).
+6. **Rename the reviewed tasks.** Use the native Codex title operation. Re-read every resulting title and correct any mismatch or truncation.
+7. **Report the result.** List renamed tasks, the current owner of each unfinished workstream, important concrete remaining actions, tasks continued elsewhere, parked uncertainties, and archive candidates.
 
-## Title Rules
+When several project clusters can be reviewed independently, dispatch one subagent per cluster. Give each subagent the task IDs and require it to read the actual conversation bodies. The main agent reconciles relationships and titles across the returned clusters.
 
-- Use **one to five** leading semantic symbols, never five by default. Most titles should use one to three.
-- Build the ordinary base as project or domain, optional work type, then optional lifecycle. Put cross-task attention or relationship markers before that base.
-- A fourth or fifth symbol is exceptional and must add a stable distinction. Never pad a title with decoration.
+## Title Contract
+
+- Use one to five leading semantic symbols, never five by default. Most titles need one to three.
 - Keep the words specific and recognizable, normally about 5–12 words.
 - Preserve exact product, repository, issue, pull request, and artifact names when they aid recognition.
-- Treat 60 UTF-16 code units as the empirically observed ceiling of Codex's native title operation: a verified 2026-07-20 batch found longer values persisted with a literal trailing ellipsis. Enforce that ceiling before mutation and prefer a lower ordinary target so later edits have room.
-- Use `✅` only when the scoped outcome is directly verified. An assistant saying “done” is not verification.
-- Use `🔴` on exactly zero or one task across the frozen audited scope: the single highest-priority unfinished task after inventory-wide comparison. If coverage is insufficient, use zero.
-- Use `🟡` only for a concrete remaining action, decision, or follow-up. It may coexist with `🔴` because priority and actionability are different dimensions.
-- Use `⏸️` for a named user or external wait and `🚧` for a specific blocker. Neither is completion or archive evidence.
-- Use `📌`, `↪️`, and `🗄️` only after cross-task review establishes canonical, superseded, or archive-candidate status. `🗄️` is a proposal marker, not archive authorization.
+- Keep the final title within 60 UTF-16 code units, the empirically observed native Codex title ceiling.
+- `✅` means the latest relevant user request was satisfied and no concrete required action remains in that task. It does not claim that the broader project is finished.
+- `🟡` means a concrete required action remains in the current owner task.
+- Use `🔴` sparingly on the clearest highest-priority unfinished task; omit it when the comparison is unclear.
+- `🗄️` marks a reasonable archive candidate. It may accompany `✅`, or identify an older unfinished task whose work clearly continued elsewhere.
+- Use `📌` and `↪️` only when cross-reading establishes a canonical task or a named successor.
 
 Examples:
 
 ```text
-🌊 Crest Research Pruning
 🌊 🧹 Crest Research Pruning
 🌊 🧹 ✅ Crest Research Pruning
-🔴 🟡 🌊 Broadside Implementation Continuation
-🟡 ⏸️ Techdeals Future-State Migration
+🟡 🌊 🛠️ Broadside Implementation Continuation
+🗄️ ↪️ 🧛 Vampire Survivors Continuation
 🗄️ ✅ Techdeals PR #84 Review
 ```
 
-The third form is valid only when the pruning's final state was checked. See [references/title-grammar.md](references/title-grammar.md) for the evidence test.
+## Completion Check
 
-## Cross-Task Safety
+Before adding `✅`, answer these questions from the task body:
 
-- Age may prioritize review; it never proves irrelevance, duplication, supersession, or archive eligibility.
-- `current` does not mean newest.
-- Preserve an old task as `completed-reference` when it has a durable result worth retaining.
-- A `superseded` or `duplicate` result must name the later related task or repository artifact and summarize the evidence.
-- An archive candidate must state why its remaining value is carried elsewhere or is negligible. Age, completion, or supersession alone is insufficient.
-- Weak or conflicting evidence becomes `needs-review`.
-- Report inaccessible tasks as coverage gaps, not as irrelevant.
+1. What was the latest relevant user request?
+2. Did the answer, artifact, change, test, publication, or other requested outcome actually satisfy it?
+3. Does any required execution, verification, recovery, decision, or user input remain?
+4. Did a later user turn extend the scope or dispute the claimed result?
 
-## Mutation Safety
-
-- Prefer supported Codex operations; do not edit internal state stores during ordinary runs.
-- Freeze IDs and old titles in the proposal manifest.
-- Recheck live state before every write.
-- For a red-winner change, freeze every current red task and the proposed winner, abort on drift, remove and verify the old red marker first, and require a zero-red re-inventory. Re-read the winner against its frozen title immediately before adding red and before any rollback. On any removal, verification, addition, or rollback failure, fail closed: do not add or overwrite from stale state, stop all remaining title mutations, and require a fresh manifest or manual reconciliation.
-- Keep title, archive, pin, and deletion scopes separate.
-- Never alter conversation content.
-- If a supported operation is unavailable, stop and report the limitation. Direct metadata editing requires a separately designed, backed-up, explicitly authorized procedure.
+Optional ideas, recommendations, and explicitly deferred future phases do not block completion. A bounded task can be complete while its broader project remains unfinished. A planning task is complete when the requested plan was delivered; a request to implement that plan is not complete merely because the plan exists.
 
 ## Periodic Automation
 
-Read [references/periodic-automation.md](references/periodic-automation.md) when defining or running an automation. The automation should invoke `$codex-thread-organizer` explicitly, scan incrementally where possible, and emit an auditable report each run.
+Read [references/periodic-automation.md](references/periodic-automation.md) when defining or running recurring organization. Each run uses the same inventory, body-reading, cross-task classification, rename, read-back, and unfinished-work report workflow.

@@ -57,7 +57,7 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `session-skill-inferencer` | C | MOO-569 | 🛑 gated · **highest concern** | `_incubator/frozen-skills/skills/` | Fix generation quality before any promotion (see below). |
 | `skill-injector` (was skill-classifier) | C | MOO-570 | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Revisit a Codex-native adapter now that Codex hook execution has matured; qualify it end-to-end before enabling, keep remote-model fallback opt-in, and finish the internal rename. |
 | `icepanel-api` | A | — | 🛑 gated · **incubating** | `_incubator/frozen-skills/skills/icepanel-api/` | Live-validate diagram push on a real landscape; attach PNG/share proof to examples; run layout/push scripts; trim description to the ~300-char bar before promotion. |
-| `codex-thread-organizer` | B | — | ✅ **ACTIVE · Codex-only · title-qualified** | `plugins/codex-thread-organizer/skills/codex-thread-organizer/` | Dedicated package listed only in the Codex lane/catalog; physically outside the shared auto-discovery package. Native title workflow is live-qualified; exercise cross-task review and a proposal-only periodic dry run before enabling automation. |
+| `codex-thread-organizer` | B | — | ✅ **ACTIVE · Codex-only · title-qualified** | `plugins/codex-thread-organizer/skills/codex-thread-organizer/` | Dedicated package listed only in the Codex lane/catalog; physically outside the shared auto-discovery package. Native title workflow is live-qualified; exercise the periodic body-reading and cross-task ownership pass before enabling automation. |
 
 Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental · Tier A = strong reference, B = functional/narrow, C = rework.
 
@@ -203,10 +203,11 @@ UPID. Exact power, snapshot, migration, and task commands are in the shipped ref
 
 ### `codex-thread-organizer` — active, Codex-only
 
-- Native Codex workflow for body-derived sidebar titles, same-repository relevance review, and periodic organization.
-- Sparse prefix grammar: one to five semantic symbols, normally one to three; never pad to five. Global attention uses
-  zero or one `🔴` for the highest-priority unfinished task and `🟡` for concrete follow-up. Lifecycle uses `⏸️`, `🚧`,
-  and directly verified `✅`; cross-task relationship and retention use `📌`, `↪️`, and proposal-only `🗄️`.
+- Native Codex workflow for body-derived sidebar titles, semantic workstream review, current-owner selection, and periodic
+  organization. Invoking the skill applies the title changes and reads them back.
+- Sparse prefix grammar: one to five semantic symbols, normally one to three; never pad to five. `✅` means the latest
+  relevant request is satisfied with no concrete required action left in that task. `🟡` marks a concrete follow-up in
+  the current owner, `🔴` is a sparingly used visual priority cue, and `📌`, `↪️`, and `🗄️` express cross-task retention.
 - **Packaging decision:** active for the Codex consumer only. Source lives in the dedicated
   `plugins/codex-thread-organizer/` package, the Codex lane/package list in `plugins/distribution.json` selects it, and
   only the Codex marketplace exposes that package. It is physically outside the shared `frozen-skills` package, so
@@ -216,14 +217,12 @@ UPID. Exact power, snapshot, migration, and task commands are in the shipped ref
   exactly. A 2026-07-20 body-reviewed batch inspected 50 tasks, renamed 49, and independently matched 50/50 final
   titles; it also established the empirical 60 UTF-16-unit ceiling. No archive, pin, content, or direct-store change
   occurred. The owner confirmed satisfaction and directed Codex-only promotion on 2026-07-27.
-- **Priority/status manual scenario evidence:** 2026-07-30 fresh-context RED-GREEN scenarios showed that the old skill left
-  priority, waiting, supersession, and archive candidacy in prose. Updated and refactored scenarios enforced sparse
-  visible markers, zero-or-one red selection, yellow external decisions, and a separate retention judgment before
-  archive candidacy. Replayable prompts, manual scoring assertions, structured cases, and raw final outputs live under
-  the skill's `evals/` directory; these are not an automated semantic runner.
-- **Residual before enabling periodic automation:** run the trigger eval protocol, complete
-  one proposal-only repository-family relevance review, and complete one proposal-only periodic dry run with checkpoint
-  recovery. Keep the skill Codex-only unless the owner explicitly changes that boundary.
+- **Cross-task behavior evidence:** a 2026-07-30 body review of 25 recent Codex tasks separated 17 done tasks, six active
+  current owners, one older task continued elsewhere, and one parked uncertainty. It exposed concrete prior title errors:
+  an unfinished Broadside interview carried `✅`, while completed Computer Use, MoneyWizard, and WRX90 tasks lacked the
+  correct done state. The revised workflow now requires body reading, semantic clustering, and current-owner selection.
+- **Residual before enabling periodic automation:** run the trigger eval protocol and one periodic cross-task pass with
+  checkpoint recovery. Keep the skill Codex-only unless the owner explicitly changes that boundary.
 
 ---
 

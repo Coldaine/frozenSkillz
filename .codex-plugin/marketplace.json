@@ -21,7 +21,7 @@
     {
       "name": "codex-thread-organizer",
       "source": "./plugins/codex-thread-organizer",
-      "description": "Codex-only task-history organization with evidence-based titles, cross-task review, and periodic maintenance workflows.",
+      "description": "Codex-only task-history organization with body-derived titles, cross-task completion review, and periodic maintenance workflows.",
       "version": "2.4.0",
       "category": "productivity"
     },

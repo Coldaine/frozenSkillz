@@ -3,7 +3,7 @@
   "notes": "Codex-only routing cases. Positives cover sidebar titles, same-repository relevance, and scheduled organization. Negatives protect other clients, generic Git cleanup, and ordinary conversation summaries. The held_out split is the final untouched test set, matching the repository's active-skill eval convention.",
   "train": [
     {
-      "query": "Review my recent Codex tasks and propose better sidebar titles from the full conversation bodies",
+      "query": "Review and rename my recent Codex tasks from the full conversation bodies",
       "should_trigger": true
     },
     {
@@ -11,7 +11,7 @@
       "should_trigger": true
     },
     {
-      "query": "Apply the approved Codex title manifest and verify every title by reading it back",
+      "query": "Find the current owner of each unfinished Codex workstream and rename the related tasks",
       "should_trigger": true
     },
     {
@@ -46,6 +46,10 @@
     },
     {
       "query": "Recommend which completed or superseded Codex tasks are archive candidates without archiving them yet",
+      "should_trigger": true
+    },
+    {
+      "query": "Read the recent relevant Codex chats for each project and distinguish done, continued elsewhere, and parked work",
       "should_trigger": true
     },
     {

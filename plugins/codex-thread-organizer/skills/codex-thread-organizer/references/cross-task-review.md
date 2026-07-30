@@ -1,86 +1,71 @@
-# Cross-Task Relevance Review
+# Cross-Task Review
 
 ## Goal
 
-Review accessible Codex task bodies in one repository or project family together and identify whether each remains current, is a durable completed reference, or was replaced by later work.
+Read recent related Codex tasks together, identify the current owner of unfinished work, and distinguish completion from continuation or dormancy.
 
-This review is proposal-only. It does not rename, archive, pin, reparent, delete, or merge tasks. An Archive Candidate label or `🗄️` title marker is a recommendation that still requires separate authorization before any archive mutation.
+## Build the Workstream
 
-## Attribution Order
+Start with working directory, project ID, and update time as routing clues. Confirm the cluster from the actual conversation bodies using repository identity, branch, pull request, issue, artifact, durable output, and semantic goal.
 
-1. Resolve the repository root from the task working directory when possible.
-2. Use stable body evidence: repository name, remote, branch, issue, pull request, artifact, or explicit path.
-3. Use a stable owner-provided project-family mapping.
-4. Otherwise mark the task unassigned.
+The same path can contain unrelated work. Different or generic paths can contain the same workstream. A relationship requires shared work, not merely shared location or vocabulary.
 
-A title, dated Codex task directory, attachment path, or age is not repository identity by itself.
+For every candidate, read enough to identify:
 
-## Required Body Evidence
+- the latest relevant user request;
+- later extensions, corrections, or disputes;
+- the delivered outcome;
+- every concrete required action still owed;
+- named branches, commits, pull requests, issues, files, and artifacts;
+- explicit continuation, duplication, correction, or replacement evidence.
 
-For each candidate, read enough to identify:
+## Completion States
 
-- dominant purpose and deliverable;
-- later pivots or corrections;
-- substantive outcome and remaining work;
-- branches, commits, pull requests, issues, files, and artifacts;
-- explicit continuation, correction, duplication, or replacement language.
+| State | Meaning | Visible treatment |
+|---|---|---|
+| `done` | The latest relevant user request was satisfied and no concrete required action remains in that task | Eligible for `✅` |
+| `active-remaining` | Required work remains and this is the current owner of that workstream | Eligible for `🟡` |
+| `continued-elsewhere` | The task stopped with required work remaining, but a named newer task clearly assumed that work | No `✅`; eligible for `↪️` and `🗄️` |
+| `parked-unclear` | Work remains, no current owner or successor is clear, and the user's present intent cannot be inferred | No `✅`; keep visible for review |
 
-For a long task, selective paging is acceptable only after reading the opening request, later substantive outcome, and all passages relevant to the proposed relationship.
+An agent response is not completion by itself. An answer or review must cover the requested scope; a change, test, publication, or real-world operation must reach the state the user requested.
 
-## Classifications
+Judge the bounded task rather than the broader project. Research can be done before a purchase occurs. A pull-request update can be done before merge when merge was not requested. A dev-server demonstration can be done even though the server later stops.
 
-| Classification | Meaning |
-|---|---|
-| `current` | Best available current source for the workstream or decision |
-| `completed-reference` | Scoped work has a durable result worth retaining |
-| `superseded` | Identified later work replaces the operative plan, decision, implementation, or outcome |
-| `duplicate` | Substantially repeats another task without a distinct durable result |
-| `needs-review` | Evidence is incomplete, conflicting, or too weak |
+Optional future work does not block `done`. A later user turn that extends the request becomes part of the completion check. Interrupted, failed, disputed, or blocked work remains unfinished until the required result is recovered or the later conversation clearly changes the scope.
 
-Directed relationships are `continues`, `supersedes`, `corrects`, `duplicates`, and `independent`.
+## Choose the Current Owner
 
-## Confidence
+For each unfinished workstream, identify one current owner when the evidence supports it:
 
-- **High:** explicit successor language, a shared named issue or artifact with later verified state, or direct repository evidence.
-- **Medium:** subject, repository, deliverable, and chronology strongly align, but there is no explicit successor statement.
-- **Low:** relationship is plausible but decisive evidence is absent. Classify the task as `needs-review` rather than `superseded` or `duplicate`.
+1. Prefer a task that explicitly continues the earlier work.
+2. Confirm that it shares the same goal, implementation state, artifact, branch, issue, or pull request.
+3. Confirm that the older task has no distinct required action excluded from the successor.
+4. Classify the older task as `continued-elsewhere` and keep `✅` off it.
 
-Age ranks what to inspect first. It never establishes a relationship or an archive recommendation.
+If an older task completed its own scoped deliverable, keep it `done` even when a successor performs a later phase. A task that delivered the requested plan is done; a task that stopped mid-implementation and was resumed elsewhere is continued elsewhere.
 
-## Attention Review
+Parallel tasks remain separate owners. Design reconciliation, implementation, and a repository audit can share a project without superseding one another.
 
-After classification, compare all eligible `current` tasks in the frozen audited scope:
+## Use Subagents for Larger Reviews
 
-1. Exclude completed references, duplicates, superseded tasks, and tasks with no unfinished outcome.
-2. Identify every task with a concrete remaining action, decision, or follow-up; these are eligible for `🟡`.
-3. Rank unfinished current tasks by explicit owner urgency, safety or loss risk, downstream blocking impact, time sensitivity, then action readiness.
-4. Assign `🔴` to the single highest-priority unfinished task only when the comparison is credible. Otherwise assign none.
-5. Verify the final manifest contains zero or one red marker.
+When the inventory contains several independent project clusters, assign one cluster to each subagent. Provide task and host IDs, require body reading, and request this compact result for every task:
 
-The red marker is scope-relative. State the audited scope and coverage beside the selection; never imply a repository-wide or history-wide winner from a partial sample. Recency may break no ties by itself.
+- state and confidence;
+- latest relevant user request;
+- completion or remaining-action evidence;
+- current owner, predecessor, or successor IDs;
+- relationship: `continues`, `supersedes`, `duplicates`, `corrects`, or `independent`;
+- archive-candidate judgment and reason.
 
-## Archive Candidate Review
+The main agent compares the cluster results, resolves overlaps, constructs titles, applies the renames, and reads them back.
 
-An Archive Candidate requires both a safe disposition and a retention judgment. Recommend `🗄️` only when one of these evidence patterns holds:
+## Age and Archive Candidates
 
-- a verified completed one-off has no meaningful durable reference value and no remaining work;
-- a duplicate has no distinct result and a named canonical task is retained;
-- a superseded task's operative value is preserved in a named accessible successor or durable artifact.
+Age helps order the review. It does not prove abandonment, completion, or irrelevance.
 
-Do not recommend archive merely because a task is described as “one-off,” old, verified complete, superseded, quiet, or inconvenient. “Delivered” and “no remaining work” establish outcome state, not retention value. Make the retention judgment from the body, related tasks, and durable artifacts. Keep a completed task when its verified result remains a useful reference. Keep an unfinished task when it is still the only source for active work, regardless of age. When value is uncertain, use `needs-review` and do not add `🗄️`.
+`🗄️` is appropriate when a completed one-off has little continuing reference value, a duplicate has a retained canonical task, or an older unfinished task is fully carried by a named successor. A durable completed reference may remain visible. An `active-remaining` current owner and a `parked-unclear` task remain visible.
 
-## Manifest Fields
+## Review Output
 
-Record one item per reviewed task:
-
-- `thread_id` and `host_id`;
-- `repository_family` and attribution basis;
-- `current_title` for review context only;
-- `classification` and confidence;
-- related task IDs, directed relationships, and evidence;
-- body-derived outcome summary and remaining work;
-- proposed markers and evidence for each marker;
-- archive-candidate basis, retained canonical task or artifact, and separate authorization status;
-- proposed follow-up: `keep`, `review`, or separately authorized future mutation candidate.
-
-Also record inventory totals, review time, inaccessible tasks, unassigned tasks, ambiguous relationships, red-marker count, the red selection basis when present, and coverage limits on that selection.
+For each task retain: task and host IDs, workstream basis, state, confidence, latest request, outcome, remaining action, related task IDs, proposed markers, archive-candidate reason, and final title. End with the important unfinished current owners and every parked uncertainty.
