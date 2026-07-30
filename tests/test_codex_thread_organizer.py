@@ -11,6 +11,9 @@ SKILL_NAME = "codex-thread-organizer"
 SHARED_PLUGIN_ROOT = ROOT / "plugins" / "frozen-skills"
 ORGANIZER_PLUGIN_ROOT = ROOT / "plugins" / "codex-thread-organizer"
 SKILL_ROOT = ORGANIZER_PLUGIN_ROOT / "skills" / SKILL_NAME
+TITLE_GRAMMAR = SKILL_ROOT / "references" / "title-grammar.md"
+CROSS_TASK_REVIEW = SKILL_ROOT / "references" / "cross-task-review.md"
+SEMANTIC_CASES = SKILL_ROOT / "evals" / "semantic-cases.json"
 SYNC_SCRIPT = ROOT / "scripts" / "sync_frozen_skills.py"
 SYNC_SPEC = importlib.util.spec_from_file_location("organizer_sync", SYNC_SCRIPT)
 sync_module = importlib.util.module_from_spec(SYNC_SPEC)
@@ -20,6 +23,51 @@ SYNC_SPEC.loader.exec_module(sync_module)
 
 
 class CodexThreadOrganizerPackagingTests(unittest.TestCase):
+    def test_priority_status_taxonomy_is_explicit_and_sparse(self):
+        skill_text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        grammar_text = TITLE_GRAMMAR.read_text(encoding="utf-8")
+        review_text = CROSS_TASK_REVIEW.read_text(encoding="utf-8")
+
+        for marker in ("🔴", "🟡", "⏸️", "🚧", "✅", "📌", "↪️", "🗄️"):
+            self.assertIn(marker, grammar_text)
+
+        grammar_lower = grammar_text.lower()
+        self.assertIn("zero or one", grammar_lower)
+        self.assertIn("single highest-priority unfinished task", grammar_lower)
+        self.assertIn("concrete remaining action", grammar_lower)
+        self.assertIn("Archive Candidate", review_text)
+        self.assertIn("separate authorization", review_text)
+        self.assertIn("global attention", skill_text)
+
+    def test_semantic_cases_cover_priority_status_and_archive_boundaries(self):
+        data = json.loads(SEMANTIC_CASES.read_text(encoding="utf-8"))
+        cases = {case["id"]: case for case in data["cases"]}
+
+        self.assertEqual(
+            set(cases),
+            {
+                "single-red-across-audited-scope",
+                "yellow-means-concrete-follow-up",
+                "waiting-and-blocked-are-distinct",
+                "completed-reference-versus-archive-candidate",
+                "supersession-needs-a-named-successor",
+                "age-alone-never-archives",
+                "sparse-prefix-does-not-pad-to-five",
+            },
+        )
+        self.assertEqual(
+            cases["single-red-across-audited-scope"]["expected"]["red_count"], 1
+        )
+        self.assertEqual(
+            cases["age-alone-never-archives"]["expected"]["archive_candidates"], []
+        )
+        self.assertEqual(
+            cases["waiting-and-blocked-are-distinct"]["expected"][
+                "waiting_yellow_marker"
+            ],
+            "🟡",
+        )
+
     def test_skill_is_active_for_codex_only(self):
         skill_text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         openai_metadata = (SKILL_ROOT / "agents" / "openai.yaml").read_text(

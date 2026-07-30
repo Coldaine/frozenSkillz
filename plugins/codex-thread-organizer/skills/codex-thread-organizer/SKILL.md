@@ -2,9 +2,9 @@
 name: codex-thread-organizer
 description: >-
   Use when reviewing or maintaining Codex task history: inventorying related tasks,
-  proposing body-derived sidebar titles, assessing same-repository supersession, or
-  running a periodic organization pass. Codex-only; do not use for ChatGPT web
-  conversations or other agent clients.
+  proposing body-derived sidebar titles, surfacing important unfinished work,
+  assessing supersession or archive candidates, or running a periodic organization
+  pass. Codex-only; do not use for ChatGPT web conversations or other agent clients.
 ---
 
 # Codex Thread Organizer
@@ -36,20 +36,25 @@ Archive, pin, or other state changes require their own explicit scope. Authoriza
 2. **Read the actual work.** Read enough of each body to understand the opening request, later changes of direction, substantive outcome, remaining work, and references to later tasks or durable artifacts. A title, preview, or first message is not enough.
 3. **Group only with evidence.** Attribute a repository or project family from the working directory, repository identity, transcript evidence, or an explicit user mapping. Leave uncertain tasks unassigned.
 4. **Compare related tasks when relevant.** If the scope includes relevance, age, duplication, or supersession, read the accessible bodies in the same family together. Follow [references/cross-task-review.md](references/cross-task-review.md).
-5. **Draft the semantic title.** Apply the sparse symbol grammar in [references/title-grammar.md](references/title-grammar.md), then critique and revise the title once.
-6. **Produce a frozen manifest.** Always include IDs, old and proposed titles, confidence, body-derived rationale, and proposed action. For cross-task reviews, include every field required by [references/cross-task-review.md](references/cross-task-review.md): repository family and attribution basis, classification, related task IDs and directed relationships, outcome and remaining work, plus inventory and coverage totals. Record inaccessible, unassigned, and ambiguous tasks.
-7. **Apply only an authorized frozen batch.** Recheck each current title immediately before mutation. Skip and report concurrent changes. Use the native Codex title operation.
-8. **Verify independently.** Re-inventory or read back every target and require an exact match before reporting success. A mutation acknowledgement is provisional.
+5. **Draft the semantic base.** Apply the project, work-type, and lifecycle grammar in [references/title-grammar.md](references/title-grammar.md), then critique the wording once.
+6. **Assign cross-task markers.** After the related inventory is classified, add evidence-backed relationship, retention, and global attention markers. The frozen audited scope may contain exactly zero or one `🔴`; `🟡` may appear only where the rationale names a concrete remaining action.
+7. **Produce a frozen manifest.** Always include IDs, old and proposed titles, confidence, body-derived rationale, remaining action, markers and their evidence, and proposed action. For cross-task reviews, include every field required by [references/cross-task-review.md](references/cross-task-review.md): repository family and attribution basis, classification, related task IDs and directed relationships, outcome and remaining work, archive-candidate basis, plus inventory and coverage totals. Record inaccessible, unassigned, and ambiguous tasks.
+8. **Apply only an authorized frozen batch.** Recheck each current title immediately before mutation. Skip and report concurrent changes. Use the native Codex title operation.
+9. **Verify independently.** Re-inventory or read back every target and require an exact match before reporting success. A mutation acknowledgement is provisional.
 
 ## Title Rules
 
 - Use **one to five** leading semantic symbols, never five by default. Most titles should use one to three.
-- Prefer one project or domain symbol, then an optional work-type symbol, then an optional lifecycle symbol.
+- Build the ordinary base as project or domain, optional work type, then optional lifecycle. Put cross-task attention or relationship markers before that base.
 - A fourth or fifth symbol is exceptional and must add a stable distinction. Never pad a title with decoration.
 - Keep the words specific and recognizable, normally about 5–12 words.
 - Preserve exact product, repository, issue, pull request, and artifact names when they aid recognition.
 - Treat 60 UTF-16 code units as the empirically observed ceiling of Codex's native title operation: a verified 2026-07-20 batch found longer values persisted with a literal trailing ellipsis. Enforce that ceiling before mutation and prefer a lower ordinary target so later edits have room.
 - Use `✅` only when the scoped outcome is directly verified. An assistant saying “done” is not verification.
+- Use `🔴` on exactly zero or one task across the frozen audited scope: the single highest-priority unfinished task after inventory-wide comparison. If coverage is insufficient, use zero.
+- Use `🟡` only for a concrete remaining action, decision, or follow-up. It may coexist with `🔴` because priority and actionability are different dimensions.
+- Use `⏸️` for a named user or external wait and `🚧` for a specific blocker. Neither is completion or archive evidence.
+- Use `📌`, `↪️`, and `🗄️` only after cross-task review establishes canonical, superseded, or archive-candidate status. `🗄️` is a proposal marker, not archive authorization.
 
 Examples:
 
@@ -57,6 +62,9 @@ Examples:
 🌊 Crest Research Pruning
 🌊 🧹 Crest Research Pruning
 🌊 🧹 ✅ Crest Research Pruning
+🔴 🟡 🌊 Broadside Implementation Continuation
+🟡 ⏸️ Techdeals Future-State Migration
+🗄️ ✅ Techdeals PR #84 Review
 ```
 
 The third form is valid only when the pruning's final state was checked. See [references/title-grammar.md](references/title-grammar.md) for the evidence test.
@@ -67,6 +75,7 @@ The third form is valid only when the pruning's final state was checked. See [re
 - `current` does not mean newest.
 - Preserve an old task as `completed-reference` when it has a durable result worth retaining.
 - A `superseded` or `duplicate` result must name the later related task or repository artifact and summarize the evidence.
+- An archive candidate must state why its remaining value is carried elsewhere or is negligible. Age, completion, or supersession alone is insufficient.
 - Weak or conflicting evidence becomes `needs-review`.
 - Report inaccessible tasks as coverage gaps, not as irrelevant.
 

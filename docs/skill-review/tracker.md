@@ -204,8 +204,9 @@ UPID. Exact power, snapshot, migration, and task commands are in the shipped ref
 ### `codex-thread-organizer` — active, Codex-only
 
 - Native Codex workflow for body-derived sidebar titles, same-repository relevance review, and periodic organization.
-- Sparse prefix grammar: one to five semantic symbols, normally one to three; never pad to five. `✅` requires direct
-  completion evidence and is not inferred from an assistant's claim.
+- Sparse prefix grammar: one to five semantic symbols, normally one to three; never pad to five. Global attention uses
+  zero or one `🔴` for the highest-priority unfinished task and `🟡` for concrete follow-up. Lifecycle uses `⏸️`, `🚧`,
+  and directly verified `✅`; cross-task relationship and retention use `📌`, `↪️`, and proposal-only `🗄️`.
 - **Packaging decision:** active for the Codex consumer only. Source lives in the dedicated
   `plugins/codex-thread-organizer/` package, the Codex lane/package list in `plugins/distribution.json` selects it, and
   only the Codex marketplace exposes that package. It is physically outside the shared `frozen-skills` package, so
@@ -215,6 +216,10 @@ UPID. Exact power, snapshot, migration, and task commands are in the shipped ref
   exactly. A 2026-07-20 body-reviewed batch inspected 50 tasks, renamed 49, and independently matched 50/50 final
   titles; it also established the empirical 60 UTF-16-unit ceiling. No archive, pin, content, or direct-store change
   occurred. The owner confirmed satisfaction and directed Codex-only promotion on 2026-07-27.
+- **Priority/status qualification:** 2026-07-30 fresh-context RED-GREEN scenarios showed that the old skill left
+  priority, waiting, supersession, and archive candidacy in prose. Updated and refactored scenarios enforced sparse
+  visible markers, zero-or-one red selection, yellow external decisions, and a separate retention judgment before
+  archive candidacy. Durable cases and the run report live under the skill's `evals/` directory.
 - **Residual before enabling periodic automation:** run the trigger eval protocol, complete
   one proposal-only repository-family relevance review, and complete one proposal-only periodic dry run with checkpoint
   recovery. Keep the skill Codex-only unless the owner explicitly changes that boundary.

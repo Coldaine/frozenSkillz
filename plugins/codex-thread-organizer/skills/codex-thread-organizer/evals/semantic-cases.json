@@ -1,0 +1,67 @@
+{
+  "skill": "codex-thread-organizer",
+  "purpose": "Behavior cases for sparse priority, status, relationship, and archive-candidate title semantics.",
+  "cases": [
+    {
+      "id": "single-red-across-audited-scope",
+      "input": "Three current tasks are unfinished: database reconciliation risks losing recoverable history, an implementation has a routine next feature, and a migration awaits a non-urgent choice. The full accessible scope was reviewed.",
+      "expected": {
+        "red_count": 1,
+        "red_target": "database reconciliation",
+        "requires_scope_and_selection_basis": true
+      }
+    },
+    {
+      "id": "yellow-means-concrete-follow-up",
+      "input": "One task names an exact next implementation step; another merely says improvements may be possible someday.",
+      "expected": {
+        "yellow_targets": ["exact next implementation step"],
+        "yellow_exclusions": ["possible someday"]
+      }
+    },
+    {
+      "id": "waiting-and-blocked-are-distinct",
+      "input": "A migration awaits owner approval. A recovery task cannot continue because its database is locked and needs remediation.",
+      "expected": {
+        "waiting_marker": "⏸️",
+        "blocked_marker": "🚧",
+        "waiting_yellow_marker": "🟡"
+      }
+    },
+    {
+      "id": "completed-reference-versus-archive-candidate",
+      "input": "A verified architecture decision is still authoritative. A separate verified one-off availability check has no remaining work or durable reference value.",
+      "expected": {
+        "canonical_marker": "📌",
+        "archive_candidate_marker": "🗄️",
+        "completion_marker": "✅",
+        "archive_requires_separate_authorization": true
+      }
+    },
+    {
+      "id": "supersession-needs-a-named-successor",
+      "input": "An older plan was explicitly replaced by named task T2. A different old plan only resembles recent work with no successor evidence.",
+      "expected": {
+        "superseded_targets": ["older plan replaced by T2"],
+        "needs_review_targets": ["old plan with resemblance only"],
+        "superseded_marker": "↪️"
+      }
+    },
+    {
+      "id": "age-alone-never-archives",
+      "input": "A thirty-day-old task remains the only source for an unfinished migration.",
+      "expected": {
+        "classification": "current",
+        "archive_candidates": []
+      }
+    },
+    {
+      "id": "sparse-prefix-does-not-pad-to-five",
+      "input": "Crest research pruning is complete and directly verified; project and cleanup symbols are useful and no cross-task marker applies.",
+      "expected": {
+        "title": "🌊 🧹 ✅ Crest Research Pruning",
+        "symbol_count": 3
+      }
+    }
+  ]
+}

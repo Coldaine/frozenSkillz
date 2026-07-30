@@ -14,13 +14,15 @@ On the first run, after checkpoint loss, or whenever no valid checkpoint exists,
 
 1. inventory tasks changed since the previous successful run;
 2. read the changed bodies and any related family members needed for context;
-3. propose sparse title or relationship updates;
+3. propose sparse title, attention, status, relationship, or archive-candidate updates;
 4. write or return a frozen manifest;
 5. make no title, archive, pin, delete, or content mutation.
 
 If title mutations are pre-authorized, the automation must still freeze the manifest, check for concurrent changes, enforce the title-length limit, apply with native Codex operations, and independently read back every result.
 
-Archive and pin changes are never implied by title authorization.
+`🔴` remains a global invariant during incremental runs. Before proposing or applying it, inventory existing red-marked tasks in the automation's declared scope and compare every credible current contender needed to preserve a zero-or-one result. If the checkpoint or coverage cannot support that comparison, emit no new red marker and request a full attention review. A changed-task scan alone is not proof of global priority.
+
+Archive-candidate markers and recommendations are proposal metadata. Archive and pin changes are never implied by title authorization.
 
 ## Suggested Cadence
 
@@ -31,6 +33,7 @@ Every run should report:
 - inventory and coverage totals;
 - changed, unchanged, inaccessible, and ambiguous tasks;
 - proposals and applied mutations as separate counts;
+- red-marker count and the audited scope used for the selection;
 - exact verification results for applied mutations;
 - whether any task was skipped due to concurrent change;
 - the next review boundary or unresolved owner decision.

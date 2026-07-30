@@ -19,6 +19,10 @@
       "should_trigger": true
     },
     {
+      "query": "Mark the single most important unfinished Codex task red and concrete follow-up tasks yellow",
+      "should_trigger": true
+    },
+    {
       "query": "Rename this Git branch and clean up stale files",
       "should_trigger": false
     },
@@ -41,6 +45,10 @@
       "should_trigger": true
     },
     {
+      "query": "Recommend which completed or superseded Codex tasks are archive candidates without archiving them yet",
+      "should_trigger": true
+    },
+    {
       "query": "Summarize this one conversation without changing or organizing my Codex sidebar",
       "should_trigger": false
     },
@@ -52,6 +60,10 @@
   "held_out": [
     {
       "query": "Audit the Codex tasks for this project family; age alone must not mean obsolete",
+      "should_trigger": true
+    },
+    {
+      "query": "Make waiting, blocked, canonical, and superseded Codex tasks visually distinct in the sidebar",
       "should_trigger": true
     },
     {
