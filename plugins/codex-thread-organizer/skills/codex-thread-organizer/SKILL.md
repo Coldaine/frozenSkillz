@@ -25,7 +25,7 @@ Organize the native Codex task surface from conversation evidence. Treat the ski
 |---|---|---|
 | Proposal | The user asks to review, organize, classify, or preview changes | Read tasks and produce a manifest only |
 | Authorized title batch | The user approves a batch or explicitly asks to rename the scoped tasks | Set titles, then read them back |
-| Cross-task relevance review | The user asks whether older work is still relevant or was superseded | Read and compare related task bodies; propose relationships only |
+| Cross-task relevance review | The user asks whether older work is still relevant or was superseded | Propose classifications, relationships, attention/status markers, retention and archive-candidate judgments; make no mutations |
 | Periodic run | A Codex automation invokes this skill | Follow the automation's explicit mutation boundary; otherwise remain proposal-only |
 
 Archive, pin, or other state changes require their own explicit scope. Authorization to rename is not authorization to archive.
@@ -39,7 +39,7 @@ Archive, pin, or other state changes require their own explicit scope. Authoriza
 5. **Draft the semantic base.** Apply the project, work-type, and lifecycle grammar in [references/title-grammar.md](references/title-grammar.md), then critique the wording once.
 6. **Assign cross-task markers.** After the related inventory is classified, add evidence-backed relationship, retention, and global attention markers. The frozen audited scope may contain exactly zero or one `🔴`; `🟡` may appear only where the rationale names a concrete remaining action.
 7. **Produce a frozen manifest.** Always include IDs, old and proposed titles, confidence, body-derived rationale, remaining action, markers and their evidence, and proposed action. For cross-task reviews, include every field required by [references/cross-task-review.md](references/cross-task-review.md): repository family and attribution basis, classification, related task IDs and directed relationships, outcome and remaining work, archive-candidate basis, plus inventory and coverage totals. Record inaccessible, unassigned, and ambiguous tasks.
-8. **Apply only an authorized frozen batch.** Recheck each current title immediately before mutation. Skip and report concurrent changes. Use the native Codex title operation.
+8. **Apply only an authorized frozen batch.** Recheck each current title immediately before mutation. Skip and report concurrent changes. Use the native Codex title operation. A red-winner change is one coupled transition: never add the new red independently from verified removal of the old red.
 9. **Verify independently.** Re-inventory or read back every target and require an exact match before reporting success. A mutation acknowledgement is provisional.
 
 ## Title Rules
@@ -84,6 +84,7 @@ The third form is valid only when the pruning's final state was checked. See [re
 - Prefer supported Codex operations; do not edit internal state stores during ordinary runs.
 - Freeze IDs and old titles in the proposal manifest.
 - Recheck live state before every write.
+- For a red-winner change, freeze every current red task and the proposed winner, abort on drift, remove and verify the old red marker first, then add the new red. Re-inventory the scope afterward; if more than one red exists, roll back the new red to its frozen non-red title and verify the rollback.
 - Keep title, archive, pin, and deletion scopes separate.
 - Never alter conversation content.
 - If a supported operation is unavailable, stop and report the limitation. Direct metadata editing requires a separately designed, backed-up, explicitly authorized procedure.

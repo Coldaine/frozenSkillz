@@ -12,6 +12,24 @@
       }
     },
     {
+      "id": "zero-red-when-no-leader",
+      "input": "Three current unfinished tasks are equally actionable, and the reviewed bodies provide no owner urgency, risk, blocking, or time-sensitivity distinction.",
+      "expected": {
+        "red_count": 0,
+        "reason": "No credible single priority leader"
+      }
+    },
+    {
+      "id": "incremental-red-handoff-is-fail-safe",
+      "input": "Task A currently has red, task B is the proposed new winner, and A's title changes after the manifest freezes but before mutation.",
+      "expected": {
+        "abort_add_on_old_red_removal_failure": true,
+        "maximum_red_count": 1,
+        "requires_final_scope_reinventory": true,
+        "rollback_new_red_if_final_count_exceeds_one": true
+      }
+    },
+    {
       "id": "yellow-means-concrete-follow-up",
       "input": "One task names an exact next implementation step; another merely says improvements may be possible someday.",
       "expected": {
@@ -29,6 +47,14 @@
       }
     },
     {
+      "id": "blocked-without-a-next-step-is-not-yellow",
+      "input": "A task is blocked by an unexplained external failure, and the reviewed body identifies no remediation, decision, or concrete next action.",
+      "expected": {
+        "blocked_marker": "🚧",
+        "yellow_marker": false
+      }
+    },
+    {
       "id": "completed-reference-versus-archive-candidate",
       "input": "A verified architecture decision is still authoritative. A separate verified one-off availability check has no remaining work or durable reference value.",
       "expected": {
@@ -36,6 +62,14 @@
         "archive_candidate_marker": "🗄️",
         "completion_marker": "✅",
         "archive_requires_separate_authorization": true
+      }
+    },
+    {
+      "id": "archive-retention-value-is-ambiguous",
+      "input": "A delivered one-off research answer has no stated remaining work, but the body and related tasks do not establish whether its result remains useful.",
+      "expected": {
+        "classification": "needs-review",
+        "archive_candidate_marker": false
       }
     },
     {
