@@ -14,6 +14,7 @@ SKILL_ROOT = ORGANIZER_PLUGIN_ROOT / "skills" / SKILL_NAME
 TITLE_GRAMMAR = SKILL_ROOT / "references" / "title-grammar.md"
 CROSS_TASK_REVIEW = SKILL_ROOT / "references" / "cross-task-review.md"
 PERIODIC_AUTOMATION = SKILL_ROOT / "references" / "periodic-automation.md"
+TRIGGER_CASES = SKILL_ROOT / "evals" / "triggers.json"
 OPENAI_METADATA = SKILL_ROOT / "agents" / "openai.yaml"
 SYNC_SCRIPT = ROOT / "scripts" / "sync_frozen_skills.py"
 SYNC_SPEC = importlib.util.spec_from_file_location("organizer_sync", SYNC_SCRIPT)
@@ -30,6 +31,8 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         review_text = CROSS_TASK_REVIEW.read_text(encoding="utf-8")
         automation_text = PERIODIC_AUTOMATION.read_text(encoding="utf-8")
         openai_text = OPENAI_METADATA.read_text(encoding="utf-8")
+        readme_text = (ROOT / "README.md").read_text(encoding="utf-8")
+        trigger_data = json.loads(TRIGGER_CASES.read_text(encoding="utf-8"))
 
         for marker in ("🔴", "🟡", "✅", "📌", "↪️", "🗄️"):
             self.assertIn(marker, grammar_text)
@@ -55,6 +58,24 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         self.assertIn("lifecycle marker last", grammar_text.lower())
         self.assertIn("attention, then retention, then relationship", grammar_text.lower())
         self.assertIn("rename", openai_text.lower())
+        self.assertIn("renames codex tasks", readme_text.lower())
+        self.assertIn("applied markers", review_text.lower())
+        self.assertIn("No `✅`; eligible for `↪️` and `🗄️`", review_text)
+        self.assertIn("age", automation_text.lower())
+        self.assertIn("archive candidacy", automation_text.lower())
+        self.assertIn("rename the reviewed tasks", automation_text.lower())
+        self.assertIn("read every title back", automation_text.lower())
+
+        positive_queries = [
+            case["query"]
+            for split in ("train", "validation", "held_out")
+            for case in trigger_data[split]
+            if case["should_trigger"]
+        ]
+        self.assertTrue(any("rename" in query.lower() for query in positive_queries))
+        self.assertTrue(
+            any("recent relevant" in query.lower() for query in positive_queries)
+        )
 
         for obsolete in (
             "proposal-only",
@@ -65,6 +86,9 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         ):
             self.assertNotIn(obsolete, combined_lower)
             self.assertNotIn(obsolete, openai_text.lower())
+
+        self.assertNotIn("proposes sparse semantic titles", readme_text.lower())
+        self.assertNotIn("proposed markers", review_text.lower())
 
     def test_skill_is_active_for_codex_only(self):
         skill_text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")

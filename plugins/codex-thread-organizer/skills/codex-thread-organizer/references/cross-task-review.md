@@ -68,4 +68,4 @@ Age helps order the review. It does not prove abandonment, completion, or irrele
 
 ## Review Output
 
-For each task retain: task and host IDs, workstream basis, state, confidence, latest request, outcome, remaining action, related task IDs, proposed markers, archive-candidate reason, and final title. End with the important unfinished current owners and every parked uncertainty.
+For each task retain: task and host IDs, workstream basis, state, confidence, latest request, outcome, remaining action, related task IDs, applied markers, archive-candidate reason, and resulting title. End with the important unfinished current owners and every parked uncertainty.
