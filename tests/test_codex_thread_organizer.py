@@ -47,7 +47,10 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
 
     def test_semantic_cases_cover_priority_status_and_archive_boundaries(self):
         data = json.loads(SEMANTIC_CASES.read_text(encoding="utf-8"))
-        cases = {case["id"]: case for case in data["cases"]}
+        case_list = data["cases"]
+        cases = {case["id"]: case for case in case_list}
+
+        self.assertEqual(len(case_list), len(cases), "semantic case IDs must be unique")
 
         self.assertEqual(
             set(cases),
