@@ -1,9 +1,9 @@
 {
   "skill": "codex-thread-organizer",
-  "notes": "Codex-app routing cases. Positives cover all accessible sidebar conversations, body-derived titles, same-repository relevance, and scheduled organization. Negatives protect other clients, generic Git cleanup, and ordinary conversation summaries. The held_out split is the final untouched test set, matching the repository's active-skill eval convention.",
+  "notes": "Codex-app routing cases. Positives cover every conversation the Codex app's sidebar exposes, body-derived titles, same-repository relevance, and scheduled organization. A ChatGPT-history request triggers whether or not the user names the sidebar: the skill inventories those conversations and reports them as `not title-mutable` rather than staying silent and letting an agent improvise. Negatives protect other clients (Claude Code, Cursor, Gemini, browser tabs), generic Git cleanup, and ordinary conversation summaries. The held_out split is the final untouched test set, matching the repository's active-skill eval convention.",
   "train": [
     {
-      "query": "Review my recent Codex tasks and propose better sidebar titles from the full conversation bodies",
+      "query": "Review and rename my recent Codex tasks from the full conversation bodies",
       "should_trigger": true
     },
     {
@@ -11,11 +11,15 @@
       "should_trigger": true
     },
     {
-      "query": "Apply the approved Codex title manifest and verify every title by reading it back",
+      "query": "Find the current owner of each unfinished Codex workstream and rename the related tasks",
       "should_trigger": true
     },
     {
       "query": "Create a periodic Codex automation that organizes changed tasks using our sparse emoji taxonomy",
+      "should_trigger": true
+    },
+    {
+      "query": "Mark the single most important unfinished Codex task red and concrete follow-up tasks yellow",
       "should_trigger": true
     },
     {
@@ -24,6 +28,10 @@
     },
     {
       "query": "Organize my ChatGPT web conversation history that appears in the Codex sidebar",
+      "should_trigger": true
+    },
+    {
+      "query": "Organize my ChatGPT web conversation history",
       "should_trigger": true
     },
     {
@@ -41,6 +49,14 @@
       "should_trigger": true
     },
     {
+      "query": "Recommend which completed or superseded Codex tasks are archive candidates without archiving them yet",
+      "should_trigger": true
+    },
+    {
+      "query": "Read the recent relevant Codex chats for each project and distinguish done, continued elsewhere, and parked work",
+      "should_trigger": true
+    },
+    {
       "query": "Summarize this one conversation without changing or organizing my Codex sidebar",
       "should_trigger": false
     },
@@ -52,6 +68,10 @@
   "held_out": [
     {
       "query": "Audit the Codex tasks for this project family; age alone must not mean obsolete",
+      "should_trigger": true
+    },
+    {
+      "query": "Make waiting, blocked, canonical, and superseded Codex tasks visually distinct in the sidebar",
       "should_trigger": true
     },
     {

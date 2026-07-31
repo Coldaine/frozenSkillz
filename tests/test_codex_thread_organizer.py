@@ -11,6 +11,11 @@ SKILL_NAME = "codex-thread-organizer"
 SHARED_PLUGIN_ROOT = ROOT / "plugins" / "frozen-skills"
 ORGANIZER_PLUGIN_ROOT = ROOT / "plugins" / "codex-thread-organizer"
 SKILL_ROOT = ORGANIZER_PLUGIN_ROOT / "skills" / SKILL_NAME
+TITLE_GRAMMAR = SKILL_ROOT / "references" / "title-grammar.md"
+CROSS_TASK_REVIEW = SKILL_ROOT / "references" / "cross-task-review.md"
+PERIODIC_AUTOMATION = SKILL_ROOT / "references" / "periodic-automation.md"
+TRIGGER_CASES = SKILL_ROOT / "evals" / "triggers.json"
+OPENAI_METADATA = SKILL_ROOT / "agents" / "openai.yaml"
 SYNC_SCRIPT = ROOT / "scripts" / "sync_frozen_skills.py"
 SYNC_SPEC = importlib.util.spec_from_file_location("organizer_sync", SYNC_SCRIPT)
 sync_module = importlib.util.module_from_spec(SYNC_SPEC)
@@ -20,6 +25,70 @@ SYNC_SPEC.loader.exec_module(sync_module)
 
 
 class CodexThreadOrganizerPackagingTests(unittest.TestCase):
+    def test_completion_and_cross_task_ownership_contract(self):
+        skill_text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        grammar_text = TITLE_GRAMMAR.read_text(encoding="utf-8")
+        review_text = CROSS_TASK_REVIEW.read_text(encoding="utf-8")
+        automation_text = PERIODIC_AUTOMATION.read_text(encoding="utf-8")
+        openai_text = OPENAI_METADATA.read_text(encoding="utf-8")
+        readme_text = (ROOT / "README.md").read_text(encoding="utf-8")
+        trigger_data = json.loads(TRIGGER_CASES.read_text(encoding="utf-8"))
+
+        for marker in ("🔴", "🟡", "✅", "⏸️", "🚧", "📌", "↪️", "🗄️"):
+            self.assertIn(marker, grammar_text)
+
+        for classification in (
+            "done",
+            "active-remaining",
+            "continued-elsewhere",
+            "parked-unclear",
+        ):
+            self.assertIn(classification, review_text.lower())
+
+        combined = "\n".join((skill_text, grammar_text, review_text, automation_text))
+        combined_lower = combined.lower()
+        self.assertIn("latest relevant user request", combined_lower)
+        self.assertIn("broader project", combined_lower)
+        self.assertIn("subagent", combined_lower)
+        self.assertIn("use sparingly", grammar_text.lower())
+        self.assertIn("lifecycle marker last", grammar_text.lower())
+        self.assertIn("attention, then retention, then relationship", grammar_text.lower())
+        self.assertIn("rename", openai_text.lower())
+        self.assertIn("renames codex tasks", readme_text.lower())
+        self.assertIn("applied markers", review_text.lower())
+
+        for classification in (
+            "done",
+            "active-remaining",
+            "continued-elsewhere",
+            "parked-unclear",
+        ):
+            self.assertIn(classification, automation_text.lower())
+
+        positive_queries = [
+            case["query"]
+            for split in ("train", "validation", "held_out")
+            for case in trigger_data[split]
+            if case["should_trigger"]
+        ]
+        self.assertTrue(any("rename" in query.lower() for query in positive_queries))
+        self.assertTrue(
+            any("recent relevant" in query.lower() for query in positive_queries)
+        )
+
+        for obsolete in (
+            "proposal-only",
+            "authorized title batch",
+            "coupled transition",
+            "roll back the new red",
+            "fresh manifest before retrying",
+        ):
+            self.assertNotIn(obsolete, combined_lower)
+            self.assertNotIn(obsolete, openai_text.lower())
+
+        self.assertNotIn("proposes sparse semantic titles", readme_text.lower())
+        self.assertNotIn("proposed markers", review_text.lower())
+
     def test_skill_is_packaged_for_codex_only(self):
         skill_text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         openai_metadata = (SKILL_ROOT / "agents" / "openai.yaml").read_text(
@@ -29,9 +98,12 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        self.assertIn("Codex-app skill", skill_text)
+        self.assertIn("Packaging is Codex-only", skill_text)
         self.assertIn("$codex-thread-organizer", openai_metadata)
-        self.assertIn("Codex lane", tracker_text)
+        self.assertIn(
+            "| `codex-thread-organizer` | active | Codex-only dedicated package;",
+            tracker_text,
+        )
 
         manifests = {
             "claude": ROOT / "plugins" / "frozen-skills" / ".claude-plugin" / "plugin.json",
@@ -87,16 +159,40 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         self.assertIn("every accessible sidebar conversation", skill_text)
         self.assertIn("title-mutable", skill_text)
         self.assertIn("not title-mutable", skill_text)
+        self.assertNotIn("not-title-mutable", skill_text)
         self.assertIn("bounded inventory", skill_text)
         self.assertIn("partial coverage", skill_text)
+        self.assertIn("full inventory total", skill_text)
         self.assertNotIn("Do not apply it to ChatGPT", skill_text)
-        chatgpt_case = next(
-            item
-            for item in evals["train"]
-            if item["query"]
-            == "Organize my ChatGPT web conversation history that appears in the Codex sidebar"
-        )
-        self.assertTrue(chatgpt_case["should_trigger"])
+        self.assertNotIn("do not use for ChatGPT", skill_text.lower())
+
+        # The 60 UTF-16 ceiling keeps its provenance; it is the only evidence
+        # for the number, and it is verified for Codex targets specifically.
+        self.assertIn("60 UTF-16 code units", skill_text)
+        self.assertIn("literal trailing ellipsis", skill_text)
+
+        chatgpt_queries = {
+            item["query"]: item["should_trigger"]
+            for split in ("train", "validation", "held_out")
+            for item in evals[split]
+            if "chatgpt" in item["query"].lower()
+        }
+        for query in (
+            "Organize my ChatGPT web conversation history",
+            "Organize my ChatGPT web conversation history that appears in the Codex sidebar",
+        ):
+            self.assertIn(query, chatgpt_queries)
+            self.assertTrue(chatgpt_queries[query], query)
+
+        other_client_negatives = {
+            item["query"]: item["should_trigger"]
+            for split in ("train", "validation", "held_out")
+            for item in evals[split]
+            if not item["should_trigger"]
+        }
+        self.assertIn("Add emoji names to my Claude Code sessions", other_client_negatives)
+        self.assertIn("Rename this Git branch and clean up stale files", other_client_negatives)
+        self.assertIn("Build a browser extension that renames chat tabs", other_client_negatives)
 
     def test_real_distribution_smoke_installs_organizer_only_for_codex(self):
         shared = {
