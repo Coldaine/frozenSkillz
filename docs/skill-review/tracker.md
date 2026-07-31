@@ -34,6 +34,7 @@ de-personalized.
 | Skill | Next action |
 |---|---|
 | `chat-history` | Content update needed (owner 2026-07-31); de-personalize paths; drop unimplemented gemini extractor from docstring. |
+| `retrospective` | Revived 2026-07-31 (owner overruled deletion — key skill): timeline script now covers all harnesses via AgentsView `--db` mode; needs trigger decision (see SKILL.md Triggering); then de-personalize. |
 | `project-docs` | Gated pending de-personalization. |
 | `skill-install` | Verify recipes. |
 | `run-opencode` | Fix driver.mjs header comment re: profile writes. |
@@ -49,10 +50,11 @@ de-personalized.
 | `explore` | Already deleted from the live root (noticed 2026-07-31; not in quarantine — 155 codex sessions had read it, owner unaware it existed). The explorer-subagent lane in [#71](https://github.com/Coldaine/frozenSkillz/issues/71) is its replacement. |
 
 Deleted forever 2026-07-31 (owner order): `review-claudemd`, `claude-md-enhancer`,
-`skill-finder`, `retrospective` — live dirs were already broken (empty or missing
-SKILL.md) and their incubator copies are removed in the same change; git history is the
-only archive. `retrospective` judged not worth restoring: broken six weeks unnoticed,
-superseded by kcap recap + the nightly session-reviewer. Also removed the empty
+`skill-finder` — live dirs were already broken (empty or missing SKILL.md) and their
+incubator copies are removed in the same change; git history is the only archive.
+`retrospective` was in the original deletion order, but the owner reversed that the
+same day — it is a key skill. Revived from a recovered copy with the timeline script
+extended to all harnesses (see Personal lane row). Also removed the empty
 `~/.codex/skills/codex-primary-runtime/` dir (live only, never tracked here).
 
 ## Intake queue
@@ -178,7 +180,8 @@ sessions each, read by subagents):
 - **INSUFFICIENT DATA:** `unity` — old "sole mutator" text caused the 2026-07-21 blowup;
   rewritten text unproven, re-grade after a real Editor session. `retrospective` — live
   skill half-deleted ~Jul 16 (SKILL.md gone, `scripts/` orphaned): restore deliberately
-  or delete the remnant. **Resolved 2026-07-31: deleted forever** (see Personal lane).
+  or delete the remnant. **Resolved 2026-07-31: deleted, then revived the same day by
+  owner order** (see Personal lane).
 - **Owner-overturned (2026-07-31): `unity-editor-ops` EARNS → NOT PROVEN.** The graded
   "success" session was a 100-tick /loop that ran with Unity/MCP down almost the whole
   time; the batch-mode recipe let it keep generating self-written, self-graded green work
