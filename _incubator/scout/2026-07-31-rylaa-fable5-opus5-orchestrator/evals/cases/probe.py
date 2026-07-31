@@ -1,9 +1,26 @@
 #!/usr/bin/env python3
 """Passive instrument: log spawn prompt sizes, never deny.
 
-Baseline control for the ledger-guard eval. Same PreToolUse matcher as
-the guard so it observes exactly what the guard would observe, but it
-always exits 0 with no output, so nothing is ever blocked.
+Baseline control for the ledger-guard eval. Registered on the same
+PreToolUse matcher as the guard (^(Agent|Task|Workflow|TaskCreate)$),
+so it is invoked on the same calls, but it always exits 0 with no
+output and nothing is ever blocked.
+
+It does NOT replicate the guard's internal filtering, and deliberately
+so — it is the uncensored control, and the guard is not a measurement
+instrument:
+
+  - The guard exempts subagent_type == "fork"; this logs forks.
+  - The guard routes TaskCreate to a separate count-based path and
+    never measures its length; this logs a TaskCreate row (chars 0,
+    since TaskCreate carries no `prompt`).
+  - The guard emits a metric only when a prompt EXCEEDS its threshold,
+    so its log is left-censored; this logs every spawn at any length.
+
+That last difference is the point: sub-threshold spawns are exactly
+what the guard cannot see and what the eval needs counted. Filter the
+resulting JSONL by `tool`/`subagent_type` when you want a
+guard-comparable subset.
 """
 import json
 import os

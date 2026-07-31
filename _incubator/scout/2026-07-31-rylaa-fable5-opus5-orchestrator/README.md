@@ -44,6 +44,13 @@ Scored and decided: **adapt concept only**. See `analysis.md` for per-component 
 
 Not adoptable as a plugin here — it hardcodes `python3` (absent from this machine's PATH) and is POSIX/tmux-bound. Its ledger and progressive-disclosure patterns are worth adapting; its tmux teammate-reaping layer is discarded.
 
-No promotion is authorized yet: no live eval has been run, and `docs/workflows/external-skill-intake.md` requires one before any pattern from this candidate lands in `plugins/` or `docs/`.
+No promotion is authorized. One live eval has now been run and persisted at
+`evals/runs/2026-07-31-spawn-prompt-richness.md`, and its result reinforces the no-promotion
+decision rather than lifting it. It establishes two things — default spawn prompts (1298–1378
+chars) sit *below* the guard's 1500-char gate, so the hook is near-inert as shipped; and the guard
+is portable to Windows with a one-line `python3` → `py -3` fix. It does **not** establish any
+comparative improvement: the candidate arm was measured with an instrument blind below the
+threshold, so that question is unresolved. See that file's "Status against the intake evaluation
+protocol" section for what it can and cannot be cited for.
 
 The one empirical check run at import time was a portability probe (see `inventory.md` → Windows portability probe), because the upstream README declares the plugin macOS/Linux-only and this repo's operator is on Windows. That probe is a platform-fitness fact, not a quality eval — it does not satisfy the live-eval requirement in `docs/workflows/external-skill-intake.md`.

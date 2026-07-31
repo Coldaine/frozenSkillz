@@ -9,13 +9,18 @@
   - Defer: `source/scripts/ledger_guard_spawn.py`
   - Discard: `source/scripts/inject_instructions.py`, `source/scripts/cleanup_session_cache.py`, reaping half of `source/scripts/ledger_guard_stop.py`, all model-tier routing
 - Outcome: **adapt concept only** (Component A) + **discard** (Component C) + **incubate for later** (Component B)
-- Affected frozenSkillz paths: none yet — no promotion is authorized until a live eval exists
+- Affected frozenSkillz paths: none yet — no promotion is authorized; the live eval that has been
+  run does not discharge the gate (see Evidence)
 
 ## Evidence
 
 - Inventory summary: `inventory.md`
 - Rubric score summary: `analysis.md` — Component A 4.4, Component B 4.3, Component C 2.3
-- Eval run paths: **none** — no live eval has been run; this blocks promotion
+- Eval run paths: `evals/runs/2026-07-31-spawn-prompt-richness.md` (instrument: `evals/cases/probe.py`).
+  Establishes that the spawn guard's 1500-char threshold sits *above* default spawn-prompt length
+  (1298–1378), so it is near-inert as shipped, and that it is Windows-portable with a one-line fix.
+  Makes **no** comparative-improvement claim — the candidate arm's instrument was left-censored at
+  the threshold, leaving that question unresolved. Promotion remains blocked.
 - Safety notes: no network, no `shell=True`, no `eval`/`exec`/`pickle`; hooks fail open. `tmux kill-server` scoped to `claude-swarm-*` sockets only; `kill-pane` requires `--agent-id` plus exact `--parent-session-id` match. Destructive surface is real but narrow and defensively written.
 - Maintenance notes: MIT, single author, 32 commits, active as of 2026-07-25. Component C couples to undocumented host internals (`--agent-id`, `--parent-session-id`, `claude-swarm-*` socket names, `@session-` pane tags, `settings.json` model field) that have already changed once upstream, forcing version-proofing code.
 
@@ -36,3 +41,8 @@ Component B (`ledger_guard_spawn.py`) is deliberately parked rather than discard
 - Owner: unassigned
 - Due date or trigger: before any Component A pattern is written into `plugins/` or `docs/`
 - Required validation: a persisted live eval under `evals/runs/` comparing baseline / candidate-inspired / frozenSkillz-adapted output, per `docs/workflows/external-skill-intake.md`. Until then this candidate stays in `_incubator/` and no tracker row claims it as active.
+- Status: **still outstanding.** `evals/runs/2026-07-31-spawn-prompt-richness.md` is a partial
+  discharge only — two arms instead of three, and no usable comparative measurement. A run that
+  would close this gate needs `probe.py` installed in *every* arm (the guard's own metrics log
+  cannot measure prompt length, being blind below its threshold), a frozenSkillz-adapted third arm,
+  and raw per-arm logs persisted alongside the writeup rather than left in an ephemeral sandbox.
