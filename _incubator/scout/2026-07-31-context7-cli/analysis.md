@@ -29,6 +29,9 @@ Scope: single question — is this safe and functional as the key-rotation trans
   keys. This directly addresses the standing `context7-mcp` failure (quota-blocked in 10+
   sessions per the 2026-07-31 regrade).
 - Windows x86_64 supported; single static binary; bilingual EN/PT (comments are PT).
+- Flag gotchas for the downstream skill: `--quiet` suppresses **all** stdout including
+  `--json` output (don't combine them), and `-v/--verbose` is defined but unused —
+  verbosity is actually controlled via `RUST_LOG`.
 
 ## Fit
 
