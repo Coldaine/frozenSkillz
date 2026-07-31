@@ -37,12 +37,14 @@ Type: hook.
 | Reuse value | 4 | Useful in any repo doing multi-phase agent work. |
 | Progressive disclosure | 3 | Single 409-line script, but heavily commented with rationale. |
 | Safety/security risk | 5 | No `subprocess`, no network, no `shell=True`. Fails open on every exception. |
-| Portability | 3 | 40/42 tests pass on Windows; `fcntl` degrades deliberately. Blocked only by `python3` hardcoded in `hooks.json`. |
+| Portability | 4 | **Demonstrated** on Windows 11 in a real Claude Code 2.1.220 session after `python3` → `py -3`: denied a >1800-char spawn with no ledger, passed the same one with a ledger, subagent dispatched. 40/42 tests pass; `fcntl` degrades deliberately for non-POSIX. Held at 4, not 5: the hardcoded interpreter name is a shipped defect that breaks on any stock Windows box, and 2 tests still fail. Revised from 3 — that score was inferred from a test run; this is observed. |
 | Testability/evaluability | 5 | 42 tests running the hook end-to-end as real subprocesses over stdin/stdout JSON. |
 | Maintenance burden | 4 | Couples only to the **public** hook contract (`tool_name`, `tool_input`, `permissionDecision`). Low drift risk. |
 | Fit with frozenSkillz scope | 4 | Adjacent-to-direct; enforces a discipline this repo already values. |
 
-**Average: 4.3** — band: useful pattern, needs focused cleanup or eval proof.
+**Average: 4.4** — band: useful pattern, needs focused cleanup or eval proof. *(Revised from 4.3 when Portability moved 3 → 4 on demonstrated Windows operation.)*
+
+The score says the artifact is well-built. It does not say it is worth installing: the eval's one solid finding is that default spawn prompts (1298–1378) sit below this guard's 1500-char gate, so it would rarely fire at all. Well-built and near-inert are not in tension.
 
 ## Component C — SessionStart injector + tmux teammate reaper
 
