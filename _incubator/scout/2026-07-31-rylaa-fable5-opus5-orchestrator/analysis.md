@@ -86,4 +86,10 @@ Type: hook / config.
 
 **Adapt concept only.** Discard Component C entirely. Component A's patterns are the prize and are platform-independent. Component B is a defensible future port if repeated manual pain justifies it — not now, and not before an eval exists.
 
-Per `docs/workflows/external-skill-intake.md`, none of Component A may be promoted into `plugins/` until a live eval is persisted under `evals/runs/` comparing baseline / candidate-inspired / frozenSkillz-adapted output. That eval has not been run. This analysis is a scoring pass only.
+Per `docs/workflows/external-skill-intake.md`, none of Component A may be promoted into `plugins/` until a live eval is persisted under `evals/runs/` comparing baseline / candidate-inspired / frozenSkillz-adapted output. This analysis is a scoring pass only.
+
+A first live eval is now persisted at `evals/runs/2026-07-31-spawn-prompt-richness.md`. It does not
+satisfy that promotion gate: it ran two arms rather than three, and its comparative result is
+unusable because the candidate arm's instrument could not observe sub-threshold prompts. What it
+does establish is that Component B's guard is near-inert at its default threshold and is portable
+to Windows with a one-line fix. Component A's promotion gate remains open.

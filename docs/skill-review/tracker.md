@@ -87,6 +87,15 @@ Scouts:
   Snapshot at `_incubator/scout/2026-07-31-rylaa-fable5-opus5-orchestrator/`;
   tmux layer discarded. Live eval under its `evals/runs/` required before any
   Component A pattern lands in `plugins/` or `docs/`.
+  First live eval landed 2026-07-31 (`evals/runs/2026-07-31-spawn-prompt-richness.md`).
+  Concluded **no promotion**, and the gate above **stays closed**: it ran two arms
+  instead of three and its comparative measurement is unusable, because the candidate
+  arm was instrumented with the guard's own metrics log, which records nothing at or
+  below the 1500-char threshold it was supposed to be measuring across. What it does
+  establish, from the uncensored control arm: default spawn prompts run 1298–1378
+  chars — *below* the gate — so the guard is near-inert as shipped; and it is
+  Windows-portable via `python3` → `py -3`. Recommendation if ever adopted: check that
+  a spawn prompt *contains* the required contract sections rather than that it is long.
 
 ## Fleet effectiveness review
 
