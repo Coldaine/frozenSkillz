@@ -10,6 +10,7 @@ content, scripts actually run, no project-specific leakage, progressive disclosu
 
 | Skill | Status | Next action |
 |---|---|---|
+| `delegation-contract` | active | None — adapted doctrine validated for contract compliance and single-writer coordination; outcome-quality evidence remains intentionally limited to the recorded n=1 eval. |
 | `doppler` | active | None — reference standard. |
 | `external-skill-intake` | active | None. |
 | `omc-reference` | active | None. |

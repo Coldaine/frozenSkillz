@@ -5,7 +5,7 @@ Write to `./.workflow/LEDGER.md` before delegating. One line per item. Files sur
 ```markdown
 - [ ] 1. Every explicit requirement, one line each
 - [ ] 2. Implicit expectations and constraints too
-- [x] 3. Marked done only after verification confirms it
+- [ ] 3. Marked done only after verification confirms it
 - [~] 4. deferred: user approved postponing this
 - [ ] V. fresh-eyes verification passed
 ```

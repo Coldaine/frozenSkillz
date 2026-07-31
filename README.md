@@ -51,7 +51,7 @@ Claude Code can instead let its marketplace manage a client-specific plugin copy
 /plugin install frozen-skills@coldaine-skills
 ```
 
-That command auto-discovers the four shared skills in the `frozen-skills` package. It does not install the physically separate `codex-thread-organizer` package, populate a Codex skill root, or install anything from `_incubator/`.
+That command auto-discovers the five shared skills in the `frozen-skills` package. It does not install the physically separate `codex-thread-organizer` package, populate a Codex skill root, or install anything from `_incubator/`.
 
 The Codex marketplace separately exposes the valid `codex-thread-organizer` plugin package. Cursor and Gemini remain separately validated packaging surfaces. Manifest presence alone is not an installer; use `sync_frozen_skills.py --consumer <name>` for a verified local installation unless a specific client provides and documents its own plugin installer.
 
@@ -59,6 +59,7 @@ The Codex marketplace separately exposes the valid `codex-thread-organizer` plug
 
 `frozen-skills` currently registers these shared skills:
 
+- `delegation-contract`: brief and receive work across agent boundaries with explicit context, authority, output, and single-writer coordination rules.
 - `doppler`: Doppler CLI and secret-injection workflow guidance that avoids exposing secret values.
 - `external-skill-intake`: sandbox, inventory, score, evaluate, and package external skill/plugin/agent repos before any promotion.
 - `omc-reference`: maintain Oh My ClaudeCode as a separate Claude Code plugin from Codex without importing OMC workflow rules into ordinary Codex work.
