@@ -4,11 +4,27 @@ Adapted pattern, not active content. Mirrors the candidate's *return* contract w
 
 The candidate defines rigorously what a worker owes the chair (five parts, ≤40 lines, rejected and re-run if violated) and says almost nothing about what the chair owes a worker — "phases cite item numbers," and send "workers with specs" without ever defining a spec. This is that definition.
 
+## First principle: you are briefing an agent, not calling a function
+
+Everything below follows from this, and the fields are worthless without it. A spawn prompt is not an argument list. The thing receiving it reasons, chooses, and will encounter your task differently than you imagined it.
+
+Seven consequences, each of which is why one of the fields exists:
+
+- **It needs intent, not just instructions.** An agent that knows *why* adapts when reality contradicts your assumption. One that knows only *what* executes your plan off a cliff and reports success. Give it the reasoning and it can defend the goal when the steps stop applying.
+- **You cannot enumerate the branches.** It will hit situations you did not foresee — that is the normal case, not the failure case. What it needs is not more steps but a rule for the unforeseen: proceed on judgment, or come back and ask.
+- **It can tell you it doesn't know — if you invite it.** The candidate's return contract already asks for "uncertain because X." That only works if uncertainty is treated as a valid deliverable. A worker that never reports doubt is not confident, it is guessing quietly.
+- **Over-scripting destroys the thing you're paying for.** Listing steps it could derive wastes its judgment and makes it brittle the moment a step doesn't fit. Specify the destination and the constraints; let it choose the route.
+- **It cannot ask about what it cannot see.** Absence is invisible. It will never think to ask about the approach you rejected last month, because nothing in the repo hints that a decision was ever made.
+- **Competence expands into any space you leave unbounded.** A good agent that notices adjacent breakage will helpfully fix it — into another worker's files, or into a decision that was yours.
+- **It is not deterministic.** Run the same prompt twice and you get different work, both plausibly correct. So the prompt must carry the *invariants* — what has to be true regardless of which path it takes — rather than a path you expect it to reproduce.
+
+The test for a spawn prompt is not "does it have all seven sections." It is: **if this worker makes a reasonable decision I did not anticipate, does it have what it needs to make a good one?**
+
 ## The rule
 
-Every spawn of a substantive worker carries all seven fields below. A spawn missing any of them is underspecified: fix it before sending, don't hope the worker infers.
+Every spawn of a substantive worker carries all seven fields below — not as a form, but because each closes one of the gaps above. A spawn missing any of them is underspecified: fix it before sending, don't hope the worker infers.
 
-Sub-minute lookups — one grep, one read, one fetch — are exempt. They are not delegations, they are remote-controlled tool calls.
+Sub-minute lookups — one grep, one read, one fetch — are exempt. They are not delegations, they are remote-controlled tool calls, and the distinction matters: the exemption exists precisely because nothing is being *judged*.
 
 ## The seven fields
 
@@ -28,7 +44,9 @@ Sub-minute lookups — one grep, one read, one fetch — are exempt. They are no
 
 ## Why this and not a length rule
 
-The candidate gates spawns on prompt length — over 1500 characters and it demands a ledger. Measured against default behavior, spawn prompts land at roughly 1300 characters, under the gate, so it rarely fires; and length was never the thing worth protecting. A 2,000-character prompt that is all restated background and no authority boundary is worse than an 800-character one carrying all seven fields.
+The candidate gates spawns on prompt length — over 1500 characters and it demands a ledger. To be fair to it, this is not a limit on verbosity: length is being used as a cheap proxy for *"is this a serious delegation?"* Nobody is arguing that long prompts are bad.
+
+It is still the wrong instrument, for two reasons. Measured against default behavior, spawn prompts land at roughly 1300 characters — under the gate — so it rarely fires at all. And more fundamentally, size tells you nothing about whether the recipient can exercise judgment well. A 2,000-character prompt that is all restated background with no authority boundary leaves an agent *less* able to handle surprise than an 800-character one carrying all seven fields. The question is never how much you wrote; it is whether what you wrote survives the worker doing something you didn't script.
 
 If any of this is ever mechanized, check for the fields, not the size. Note the honest limit of doing so: presence of a heading is not presence of content, and the candidate's own author warned that mechanizing further "invites ritual compliance." A field check is a floor on effort, not a quality bar. It is still worth having, because it is checked when the prompt is written rather than self-marked afterward, and filling a field honestly costs barely more than faking it.
 
