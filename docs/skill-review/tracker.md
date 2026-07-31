@@ -10,7 +10,7 @@ content, scripts actually run, no project-specific leakage, progressive disclosu
 
 | Skill | Status | Next action |
 |---|---|---|
-| `doppler` | active | None — reference standard. |
+| `doppler` | active | Verify content is still current (owner 2026-07-31); otherwise reference standard. |
 | `external-skill-intake` | active | None. |
 | `omc-reference` | active | None. |
 | `pdm-cli-operations` | active | None — live-qualified 2026-07-20. |
@@ -33,7 +33,7 @@ de-personalized.
 
 | Skill | Next action |
 |---|---|
-| `chat-history` | De-personalize paths; drop unimplemented gemini extractor from docstring. |
+| `chat-history` | Content update needed (owner 2026-07-31); de-personalize paths; drop unimplemented gemini extractor from docstring. |
 | `retrospective` | Live skill half-deleted ~Jul 16 (SKILL.md gone, scripts/ orphaned) — restore deliberately or delete; then de-personalize. |
 | `project-docs` | Gated pending de-personalization. |
 | `skill-install` | Verify recipes. |
@@ -47,9 +47,10 @@ de-personalized.
 | `nlm-skill` | Confirm provenance. |
 | `skill-finder` | Confirm provenance. |
 | `google-stitch-ui-designer` | Confirm provenance. |
-| `context7-mcp` | Keep but narrow trigger (27/39 fires never call the MCP); add quota-fallback line. |
+| `context7-mcp` | Complete rewrite (owner 2026-07-31) — the MCP is useful, the skill isn't. Supersedes the narrow-trigger fix; 27/39 fires never called the MCP. |
 | `patrickspowerfulpresentations` | Incubating; stays personal. |
 | `audio-producer` | Incubating; stays personal. Broadside examples are worked evidence — keep. |
+| `explore` | Already deleted from the live root (noticed 2026-07-31; not in quarantine — 155 codex sessions had read it, owner unaware it existed). The explorer-subagent lane in [#71](https://github.com/Coldaine/frozenSkillz/issues/71) is its replacement. |
 
 ## Intake queue
 
@@ -126,7 +127,11 @@ not rerunnable from this repository):
   scoped to substantial changes. **Escalated 2026-07-31: owner removed the whole pack
   from the codex cache.** Capabilities that died with it (delegation, planning,
   debugging, git-worktree lanes) get rebuilt without the ceremony register —
-  [#71](https://github.com/Coldaine/frozenSkillz/issues/71).
+  [#71](https://github.com/Coldaine/frozenSkillz/issues/71). Owner nuance, same day:
+  the pack's *auto-fire bootstrap* (`using-superpowers`) was the one part worth
+  keeping — it is why codex out-fires every other harness on skills — so #71 carries a
+  skill-activation-bootstrap lane (owner previously ran a hook for the same job); only
+  the ceremony payload dies unreplaced.
 - `doppler`, `project-docs`, `chat-history` (trigger narrowed to forensic-only
   2026-07-30), `parallel-web-search`, `canvas`, `create-hook` earn their keep.
 - `git-master`: an `oh-my-openagent` built-in, opencode-only — not Codex. Dead since
@@ -147,7 +152,8 @@ sessions each, read by subagents):
   **refuted** (23/44 firing sessions apply its formatting vs 2/127 baseline, zero owner
   complaints); `context7-mcp` when used — prior "meta-inflated" verdict **refuted**, real
   doc pulls shaped work, but 27/39 fires load-and-never-use and the service was
-  quota-blocked in 10+ sessions → narrow trigger, add quota-fallback line;
+  quota-blocked in 10+ sessions → superseded 2026-07-31: owner escalated to a
+  complete rewrite (see Personal lane row);
   `hangar-logbook` — keep, but revise persistence to markdown-first (owner asked
   verbatim 2026-07-27; it still writes into `.ts` files).
 - **IGNORED:** `feature-research` — its sole prescriptive step ran 0 times across all
@@ -166,6 +172,18 @@ sessions each, read by subagents):
   progress did we?" Rubric fix baked in below: skill compliance ≠ session success — every
   grade must include an outcome check (owner's closing reaction + something owner-visible
   changed), and self-written tests passing is not an outcome.
+
+**2026-07-31 owner review of the OpenAI codex pack** (`~/.codex/plugins/cache/openai-curated-remote/github/` — OpenAI-managed, version-pinned: override via AGENTS.md routing or a competing skill, never edit in place):
+
+- `github` (296 codex sessions): a triage router — classify → route → resolve-context gates
+  before any action, and its publish path deliberately ends at a **draft** PR. Owner verdict:
+  too many gates; superseded by the ship-to-merged skill lane in
+  [#71](https://github.com/Coldaine/frozenSkillz/issues/71).
+- `yeet` (117): sound commit → push → open-PR mechanics (branch naming, scoped staging), but
+  stops at a draft PR and interviews the user about scope. Seed material for ship-to-merged.
+- `gh-address-comments` (120) / `gh-fix-ci`: keep — the checks-fixing loop feeds
+  ship-to-merged.
+- `project-docs` (208): owner affirmed keep.
 
 ## Loose ends
 
