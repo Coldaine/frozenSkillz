@@ -28,6 +28,11 @@ Attention is `🔴` or `🟡`; retention is `🗄️` or `📌`; relationship is
 | `↪️` | Continued or superseded elsewhere | A named successor carries the older task's unfinished work or replaces its operative result |
 | `🗄️` | Archive candidate | The task is done with little continuing value, duplicated, or fully carried by a named successor |
 
+Status markers (`✅` `🟡` `🔴` `⏸️` `🚧`) are mutually exclusive — at most one per
+title, leading position. Relationship markers (`📌` `↪️` `🗄️`) may accompany a
+status marker but never contradict it (e.g. `✅` with `⏸️` is invalid; `↪️` on a
+task whose successor is named is fine).
+
 `✅` and `🗄️` can coexist: one says the task is finished, the other says it is a reasonable archive candidate. A `continued-elsewhere` task can receive `↪️` and `🗄️` without receiving `✅`.
 
 ## Definition of Done

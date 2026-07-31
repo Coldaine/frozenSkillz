@@ -11,7 +11,9 @@ Recurring organization is a periodic Codex automation that explicitly invokes `$
 3. Cluster by semantic workstream, treating the working directory as a routing clue rather than identity.
 4. Cross-read each cluster and identify `done`, `active-remaining`, `continued-elsewhere`, and `parked-unclear` tasks plus the current owner of each unfinished workstream.
 5. Construct sparse titles with `✅`, `🟡`, `🗄️`, and other useful markers.
-6. Rename the reviewed tasks through native Codex operations and read every title back.
+6. Rename only tasks whose bodies were actually read and classified; inaccessible
+   and `parked-unclear` tasks keep their titles and go to the report instead.
+   Apply through native Codex operations and read every title back.
 7. Report renamed tasks, important unfinished current owners, tasks continued elsewhere, archive candidates, parked uncertainties, and coverage gaps.
 
 Use subagents when multiple independent project clusters make the review large enough to parallelize. Each subagent reads the actual conversation bodies for its assigned cluster and returns evidence; the main automation reconciles the classifications before applying titles.
