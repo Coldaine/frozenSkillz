@@ -89,14 +89,40 @@ class SyncFrozenSkillsTests(unittest.TestCase):
             json.dumps(distribution), encoding="utf-8"
         )
 
-    def _sync(self, *, consumer="codex", apply=False, prune=False, force=False):
+    def _write_deployment(
+        self,
+        name,
+        skills,
+        *,
+        consumer="codex",
+        description="test deployment subset",
+    ):
+        path = self.repo / "plugins" / sync_module.DISTRIBUTION_PATH
+        distribution = json.loads(path.read_text(encoding="utf-8"))
+        entry = {"description": description, "skills": skills}
+        if consumer is not None:
+            entry["consumer"] = consumer
+        distribution.setdefault("deployments", {})[name] = entry
+        path.write_text(json.dumps(distribution), encoding="utf-8")
+
+    def _sync(
+        self,
+        *,
+        consumer="codex",
+        apply=False,
+        prune=False,
+        force=False,
+        deployment=None,
+        destination=None,
+    ):
         return sync_module.sync(
             self.repo,
-            self.destination,
+            destination or self.destination,
             consumer=consumer,
             apply=apply,
             prune=prune,
             force=force,
+            deployment=deployment,
         )
 
     def test_fresh_install_then_check_is_current(self):
@@ -453,9 +479,19 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         with self.assertRaisesRegex(sync_module.SyncError, "managed for consumer 'codex'"):
             self._sync(consumer="claude")
 
-    def test_cli_requires_explicit_consumer(self):
-        with self.assertRaises(SystemExit):
-            sync_module.build_parser().parse_args(["--check"])
+    def test_cli_requires_a_consumer_or_a_deployment(self):
+        self.assertEqual(
+            sync_module.main(
+                [
+                    "--check",
+                    "--repo-root",
+                    str(self.repo),
+                    "--destination",
+                    str(self.destination),
+                ]
+            ),
+            2,
+        )
 
     def test_codex_has_private_default_and_other_consumers_require_destination(self):
         self.assertEqual(
@@ -470,6 +506,354 @@ class SyncFrozenSkillsTests(unittest.TestCase):
             sync_module.resolve_destination("claude", explicit),
             explicit,
         )
+
+    def test_deployment_installs_only_its_selected_skills(self):
+        self._write_skill("beta", "beta v1")
+        self._write_manifests(
+            {consumer: ["alpha", "beta"] for consumer in sync_module.MANIFEST_PATHS}
+        )
+        self._write_deployment("hermes-ops", ["beta"])
+
+        result = self._sync(
+            consumer=None, apply=True, prune=True, deployment="hermes-ops"
+        )
+
+        self.assertFalse(result.conflicts)
+        self.assertFalse((self.destination / "alpha").exists())
+        self.assertTrue((self.destination / "beta/SKILL.md").is_file())
+        state = json.loads(
+            (self.destination / sync_module.STATE_FILE).read_text(encoding="utf-8")
+        )
+        self.assertEqual(state["deployment"], "hermes-ops")
+        self.assertEqual(state["consumer"], "codex")
+        self.assertEqual(set(state["skills"]), {"beta"})
+
+    def test_deployment_supplies_its_own_consumer(self):
+        self._write_skill("only-cursor", "only cursor")
+        self._write_manifests(
+            {
+                "claude": ["alpha"],
+                "codex": ["alpha"],
+                "cursor": ["alpha", "only-cursor"],
+                "gemini": ["alpha"],
+            }
+        )
+        self._write_deployment("cursor-ops", ["only-cursor"], consumer="cursor")
+
+        result = self._sync(
+            consumer=None, apply=True, prune=True, deployment="cursor-ops"
+        )
+
+        self.assertFalse(result.conflicts)
+        self.assertTrue((self.destination / "only-cursor/SKILL.md").is_file())
+        state = json.loads(
+            (self.destination / sync_module.STATE_FILE).read_text(encoding="utf-8")
+        )
+        self.assertEqual(state["consumer"], "cursor")
+
+    def test_deployment_rejects_an_inconsistent_explicit_consumer(self):
+        self._write_deployment("hermes-ops", ["alpha"], consumer="codex")
+
+        with self.assertRaisesRegex(
+            sync_module.SyncError, "already selects its own consumer"
+        ):
+            self._sync(consumer="claude", prune=True, deployment="hermes-ops")
+
+        self.assertFalse(
+            self._sync(
+                consumer="codex", prune=True, deployment="hermes-ops"
+            ).conflicts
+        )
+
+    def test_deployment_cannot_select_a_skill_the_consumer_lacks(self):
+        self._write_skill("only-cursor", "only cursor")
+        self._write_manifests(
+            {
+                "claude": ["alpha"],
+                "codex": ["alpha"],
+                "cursor": ["alpha", "only-cursor"],
+                "gemini": ["alpha"],
+            }
+        )
+        self._write_deployment("hermes-ops", ["only-cursor"], consumer="codex")
+
+        with self.assertRaisesRegex(
+            sync_module.SyncError, "is not active for consumer 'codex'"
+        ):
+            self._sync(consumer=None, prune=True, deployment="hermes-ops")
+
+    def test_runtime_deployment_without_a_consumer_installs_shared_skills(self):
+        self._write_skill("beta", "beta v1")
+        self._write_manifests(
+            {consumer: ["alpha", "beta"] for consumer in sync_module.MANIFEST_PATHS}
+        )
+        self._write_deployment("hermes-ops", ["alpha", "beta"], consumer=None)
+
+        result = self._sync(
+            consumer=None, apply=True, prune=True, deployment="hermes-ops"
+        )
+
+        self.assertFalse(result.conflicts)
+        self.assertTrue((self.destination / "alpha/SKILL.md").is_file())
+        self.assertTrue((self.destination / "beta/SKILL.md").is_file())
+        state = json.loads(
+            (self.destination / sync_module.STATE_FILE).read_text(encoding="utf-8")
+        )
+        self.assertNotIn("consumer", state)
+        self.assertEqual(state["deployment"], "hermes-ops")
+
+        checked = self._sync(consumer=None, prune=True, deployment="hermes-ops")
+        self.assertEqual([action.kind for action in checked.actions], ["current"] * 2)
+
+    def test_runtime_deployment_cannot_select_a_restricted_package(self):
+        self._write_skill("only-codex", "only codex")
+        self._write_manifests(
+            {
+                "claude": ["alpha"],
+                "codex": ["alpha", "only-codex"],
+                "cursor": ["alpha"],
+                "gemini": ["alpha"],
+            }
+        )
+        self._write_deployment("hermes-ops", ["alpha", "only-codex"], consumer=None)
+
+        with self.assertRaisesRegex(
+            sync_module.SyncError,
+            "declares no consumer, so it may only select shared skills",
+        ):
+            self._sync(consumer=None, prune=True, deployment="hermes-ops")
+
+    def test_runtime_deployment_refuses_an_explicit_consumer(self):
+        self._write_deployment("hermes-ops", ["alpha"], consumer=None)
+
+        with self.assertRaisesRegex(
+            sync_module.SyncError, "declares no consumer because it is not a client"
+        ):
+            self._sync(consumer="codex", prune=True, deployment="hermes-ops")
+
+    def test_runtime_and_client_deployment_states_are_distinguishable(self):
+        self._write_deployment("hermes-ops", ["alpha"], consumer=None)
+        self._sync(consumer=None, apply=True, prune=True, deployment="hermes-ops")
+
+        self._write_deployment("hermes-ops", ["alpha"], consumer="codex")
+        with self.assertRaisesRegex(
+            sync_module.SyncError, "managed for consumer None, not 'codex'"
+        ):
+            self._sync(consumer=None, prune=True, deployment="hermes-ops")
+
+    def test_file_destination_is_a_clean_error_not_a_traceback(self):
+        self._write_deployment("hermes-ops", ["alpha"], consumer=None)
+        destination = self.root / "not-a-directory"
+        destination.write_text("i am a file", encoding="utf-8")
+
+        for deployment in ("hermes-ops", None):
+            with self.subTest(deployment=deployment):
+                with self.assertRaisesRegex(
+                    sync_module.SyncError, "Destination must be a directory"
+                ):
+                    self._sync(
+                        consumer=None if deployment else "codex",
+                        prune=True,
+                        deployment=deployment,
+                        destination=destination,
+                    )
+
+    def test_deployment_rejects_unpromoted_and_duplicate_skills(self):
+        self._write_deployment("subset", ["alpha", "not-active"])
+        with self.assertRaisesRegex(sync_module.SyncError, "is not active for consumer"):
+            self._sync(consumer=None, prune=True, deployment="subset")
+
+        self._write_deployment("subset", ["alpha", "alpha"])
+        with self.assertRaisesRegex(sync_module.SyncError, "duplicate skill"):
+            self._sync(consumer=None, prune=True, deployment="subset")
+
+    def test_deployment_entry_shape_is_validated(self):
+        self._write_deployment("subset", ["alpha"], description="  ")
+        with self.assertRaisesRegex(sync_module.SyncError, "has no description"):
+            self._sync(consumer=None, prune=True, deployment="subset")
+
+        self._write_deployment("subset", ["alpha"], consumer="not-a-client")
+        with self.assertRaisesRegex(sync_module.SyncError, "must name one consumer"):
+            self._sync(consumer=None, prune=True, deployment="subset")
+
+        self._write_deployment("subset", [])
+        with self.assertRaisesRegex(sync_module.SyncError, "has no skills"):
+            self._sync(consumer=None, prune=True, deployment="subset")
+
+    def test_unsafe_or_unknown_deployment_names_are_rejected(self):
+        with self.assertRaisesRegex(sync_module.SyncError, "Unknown deployment"):
+            self._sync(consumer=None, prune=True, deployment="missing")
+
+        self._write_deployment("../outside", ["alpha"])
+        with self.assertRaisesRegex(sync_module.SyncError, "Unsafe deployment name"):
+            self._sync(consumer=None, prune=True, deployment="../outside")
+
+    def test_malformed_deployments_block_fails_an_ordinary_consumer_sync(self):
+        path = self.repo / "plugins" / sync_module.DISTRIBUTION_PATH
+        distribution = json.loads(path.read_text(encoding="utf-8"))
+        distribution["deployments"] = {"broken": {"consumer": "codex"}}
+        path.write_text(json.dumps(distribution), encoding="utf-8")
+
+        with self.assertRaisesRegex(sync_module.SyncError, "has no description"):
+            self._sync(consumer="codex")
+
+    def test_managed_destination_refuses_a_different_deployment(self):
+        self._write_deployment("first", ["alpha"])
+        self._write_deployment("second", ["alpha"])
+        self._sync(consumer=None, apply=True, prune=True, deployment="first")
+
+        with self.assertRaisesRegex(
+            sync_module.SyncError, "managed by deployment 'first'"
+        ):
+            self._sync(consumer=None, prune=True, deployment="second")
+
+    def test_deployment_requires_prune_for_check_and_apply(self):
+        self._write_skill("beta", "beta v1")
+        self._write_manifests(
+            {consumer: ["alpha", "beta"] for consumer in sync_module.MANIFEST_PATHS}
+        )
+        self._write_deployment("hermes-ops", ["alpha", "beta"])
+        self._sync(consumer=None, apply=True, prune=True, deployment="hermes-ops")
+        self._write_deployment("hermes-ops", ["alpha"])
+
+        for apply in (False, True):
+            with self.subTest(apply=apply):
+                with self.assertRaisesRegex(sync_module.SyncError, "requires --prune"):
+                    self._sync(consumer=None, apply=apply, deployment="hermes-ops")
+
+        self.assertTrue((self.destination / "beta").is_dir())
+
+    def test_deployment_prune_preserves_modified_retired_skill_as_conflict(self):
+        self._write_skill("beta", "beta v1")
+        self._write_manifests(
+            {consumer: ["alpha", "beta"] for consumer in sync_module.MANIFEST_PATHS}
+        )
+        self._write_deployment("hermes-ops", ["alpha", "beta"])
+        self._sync(consumer=None, apply=True, prune=True, deployment="hermes-ops")
+        (self.destination / "beta/SKILL.md").write_text(
+            "local beta edit", encoding="utf-8"
+        )
+        self._write_deployment("hermes-ops", ["alpha"])
+
+        result = self._sync(
+            consumer=None, apply=True, prune=True, deployment="hermes-ops"
+        )
+
+        self.assertEqual(
+            [action.kind for action in result.actions], ["current", "conflict"]
+        )
+        self.assertEqual(
+            (self.destination / "beta/SKILL.md").read_text(encoding="utf-8"),
+            "local beta edit",
+        )
+
+    def test_empty_deployment_state_refuses_a_different_deployment(self):
+        self._write_deployment("first", ["alpha"])
+        self._write_deployment("second", ["alpha"])
+        self.destination.mkdir(parents=True)
+        (self.destination / sync_module.STATE_FILE).write_text(
+            json.dumps(
+                {
+                    "schema": sync_module.STATE_SCHEMA,
+                    "plugin": "frozen-skills",
+                    "consumer": "codex",
+                    "plugin_version": "1.0.0",
+                    "deployment": "first",
+                    "skills": {},
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        with self.assertRaises(sync_module.SyncError):
+            self._sync(consumer=None, prune=True, deployment="second")
+
+    def test_full_and_deployment_destinations_cannot_be_reused(self):
+        self._write_deployment("hermes-ops", ["alpha"])
+        self._sync(apply=True)
+
+        with self.assertRaisesRegex(
+            sync_module.SyncError, "managed by the full consumer distribution"
+        ):
+            self._sync(consumer=None, prune=True, deployment="hermes-ops")
+
+        deployment_destination = self.root / "deployment-skills"
+        self._sync(
+            consumer=None,
+            apply=True,
+            prune=True,
+            deployment="hermes-ops",
+            destination=deployment_destination,
+        )
+        with self.assertRaisesRegex(
+            sync_module.SyncError, "managed by deployment 'hermes-ops'"
+        ):
+            self._sync(destination=deployment_destination)
+
+    def test_deployment_reports_unmanaged_destination_content(self):
+        self._write_skill("beta", "beta v1")
+        self._write_manifests(
+            {consumer: ["alpha", "beta"] for consumer in sync_module.MANIFEST_PATHS}
+        )
+        self._write_deployment("hermes-ops", ["alpha", "beta"])
+        self._sync(consumer=None, apply=True, prune=True, deployment="hermes-ops")
+        unrelated = self.destination / "local-hermes-skill"
+        unrelated.mkdir()
+        (unrelated / "SKILL.md").write_text("local", encoding="utf-8")
+
+        self._write_deployment("hermes-ops", ["alpha"])
+        result = self._sync(
+            consumer=None,
+            apply=True,
+            prune=True,
+            force=True,
+            deployment="hermes-ops",
+        )
+
+        self.assertEqual(
+            [action.kind for action in result.actions],
+            ["current", "remove", "conflict"],
+        )
+        self.assertTrue((self.destination / "beta").is_dir())
+        self.assertTrue(unrelated.is_dir())
+
+    def test_deployment_cli_requires_explicit_destination_and_prune(self):
+        self._write_deployment("hermes-ops", ["alpha"])
+        self.assertEqual(
+            sync_module.main(
+                ["--check", "--repo-root", str(self.repo), "--deployment", "hermes-ops"]
+            ),
+            2,
+        )
+        self.assertEqual(
+            sync_module.main(
+                [
+                    "--check",
+                    "--repo-root",
+                    str(self.repo),
+                    "--destination",
+                    str(self.destination),
+                    "--deployment",
+                    "hermes-ops",
+                ]
+            ),
+            2,
+        )
+
+    def test_deployment_cli_exit_codes_distinguish_drift_and_current(self):
+        self._write_deployment("hermes-ops", ["alpha"])
+        common = [
+            "--repo-root",
+            str(self.repo),
+            "--destination",
+            str(self.destination),
+            "--deployment",
+            "hermes-ops",
+            "--prune",
+        ]
+        self.assertEqual(sync_module.main(["--check", *common]), 1)
+        self.assertEqual(sync_module.main(["--apply", *common]), 0)
+        self.assertEqual(sync_module.main(["--check", *common]), 0)
 
 
 if __name__ == "__main__":
