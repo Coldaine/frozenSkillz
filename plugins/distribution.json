@@ -1,8 +1,12 @@
 {
   "schema": 1,
   "plugin": "frozen-skills",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "shared": [
+    {
+      "name": "delegation-contract",
+      "path": "frozen-skills/skills/delegation-contract"
+    },
     {
       "name": "doppler",
       "path": "frozen-skills/skills/doppler"
