@@ -75,23 +75,56 @@ On macOS or Linux, the same Python command works with POSIX paths.
 
 The destination must be disjoint from the repository. The synchronizer rejects a destination inside the checkout and a destination that contains the checkout. It never reverse-synchronizes installed content into reviewed active source.
 
+## Skill Consumer Shapes
+
+Three different things consume material from this repository. Only the first is modeled by `--consumer`, and conflating them is what produces placeholder consumers and invented sync lanes.
+
+| Shape | Example | How it consumes | Modeled as |
+|---|---|---|---|
+| Client | Claude, Codex, Cursor, Gemini | Discovers skills from a client-specific root; needs that client's packaging format and plugin manifest | The `--consumer` axis |
+| Runtime | Hermes | Reads bare `SKILL.md` directories from a path; no packaging format, no manifest | A consumer-less deployment, restricted to `shared` skills |
+| Service | Letta | Consumes no skills at all | Nothing — deliberately outside the sync lane |
+
+**Clients.** The four-consumer enum is the set this repository has decided to package for. It is not the set of skill-running clients on the operator's machines: `~/.kilo/skills` currently holds four live skills that frozenSkillz does not manage and that carry no `.frozen-skills-sync.json`. Adding a fifth consumer is an explicit decision — new manifests, marketplace entries, and a qualified destination — not something that happens by discovering an unmanaged skill root.
+
+**Runtimes.** A runtime has a filesystem path and nothing else. See [`docs/deployments/hermes.md`](../deployments/hermes.md) for the worked example.
+
+**Services.** `tools/session-review/nightly.ps1` pipes the Prompt section of `reviewer-prompt.md` to `letta -a <agent_id> -p` as a message, versioned by `rubric_version` in `tools/session-review/config.json`. That is repo-managed content deployed to a cloud agent, not a skill distribution. It has no destination, no management record, and no consumer. Do not "fix" it by inventing one.
+
 ## Deployment Subsets
 
 `--consumer` selects a client *format*, not a skill subset: a destination synchronized for a consumer always receives that consumer's entire shared-plus-restricted set. A destination that must receive only part of it — a standing runtime like Hermes, for example — is described by a named deployment.
 
 Deployments live in the optional `deployments` object of `plugins/distribution.json`, so the distribution stays the single source of truth. There is no separate registry directory.
 
+There are two kinds, distinguished by whether the deployment declares a `consumer`.
+
+**Client-scoped deployment.** The destination belongs to one of the four supported clients and wants only part of that client's distribution. It names its consumer and may select from that consumer's shared-plus-restricted set:
+
+```json
+"deployments": {
+  "codex-minimal": {
+    "description": "Trimmed Codex set for a low-context workstation.",
+    "consumer": "codex",
+    "skills": ["doppler", "codex-thread-organizer"]
+  }
+}
+```
+
+**Runtime deployment.** The destination is not a Claude/Codex/Cursor/Gemini client at all — a service that reads bare `SKILL.md` directories, for example. It omits `consumer` entirely and may select **only shared skills**, because it has no client packaging format to render a consumer-restricted package into:
+
 ```json
 "deployments": {
   "hermes-ops": {
-    "description": "Reviewed shared skills exposed to the standing Hermes operations runtime.",
-    "consumer": "codex",
+    "description": "Reviewed shared skills exposed to the standing Hermes operations runtime. Hermes is a bare-SKILL.md service runtime, not a client: it reads skill directories from a read-only bind mount, so it declares no consumer.",
     "skills": ["doppler", "pdm-cli-operations"]
   }
 }
 ```
 
-A deployment names the consumer whose client format it receives and the exact subset of that consumer's available skills. Every listed skill must already be active for that consumer in the aligned manifests; a deployment cannot select a skill the distribution does not carry.
+Do not give a non-client runtime a placeholder consumer. A consumer that is inert today because every selected skill happens to be shared becomes a false statement the moment a restricted skill is added, and the omission is what makes the shared-only constraint enforceable.
+
+Every listed skill must already be active in the aligned manifests for that deployment's scope — its consumer's set, or `shared` when it declares none. A deployment cannot select a skill the distribution does not carry, and a runtime deployment that names a consumer-restricted package is rejected by name.
 
 ```powershell
 python scripts/sync_frozen_skills.py --check --deployment hermes-ops --destination /srv/hermes/skill-sets/hermes-ops --prune
@@ -101,8 +134,8 @@ python scripts/sync_frozen_skills.py --apply --deployment hermes-ops --destinati
 Rules specific to deployment mode:
 
 - `--deployment` requires an explicit `--destination` and mandatory `--prune`; there is no default deployment destination.
-- `--deployment` and a bare `--consumer` run are alternative ways to pick the skill set. A deployment supplies its own consumer, so passing a `--consumer` that disagrees with it is an error.
-- A destination is owned by exactly one deployment (or by the full, undeployed consumer distribution) for its lifetime. Reusing a destination under a different deployment, or under the full distribution, is a conflict. Ownership is recorded in the destination's `.frozen-skills-sync.json`.
+- `--deployment` and a bare `--consumer` run are alternative ways to pick the skill set. A deployment supplies its own consumer, so passing a `--consumer` that disagrees with it is an error, and passing `--consumer` at all alongside a runtime deployment is an error.
+- A destination is owned by exactly one deployment (or by the full, undeployed consumer distribution) for its lifetime. Reusing a destination under a different deployment, or under the full distribution, is a conflict. Ownership is recorded in the destination's `.frozen-skills-sync.json`, which omits `consumer` for a runtime deployment.
 - Pruning is exact: any top-level destination content that is neither an active deployment skill nor a still-recorded retired one is reported as a conflict, not silently ignored.
 - `python scripts/validate_manifests.py` validates every deployment against the active distribution as part of ordinary manifest validation.
 

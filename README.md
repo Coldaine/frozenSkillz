@@ -36,7 +36,7 @@ Every run selects either `--consumer` or a named `--deployment` subset. Codex de
 
 Use `--destination <path>` for another local skill root. Use `--prune` to remove unchanged, previously managed skills that have left the selected distribution. `--force` overwrites local conflicts and should be used only after reviewing the reported plan.
 
-A destination that must receive only part of a consumer's distribution uses a named deployment from `plugins/distribution.json:deployments`, which supplies its own consumer and requires an explicit `--destination` plus `--prune`. See [`docs/workflows/skill-authority-and-frozen-sync.md`](docs/workflows/skill-authority-and-frozen-sync.md) → **Deployment Subsets**.
+A destination that must receive only part of a distribution uses a named deployment from `plugins/distribution.json:deployments`, which requires an explicit `--destination` plus `--prune`. A deployment either names its consumer and selects from that consumer's set, or omits `consumer` because it is a non-client runtime and may then select only shared skills. See [`docs/workflows/skill-authority-and-frozen-sync.md`](docs/workflows/skill-authority-and-frozen-sync.md) → **Deployment Subsets**.
 
 The destination must be disjoint from the repository: it cannot be inside the frozenSkillz checkout or contain that checkout. This enforces outward-only deployment and prevents reverse synchronization into reviewed source.
 

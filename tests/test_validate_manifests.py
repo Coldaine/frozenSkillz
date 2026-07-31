@@ -123,7 +123,16 @@ class ValidateManifestsTests(unittest.TestCase):
     def test_contract_rejects_a_malformed_deployment_entry(self):
         for deployments, expected in (
             ({"hermes-ops": {"consumer": "codex", "skills": ["doppler"]}}, "no description"),
-            ({"hermes-ops": {"description": "t", "skills": ["doppler"]}}, "must name one consumer"),
+            (
+                {
+                    "hermes-ops": {
+                        "description": "t",
+                        "consumer": "not-a-client",
+                        "skills": ["doppler"],
+                    }
+                },
+                "must name one consumer",
+            ),
             ({"hermes-ops": {"description": "t", "consumer": "codex", "skills": []}}, "has no skills"),
             (
                 {
@@ -144,6 +153,33 @@ class ValidateManifestsTests(unittest.TestCase):
                 valid, output = self._contract_with_deployments(deployments)
                 self.assertFalse(valid)
                 self.assertIn(expected, output)
+
+    def test_contract_accepts_a_consumer_less_runtime_deployment(self):
+        valid, output = self._contract_with_deployments(
+            {
+                "hermes-ops": {
+                    "description": "bare-SKILL.md service runtime, not a client",
+                    "skills": ["doppler", "pdm-cli-operations"],
+                }
+            }
+        )
+        self.assertTrue(valid, output)
+        self.assertIn("1 deployment subset(s) are aligned", output)
+
+    def test_contract_rejects_a_restricted_package_in_a_consumer_less_deployment(self):
+        valid, output = self._contract_with_deployments(
+            {
+                "hermes-ops": {
+                    "description": "bare-SKILL.md service runtime, not a client",
+                    "skills": ["doppler", "codex-thread-organizer"],
+                }
+            }
+        )
+        self.assertFalse(valid)
+        self.assertIn(
+            "declares no consumer, so it may only select shared skills", output
+        )
+        self.assertIn("codex-thread-organizer", output)
 
     def test_contract_accepts_a_valid_deployment(self):
         valid, output = self._contract_with_deployments(

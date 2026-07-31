@@ -206,9 +206,17 @@ def _resolve_distribution_skill(source_root: Path, name: str, relative_path: str
 def validate_deployments(
     distribution: dict,
     source: Path,
+    shared_names: set[str],
     available_by_consumer: dict[str, set[str]],
 ) -> dict[str, dict]:
-    """Validate the optional deployment subsets against the active distribution."""
+    """Validate the optional deployment subsets against the active distribution.
+
+    A deployment is one of two kinds. A client-scoped deployment names its
+    consumer and may select from that consumer's shared-plus-restricted set. A
+    runtime deployment omits ``consumer`` because it is not a Claude/Codex/
+    Cursor/Gemini client at all, and may therefore select only shared skills:
+    it has no client packaging format to render a restricted package into.
+    """
 
     deployments = distribution.get("deployments", {})
     if not isinstance(deployments, dict):
@@ -223,15 +231,20 @@ def validate_deployments(
         if not isinstance(description, str) or not description.strip():
             raise SyncError(f"Deployment {name!r} has no description: {source}")
         deployment_consumer = entry.get("consumer")
-        if deployment_consumer not in available_by_consumer:
+        if deployment_consumer is not None and deployment_consumer not in available_by_consumer:
             raise SyncError(
                 f"Deployment {name!r} must name one consumer of "
-                f"{sorted(available_by_consumer)}: {source}"
+                f"{sorted(available_by_consumer)}, or omit 'consumer' entirely for "
+                f"a non-client runtime that receives only shared skills: {source}"
             )
         names = entry.get("skills")
         if not isinstance(names, list) or not names:
             raise SyncError(f"Deployment {name!r} has no skills: {source}")
-        available = available_by_consumer[deployment_consumer]
+        available = (
+            shared_names
+            if deployment_consumer is None
+            else available_by_consumer[deployment_consumer]
+        )
         selected: list[str] = []
         for skill_name in names:
             _validate_safe_name(skill_name, "skill", source)
@@ -240,6 +253,12 @@ def validate_deployments(
                     f"Deployment {name!r} contains duplicate skill {skill_name!r}: {source}"
                 )
             if skill_name not in available:
+                if deployment_consumer is None:
+                    raise SyncError(
+                        f"Deployment {name!r} declares no consumer, so it may only "
+                        f"select shared skills; {skill_name!r} is a consumer-restricted "
+                        f"package or is not in the distribution: {source}"
+                    )
                 raise SyncError(
                     f"Deployment {name!r} skill {skill_name!r} is not active for "
                     f"consumer {deployment_consumer!r}"
@@ -255,8 +274,13 @@ def validate_deployments(
 
 def load_distribution(
     repo_root: Path, consumer: str | None = None, *, deployment: str | None = None
-) -> tuple[Path, str, str, tuple[SkillSource, ...]]:
-    """Validate all manifests and load one consumer or deployment's distribution."""
+) -> tuple[Path, str, str | None, tuple[SkillSource, ...]]:
+    """Validate all manifests and load one consumer or deployment's distribution.
+
+    The returned consumer is the one actually selected. It is ``None`` only for
+    a runtime deployment, which declares no consumer and receives shared skills
+    exclusively.
+    """
 
     if consumer is not None and consumer not in MANIFEST_PATHS:
         raise SyncError(f"Unknown skill consumer: {consumer!r}")
@@ -372,6 +396,7 @@ def load_distribution(
     deployments = validate_deployments(
         distribution,
         distribution_path,
+        shared_names,
         {
             manifest_consumer: shared_names | {name for name, _path in entries}
             for manifest_consumer, entries in consumer_skills.items()
@@ -382,22 +407,32 @@ def load_distribution(
         selected_deployment = deployments.get(deployment)
         if selected_deployment is None:
             raise SyncError(f"Unknown deployment {deployment!r} in {distribution_path}")
-        if consumer is not None and consumer != selected_deployment["consumer"]:
+        deployment_consumer = selected_deployment["consumer"]
+        if consumer is not None and deployment_consumer is None:
+            raise SyncError(
+                f"Deployment {deployment!r} declares no consumer because it is not a "
+                f"client runtime; do not pass --consumer {consumer!r} with it"
+            )
+        if consumer is not None and consumer != deployment_consumer:
             raise SyncError(
                 f"Deployment {deployment!r} targets consumer "
-                f"{selected_deployment['consumer']!r}, not the requested {consumer!r}; "
+                f"{deployment_consumer!r}, not the requested {consumer!r}; "
                 "a deployment already selects its own consumer"
             )
-        consumer = selected_deployment["consumer"]
-    if consumer is None:
+        consumer = deployment_consumer
+    elif consumer is None:
         raise SyncError("A consumer or a deployment must be selected")
 
-    selected_skills = shared_skills + consumer_skills[consumer]
     if deployment is not None:
-        path_by_name = dict(selected_skills)
+        available_skills = (
+            shared_skills if consumer is None else shared_skills + consumer_skills[consumer]
+        )
+        path_by_name = dict(available_skills)
         selected_skills = tuple(
             (name, path_by_name[name]) for name in deployments[deployment]["skills"]
         )
+    else:
+        selected_skills = shared_skills + consumer_skills[consumer]
 
     sources: list[SkillSource] = []
     for name, relative_path in selected_skills:
@@ -407,15 +442,16 @@ def load_distribution(
     return source_root, version, consumer, tuple(sources)
 
 
-def _empty_state(consumer: str, deployment: str | None = None) -> dict:
+def _empty_state(consumer: str | None, deployment: str | None = None) -> dict:
     """Return a new empty synchronization management record."""
 
     state = {
         "schema": STATE_SCHEMA,
         "plugin": "frozen-skills",
-        "consumer": consumer,
         "skills": {},
     }
+    if consumer is not None:
+        state["consumer"] = consumer
     if deployment is not None:
         state["deployment"] = deployment
     return state
@@ -429,7 +465,9 @@ def _owner_label(deployment: str | None) -> str:
     return f"deployment {deployment!r}"
 
 
-def load_state(destination: Path, consumer: str, deployment: str | None = None) -> dict:
+def load_state(
+    destination: Path, consumer: str | None, deployment: str | None = None
+) -> dict:
     """Load and validate the destination's management record."""
 
     path = destination / STATE_FILE
@@ -444,7 +482,8 @@ def load_state(destination: Path, consumer: str, deployment: str | None = None) 
     state_consumer = data.get("consumer")
     if state_consumer != consumer:
         raise SyncError(
-            f"Destination is managed for consumer {state_consumer!r}, not {consumer!r}: {path}"
+            f"Destination is managed for consumer {state_consumer!r}, not "
+            f"{consumer!r}: {path}"
         )
     state_deployment = data.get("deployment")
     if state_deployment is not None:
@@ -798,10 +837,11 @@ def sync(
     next_state = {
         "schema": STATE_SCHEMA,
         "plugin": "frozen-skills",
-        "consumer": consumer,
         "plugin_version": version,
         "skills": next_skills,
     }
+    if consumer is not None:
+        next_state["consumer"] = consumer
     if deployment is not None:
         next_state["deployment"] = deployment
     _write_state(destination, next_state)
@@ -850,7 +890,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--deployment",
         help=(
             "named deployment subset from plugins/distribution.json:deployments; "
-            "supplies its own consumer and requires explicit --destination and --prune"
+            "supplies its own consumer (or none, for a shared-only runtime) and "
+            "requires explicit --destination and --prune"
         ),
     )
     parser.add_argument(

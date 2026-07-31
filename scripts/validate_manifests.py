@@ -101,12 +101,16 @@ def validate_skill_entry(plugin_root, skill, seen_names):
         raise ValueError(f"Skill {skill_name} has invalid metadata: {exc}") from exc
 
 
-def validate_deployment_subsets(distribution, available_by_consumer):
+def validate_deployment_subsets(distribution, shared_names, available_by_consumer):
     """Check every deployment subset against the aligned active distribution.
 
-    A deployment names the consumer whose client format it receives plus the
-    exact subset of that consumer's active skills. It can never select a skill
-    the distribution does not already carry for that consumer.
+    A deployment comes in two kinds. A client-scoped deployment names the
+    consumer whose client format it receives plus the exact subset of that
+    consumer's active skills. A runtime deployment omits ``consumer`` because it
+    is not one of the four clients — it may select only shared skills, since it
+    has no client packaging format to render a restricted package into.
+
+    Neither kind may select a skill the distribution does not already carry.
     """
 
     deployments = distribution.get("deployments", {})
@@ -121,14 +125,18 @@ def validate_deployment_subsets(distribution, available_by_consumer):
         if not isinstance(description, str) or not description.strip():
             raise ValueError(f"Deployment {name} has no description")
         consumer = entry.get("consumer")
-        if consumer not in available_by_consumer:
+        if consumer is not None and consumer not in available_by_consumer:
             raise ValueError(
                 f"Deployment {name} must name one consumer of "
-                f"{sorted(available_by_consumer)}"
+                f"{sorted(available_by_consumer)}, or omit consumer entirely for a "
+                "non-client runtime that receives only shared skills"
             )
         skills = entry.get("skills")
         if not isinstance(skills, list) or not skills:
             raise ValueError(f"Deployment {name} has no skills")
+        available = (
+            shared_names if consumer is None else available_by_consumer[consumer]
+        )
         seen = set()
         for skill_name in skills:
             if not isinstance(skill_name, str) or not SAFE_NAME_PATTERN.fullmatch(
@@ -138,7 +146,13 @@ def validate_deployment_subsets(distribution, available_by_consumer):
             if skill_name in seen:
                 raise ValueError(f"Deployment {name} duplicates skill {skill_name}")
             seen.add(skill_name)
-            if skill_name not in available_by_consumer[consumer]:
+            if skill_name not in available:
+                if consumer is None:
+                    raise ValueError(
+                        f"Deployment {name} declares no consumer, so it may only "
+                        f"select shared skills; {skill_name} is a consumer-restricted "
+                        "package or is not in the distribution"
+                    )
                 raise ValueError(
                     f"Deployment {name} skill {skill_name} is not active for "
                     f"consumer {consumer}"
@@ -329,7 +343,7 @@ def _validate_frozen_consumer_contract():
                     )
 
         deployment_count = validate_deployment_subsets(
-            distribution, available_by_consumer
+            distribution, shared_names, available_by_consumer
         )
     except ValueError as exc:
         print(f"  FAILED: {exc}")

@@ -582,6 +582,65 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         ):
             self._sync(consumer=None, prune=True, deployment="hermes-ops")
 
+    def test_runtime_deployment_without_a_consumer_installs_shared_skills(self):
+        self._write_skill("beta", "beta v1")
+        self._write_manifests(
+            {consumer: ["alpha", "beta"] for consumer in sync_module.MANIFEST_PATHS}
+        )
+        self._write_deployment("hermes-ops", ["alpha", "beta"], consumer=None)
+
+        result = self._sync(
+            consumer=None, apply=True, prune=True, deployment="hermes-ops"
+        )
+
+        self.assertFalse(result.conflicts)
+        self.assertTrue((self.destination / "alpha/SKILL.md").is_file())
+        self.assertTrue((self.destination / "beta/SKILL.md").is_file())
+        state = json.loads(
+            (self.destination / sync_module.STATE_FILE).read_text(encoding="utf-8")
+        )
+        self.assertNotIn("consumer", state)
+        self.assertEqual(state["deployment"], "hermes-ops")
+
+        checked = self._sync(consumer=None, prune=True, deployment="hermes-ops")
+        self.assertEqual([action.kind for action in checked.actions], ["current"] * 2)
+
+    def test_runtime_deployment_cannot_select_a_restricted_package(self):
+        self._write_skill("only-codex", "only codex")
+        self._write_manifests(
+            {
+                "claude": ["alpha"],
+                "codex": ["alpha", "only-codex"],
+                "cursor": ["alpha"],
+                "gemini": ["alpha"],
+            }
+        )
+        self._write_deployment("hermes-ops", ["alpha", "only-codex"], consumer=None)
+
+        with self.assertRaisesRegex(
+            sync_module.SyncError,
+            "declares no consumer, so it may only select shared skills",
+        ):
+            self._sync(consumer=None, prune=True, deployment="hermes-ops")
+
+    def test_runtime_deployment_refuses_an_explicit_consumer(self):
+        self._write_deployment("hermes-ops", ["alpha"], consumer=None)
+
+        with self.assertRaisesRegex(
+            sync_module.SyncError, "declares no consumer because it is not a client"
+        ):
+            self._sync(consumer="codex", prune=True, deployment="hermes-ops")
+
+    def test_runtime_and_client_deployment_states_are_distinguishable(self):
+        self._write_deployment("hermes-ops", ["alpha"], consumer=None)
+        self._sync(consumer=None, apply=True, prune=True, deployment="hermes-ops")
+
+        self._write_deployment("hermes-ops", ["alpha"], consumer="codex")
+        with self.assertRaisesRegex(
+            sync_module.SyncError, "managed for consumer None, not 'codex'"
+        ):
+            self._sync(consumer=None, prune=True, deployment="hermes-ops")
+
     def test_deployment_rejects_unpromoted_and_duplicate_skills(self):
         self._write_deployment("subset", ["alpha", "not-active"])
         with self.assertRaisesRegex(sync_module.SyncError, "is not active for consumer"):
@@ -596,7 +655,7 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         with self.assertRaisesRegex(sync_module.SyncError, "has no description"):
             self._sync(consumer=None, prune=True, deployment="subset")
 
-        self._write_deployment("subset", ["alpha"], consumer=None)
+        self._write_deployment("subset", ["alpha"], consumer="not-a-client")
         with self.assertRaisesRegex(sync_module.SyncError, "must name one consumer"):
             self._sync(consumer=None, prune=True, deployment="subset")
 
