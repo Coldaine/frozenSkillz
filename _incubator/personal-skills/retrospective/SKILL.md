@@ -17,21 +17,19 @@ Run at end of coding sessions to capture learnings before context is lost. Invok
 
 ## Triggering
 
-The known failure mode is forgetting to run this at all. Options, none currently
-installed — pick one deliberately rather than defaulting to memory:
-
-- **Stop/SessionEnd hook** — a harness hook that nudges "worth a retro?" when a
-  session had heavy user corrections. Catches the session while context is freshest;
-  costs a small prompt at the end of every session and only covers the harness the
-  hook is installed in.
-- **Weekly scheduled retro** — a letta-cron (or other scheduler) job that runs a
-  weekly retro over the week's sessions via `session_timeline.py --db`. Covers every
-  harness AgentsView ingests and needs no in-session discipline; loses same-session
-  freshness, so it leans entirely on transcripts.
-- **Nightly session-reviewer flag** — the existing Letta session-reviewer (grades
-  sessions nightly into the frozenSkillz-review worktree) flags retro-worthy sessions
-  for the owner. Cheapest to add since that pipeline already runs; still relies on
-  the owner acting on the flag.
+The known failure mode was forgetting to run this at all. **Settled 2026-07-31 (owner):
+the Letta Session Reviewer runs it** — no human in the trigger loop. The nightly
+pipeline's wake runbook now has a retrospective phase — `tools/session-review/retro-prompt.md`
+on this repo's `review/nightly-grades` branch (the reviewer's dedicated worktree),
+rationale file alongside: on
+calibrated runs the reviewer selects up to 2 of the night's sessions — its own
+`mutation_candidate` flags first — runs this skill on each via
+`session_timeline.py --db`, and escalates repeat observations across runs
+(Hypothesis → Corroborated) using its persistent memory of the project's whole history.
+Append-only skill-Learnings writes are made directly; structural skill changes route to
+the pipeline's `proposals.md` for the owner. This skill remains manually invocable
+(`/retrospective`) for same-session freshness whenever wanted; the Letta agent is
+discovery-wired via the `~/.letta/skills/retrospective` symlink.
 
 ## Process
 
