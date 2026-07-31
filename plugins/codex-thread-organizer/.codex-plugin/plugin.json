@@ -1,0 +1,24 @@
+{
+  "name": "codex-thread-organizer",
+  "version": "2.5.0",
+  "description": "Organize Codex task history with body-derived titles, cross-task completion review, and periodic maintenance workflows.",
+  "author": {
+    "name": "Coldaine",
+    "url": "https://github.com/Coldaine"
+  },
+  "repository": "https://github.com/Coldaine/frozenSkillz",
+  "license": "MIT",
+  "keywords": ["codex", "tasks", "history", "organization"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Thread Organizer",
+    "shortDescription": "Organize Codex task history",
+    "longDescription": "Read related Codex task bodies, identify current and continued work, apply sparse sidebar titles, and surface important unfinished tasks.",
+    "developerName": "Coldaine",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Read my recent related Codex tasks, rename them with clear status-aware titles, and show me the important unfinished current owners."
+    ]
+  }
+}

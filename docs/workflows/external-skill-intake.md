@@ -11,15 +11,16 @@ The goal is to learn from external work without turning active marketplace conte
 3. Inventory artifacts before judging them.
 4. Select a narrow scope for evaluation.
 5. Score scoped artifacts with artifact-specific rubrics.
-6. Run at least one sandboxed live eval before recommending any large pattern for promotion.
+6. Complete at least one live or forensic evaluation before recommending any large pattern for promotion.
 7. Record packaging decisions with rationale and affected paths.
 8. Promote only adapted, reviewed output into `plugins/`, `docs/`, or another active location.
+9. Land `_incubator/` and tracker changes with commit + push + PR in the same session unless the operator said live-only. Files and tracker rows alone are incomplete; see Completion Contract in `docs/workflows/skill-authority-and-frozen-sync.md`.
 
 ## Non-Negotiables
 
 - Do not import external repos directly into `plugins/`.
 - Do not modify files under a scout `source/` directory.
-- Do not claim a candidate improves outcomes unless eval prompts, outputs, and scorer notes are persisted.
+- Match claims to the evaluation mode and its evidence. Comparative improvement claims require persisted live outputs and scorer notes.
 - Do not promote directly from scout source. Adapt the concept into frozenSkillz-owned files.
 - Do not add scripts for intake v1 unless repeated manual pain has been observed and documented.
 - Do not commit secrets, local client caches, or generated runtime state.
@@ -37,6 +38,7 @@ _incubator/scout/<YYYY-MM-DD>-<repo>/
   decisions.md
   evals/cases/
   evals/runs/
+  evals/forensic/
   extracted-patterns/
 ```
 
@@ -71,17 +73,26 @@ For each scoped artifact, record:
 - `N/A` only where structurally inapplicable.
 - Summary recommendation.
 
-## Live Evals
+## Live or Forensic Evaluations
 
-Use `plugins/frozen-skills/skills/external-skill-intake/references/live-eval-protocol.md`.
+Use `plugins/frozen-skills/skills/external-skill-intake/references/evaluation-protocol.md`.
 
-Each eval case must compare:
+Use a **live evaluation** when the decision depends on exercising candidate behavior or comparing
+outputs. A live case compares:
 
 - Baseline output without candidate material.
 - Candidate-inspired output using the external pattern.
 - frozenSkillz-adapted output using a repo-owned adaptation.
 
 Persist prompts, inputs, outputs, and scorer notes under `evals/runs/`.
+
+Use a **forensic evaluation** when real agents or users have already produced relevant evidence.
+Inspect transcripts, issue reproductions, code history, maintainer confirmations, tests, and release
+notes. Persist findings under `evals/forensic/` with source, version and harness when known,
+current-versus-historical status, corroboration, and confidence.
+
+Do not invent a sandbox run when forensic evidence answers the question. Do not use forensic
+evidence alone to claim comparative improvement over a baseline.
 
 ## Decision Log
 
@@ -90,7 +101,7 @@ Use `decisions.md` or the decision-log template. Each decision must include:
 - Date and reviewer.
 - Candidate artifact paths.
 - Chosen packaging outcome.
-- Rationale grounded in inventory, rubric scores, and evals.
+- Rationale grounded in inventory, rubric scores, and the applicable evaluations.
 - Affected frozenSkillz paths.
 - Follow-up work and owner, if any.
 
@@ -116,7 +127,7 @@ When a candidate passes the gate:
 2. Keep active `SKILL.md` files lean and route heavy detail to `references/` and `templates/`.
 3. Update plugin manifests and versions if adding an active skill.
 4. Update `docs/skill-review/tracker.md`.
-5. Validate JSON manifests and every `skills[].path`.
+5. Validate JSON manifests, every `distribution.json` skill path, and each native manifest component path.
 6. Run `git diff --check` and any relevant repo validation.
 
 ## Related Files

@@ -32,7 +32,7 @@ Each decision must include:
 - Decision option.
 - Evidence from inventory.
 - Rubric score summary.
-- Eval evidence, if applicable.
+- Evaluation evidence and mode, if applicable.
 - Safety and maintenance notes.
 - Affected frozenSkillz paths.
 - Follow-up owner or `none`.
@@ -42,5 +42,5 @@ Each decision must include:
 - Adapted files are outside scout `source/`.
 - Active `SKILL.md` remains lean.
 - Heavy detail lives in `references/`, `templates/`, or `docs/workflows/`.
-- Manifest versions and `skills[].path` entries are updated if a skill becomes active.
+- `plugins/distribution.json`, physical shared/dedicated packages, and native marketplace/plugin metadata are updated if a skill becomes active.
 - `docs/skill-review/tracker.md` reflects the state change.

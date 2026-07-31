@@ -1,21 +1,23 @@
 # Skill Authority and Computer Synchronization
 
-This repository has two deliberate authority lanes. Manifest-listed active skills are reviewed here and synchronized outward to computers. Personal or gated skills are authored in the live personal root and mirrored into `_incubator/` for durable review. Mixing those directions recreates the drift this workflow is designed to prevent.
+This repository has two deliberate authority lanes. Distribution-listed active skills are reviewed here and synchronized outward to consumer-specific roots. Personal or gated skills are authored in the live personal root and mirrored into `_incubator/` for durable review. Mixing those directions recreates the drift this workflow is designed to prevent.
 
 ## Authority Model
 
 ### Active distributed skills
 
-The active distribution is the intersection of two requirements:
+An active consumer distribution is the composition of:
 
-1. the skill directory exists under `plugins/frozen-skills/skills/<skill-name>/`; and
-2. the same name and path are listed in all four `frozen-skills` plugin manifests.
+1. shared skills under `plugins/frozen-skills/skills/<skill-name>/`, listed in `plugins/distribution.json:shared`; and
+2. restricted skills in dedicated `plugins/<package>/skills/<skill-name>/` packages, listed only in approved `consumer_packages` and consumer lanes.
 
-The synchronizer refuses to run if the Claude, Codex, Cursor, and Gemini manifests disagree on the plugin version or ordered skill list. For this lane, the repository copy is authoritative and each computer's managed copy is runtime output.
+`plugins/distribution.json` is the exact synchronizer allowlist. The synchronizer refuses to run if its release identity/version differs from native manifests, and it loads the shared package plus only packages declared for the explicitly selected consumer. For this lane, the repository copy is authoritative and each consumer-specific managed copy is runtime output.
+
+The physical split is a packaging boundary, not decoration. Claude Code automatically discovers every skill below a plugin's default `skills/` directory and has no per-skill manifest exclusion. Current Codex ingestion also requires a plugin's `skills` path to resolve to that package's default `skills/` directory. Therefore a restricted skill needs a dedicated package, and only approved consumer catalogs may expose it. See the [Claude plugin structure contract](https://github.com/anthropics/claude-code/blob/main/claude-code/plugins/plugin-dev/skills/plugin-structure/SKILL.md) and [OpenAI plugin packaging path rules](https://developers.openai.com/plugins/build/plugins#path-rules).
 
 ### Personal or gated skills
 
-Personal skills that are not in the active manifests are authored under:
+Personal skills that are not in the active distribution are authored under:
 
 ```text
 ~/.agents/skills/<skill-name>/
@@ -31,21 +33,26 @@ The live personal copy is authoritative for this lane. `_incubator/` is review m
 
 | Surface | Role |
 |---|---|
-| `plugins/frozen-skills/skills` | Reviewed source for active distributed skills. |
-| Four `plugins/frozen-skills` manifests | Exact allowlist and version contract for the active distribution. |
-| `~/.agents/skills` | Managed runtime destination for active skills; authoring source for personal/gated skills. |
+| `plugins/frozen-skills/skills` | Reviewed shared active source, natively auto-discovered across consumers. |
+| Dedicated `plugins/<package>/skills` | Reviewed active source restricted to approved consumers. |
+| `plugins/distribution.json` | Exact shared-plus-consumer package composition for synchronization, plus any named deployment subsets. |
+| Four native `plugins/frozen-skills` manifests | Client packaging metadata and shared plugin identity/version contract. |
+| Consumer-specific skill root | Managed runtime destination for the selected consumer's active skills. Codex defaults to `~/.codex/skills`. |
+| `~/.agents/skills` | Shared authoring/discovery source for personal or gated skills; not a safe default for consumer-restricted active sync. |
 | `_incubator/personal-skills` | Durable review mirror for tracked personal/gated skills; never installed. |
 | Client plugin/cache directories | Client-managed runtime state, when a client has its own installer. |
 
-The management record at `~/.agents/skills/.frozen-skills-sync.json` distinguishes active managed copies from unrelated personal skills.
+The management record at the selected destination's `.frozen-skills-sync.json` names its consumer, and its deployment when one is selected, and distinguishes managed copies from unrelated skills. A destination managed for one consumer cannot be reused for another consumer, and a destination managed by one deployment cannot be reused by another deployment or by the full consumer distribution.
+
+Legacy schema-1 state from the old shared-root synchronizer is rejected instead of guessed or auto-migrated. Use a fresh consumer-private destination, or perform a separately reviewed migration after reconciling every existing skill.
 
 ## Synchronize Active Skills to a Computer
 
 Clone this repository once on each computer. After cloning or pulling a new revision, inspect and apply the local plan:
 
 ```powershell
-python scripts/sync_frozen_skills.py --check
-python scripts/sync_frozen_skills.py --apply
+python scripts/sync_frozen_skills.py --consumer codex --check
+python scripts/sync_frozen_skills.py --consumer codex --apply
 ```
 
 Both commands validate the distribution first. `--check` writes nothing and exits with:
@@ -54,46 +61,50 @@ Both commands validate the distribution first. `--check` writes nothing and exit
 - `1` when a safe install, update, adoption, or removal is pending;
 - `2` when the distribution is invalid or local content conflicts with it.
 
-`--apply` writes the active skills and management record under `~/.agents/skills`. A matching pre-existing skill is adopted without rewriting it. A previously managed, unchanged copy is safely updated. An unmanaged or locally modified copy is reported as a conflict and left untouched.
+`--apply` writes only the selected consumer's active skills and management record. Codex defaults to its private `~/.codex/skills` root. A matching pre-existing skill is adopted without rewriting it. A previously managed, unchanged copy is safely updated. An unmanaged or locally modified copy is reported as a conflict and left untouched.
+
+Every run must select either `--consumer` or `--deployment`. Claude, Cursor, and Gemini also require `--destination` until a consumer-private default has been explicitly qualified. This prevents the synchronizer from guessing a root that may be shared with another client.
 
 For a non-default root:
 
 ```powershell
-python scripts/sync_frozen_skills.py --apply --destination "C:\path\to\skills"
+python scripts/sync_frozen_skills.py --consumer claude --apply --destination "C:\path\to\claude-skills"
 ```
 
 On macOS or Linux, the same Python command works with POSIX paths.
 
 The destination must be disjoint from the repository. The synchronizer rejects a destination inside the checkout and a destination that contains the checkout. It never reverse-synchronizes installed content into reviewed active source.
 
-## Named Profile Deployments
+## Deployment Subsets
 
-A profile is a named subset of the active distribution for a destination that must not receive every reviewed skill — for example, a standing runtime like Hermes. Profiles are defined at `profiles/<name>.json`:
+`--consumer` selects a client *format*, not a skill subset: a destination synchronized for a consumer always receives that consumer's entire shared-plus-restricted set. A destination that must receive only part of it — a standing runtime like Hermes, for example — is described by a named deployment.
+
+Deployments live in the optional `deployments` object of `plugins/distribution.json`, so the distribution stays the single source of truth. There is no separate registry directory.
 
 ```json
-{
-  "schema": 1,
-  "name": "hermes-ops",
-  "description": "Reviewed shared skills exposed to the standing Hermes operations runtime.",
-  "skills": ["doppler", "pdm-cli-operations"]
+"deployments": {
+  "hermes-ops": {
+    "description": "Reviewed shared skills exposed to the standing Hermes operations runtime.",
+    "consumer": "codex",
+    "skills": ["doppler", "pdm-cli-operations"]
+  }
 }
 ```
 
-Every skill listed in a profile must already be active in all four aligned manifests; a profile cannot select a skill the active distribution does not carry.
+A deployment names the consumer whose client format it receives and the exact subset of that consumer's available skills. Every listed skill must already be active for that consumer in the aligned manifests; a deployment cannot select a skill the distribution does not carry.
 
 ```powershell
-python scripts/sync_frozen_skills.py --check --profile hermes-ops --destination /srv/hermes/skill-sets/hermes-ops --prune
-python scripts/sync_frozen_skills.py --apply --profile hermes-ops --destination /srv/hermes/skill-sets/hermes-ops --prune
+python scripts/sync_frozen_skills.py --check --deployment hermes-ops --destination /srv/hermes/skill-sets/hermes-ops --prune
+python scripts/sync_frozen_skills.py --apply --deployment hermes-ops --destination /srv/hermes/skill-sets/hermes-ops --prune
 ```
 
-Rules specific to profile mode:
+Rules specific to deployment mode:
 
-- `--profile` requires an explicit `--destination` and mandatory `--prune`; there is no default profile destination.
-- A destination is owned by exactly one profile (or by the full, unprofiled distribution) for its lifetime. Reusing a destination under a different profile, or under the full distribution, is a conflict.
-- Pruning is exact: any top-level destination content that is neither an active profile skill nor a still-recorded retired one is reported as a conflict, not silently ignored.
-- `python scripts/validate_manifests.py` validates every file under `profiles/` against the active distribution as part of ordinary manifest validation.
-
-A production consumer (deploy script, service unit, etc.) that pins a specific frozenSkillz commit for its profile sync must pin a commit reachable from `main` — never an unmerged or abandoned branch. A pin that only resolves on a branch is not reviewed distribution.
+- `--deployment` requires an explicit `--destination` and mandatory `--prune`; there is no default deployment destination.
+- `--deployment` and a bare `--consumer` run are alternative ways to pick the skill set. A deployment supplies its own consumer, so passing a `--consumer` that disagrees with it is an error.
+- A destination is owned by exactly one deployment (or by the full, undeployed consumer distribution) for its lifetime. Reusing a destination under a different deployment, or under the full distribution, is a conflict. Ownership is recorded in the destination's `.frozen-skills-sync.json`.
+- Pruning is exact: any top-level destination content that is neither an active deployment skill nor a still-recorded retired one is reported as a conflict, not silently ignored.
+- `python scripts/validate_manifests.py` validates every deployment against the active distribution as part of ordinary manifest validation.
 
 ## Personal/Gated Skill Sync
 
@@ -104,11 +115,11 @@ After a deliberate rewrite or material fix of a personal skill that already has 
 3. update the row or notes in `docs/skill-review/tracker.md`; and
 4. commit and push that mirror on a branch/PR in this repository in the same session.
 
-A GitHub issue alone is not the durable rewrite. Uncommitted incubator files are not “in frozenSkillz.” “Stay gated” means do not add the skill to `plugins/frozen-skills/skills` or the manifests; it does not mean skip Git.
+A GitHub issue alone is not the durable rewrite. Uncommitted incubator files are not “in frozenSkillz.” “Stay gated” means do not add the skill to a shared/dedicated active package or `plugins/distribution.json`; it does not mean skip Git.
 
 ## Completion Contract
 
-When the operator asks to rewrite, fix, or sync a skill that this repository tracks, the work is incomplete until the applicable authority lane is durable:
+When the operator asks to rewrite, fix, sync, or land tracked skill material into this repository (including scout/intake under `_incubator/` and related tracker updates), the work is incomplete until the applicable authority lane is durable:
 
 | Required | Not sufficient |
 |---|---|
@@ -121,11 +132,11 @@ Exception: the operator explicitly says “live-only, do not touch the repo.” 
 
 ## Removal and Conflict Rules
 
-Removing a skill from the manifests does not delete it from computers during an ordinary apply. This makes removal a separate, reviewable operation:
+Removing a skill from one consumer lane in `plugins/distribution.json` does not delete it from that consumer's managed destination during an ordinary apply. This makes removal a separate, reviewable operation:
 
 ```powershell
-python scripts/sync_frozen_skills.py --check --prune
-python scripts/sync_frozen_skills.py --apply --prune
+python scripts/sync_frozen_skills.py --consumer codex --check --prune
+python scripts/sync_frozen_skills.py --consumer codex --apply --prune
 ```
 
 Pruning removes only previously managed content that still matches its recorded digest. A locally modified retired skill becomes a conflict.
@@ -134,11 +145,11 @@ Pruning removes only previously managed content that still matches its recorded 
 
 ## Editing and Promotion Flow
 
-For an already active skill, make the reusable change under `plugins/frozen-skills/skills/<skill-name>/`, validate it, review it, merge it, and then synchronize computers outward from that repository revision.
+For an already active skill, make the reusable change in its shared or dedicated package, validate it, review it, merge it, and then synchronize computers outward from that repository revision.
 
 If an active skill was accidentally edited in a local runtime copy, do not run `--force` immediately. Compare it with the repository source, deliberately port any reusable change into the repository, validate and review it, then synchronize. The conflict is evidence that authority must be reconciled.
 
-New skills enter `_incubator/` and pass the gate in `docs/skill-review/tracker.md` before promotion. Promotion requires moving or adapting the skill into `plugins/frozen-skills/skills`, adding it to all four plugin manifests, and aligning plugin and marketplace versions. The next computer synchronization installs it.
+New skills enter `_incubator/` and pass the gate in `docs/skill-review/tracker.md` before promotion. Promotion requires moving or adapting the skill into the shared package or a dedicated consumer package, registering it in `plugins/distribution.json`, exposing dedicated packages only in approved marketplaces, and aligning versions. The next synchronization installs it only for the composed consumer allowlists.
 
 ## Marketplace Installation Is Different
 
@@ -149,7 +160,7 @@ Claude Code supports this repository as a marketplace:
 /plugin install frozen-skills@coldaine-skills
 ```
 
-That installs a Claude-managed plugin copy. It does not synchronize `~/.agents/skills` and does not prove that another client's similarly named manifest is installable. The Codex, Cursor, and Gemini manifests remain packaging metadata and one enforced distribution contract; `sync_frozen_skills.py` is the repository-owned cross-platform local installation path.
+That installs the shared `frozen-skills` package into a Claude-managed plugin copy. It does not contain or install the separate `codex-thread-organizer` package, which appears only in the Codex catalog. Cursor and Gemini remain separately validated packaging surfaces. `sync_frozen_skills.py` is the repository-owned consumer-selecting local installation path.
 
 ## Required Checks
 
@@ -169,9 +180,9 @@ For an end-to-end smoke test, use a unique temporary directory, assert both comm
 $tempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $target = Join-Path $tempRoot ("frozen-skills-smoke-" + [guid]::NewGuid().ToString("N"))
 try {
-    python scripts/sync_frozen_skills.py --apply --destination $target
+    python scripts/sync_frozen_skills.py --consumer codex --apply --destination $target
     if ($LASTEXITCODE -ne 0) { throw "Smoke-test apply failed: $LASTEXITCODE" }
-    python scripts/sync_frozen_skills.py --check --destination $target
+    python scripts/sync_frozen_skills.py --consumer codex --check --destination $target
     if ($LASTEXITCODE -ne 0) { throw "Smoke-test check failed: $LASTEXITCODE" }
 } finally {
     $resolvedTarget = [System.IO.Path]::GetFullPath($target)
@@ -186,12 +197,12 @@ try {
 
 For an active distribution change, report:
 
-- active source paths and manifest/version changes;
+- active source paths, approved consumers, and manifest/version changes;
 - validation and synchronization checks;
 - destination conflicts intentionally left unresolved; and
 - the repository revision synchronized to each computer when deployment is in scope.
 
-For a personal/gated change, report:
+For a personal/gated or incubator/scout landing change, report:
 
 - the live path compared and incubator path changed;
 - tracker or promotion status changes;

@@ -19,13 +19,14 @@ Local developer auth is saved in the Doppler config directory. CI and production
 doppler setup
 doppler setup -p my-project -c dev
 doppler setup --no-interactive
-doppler configure
-doppler configure --all
-doppler configure debug
+doppler configure get project config --plain
+doppler me
 doppler configure unset project config --scope /path/to/project
 ```
 
 Directory scopes are path based. If a project moves, rerun `doppler setup`.
+
+Do not use bare configuration display, its `--all` variant, or the configuration debug subcommand in an agent transcript. Those views include token fields, and the debug form may reveal the saved CLI token. Query only known non-secret options explicitly.
 
 ## Secret Management
 
@@ -123,7 +124,8 @@ Doppler-provided child-process variables include:
 Wrong or missing secret:
 
 ```shell
-doppler configure debug
+doppler configure get project config --plain
+doppler me
 doppler secrets --only-names
 doppler run -- sh -c 'test -n "$MY_SECRET" && echo MY_SECRET=set || echo MY_SECRET=missing'
 ```
@@ -137,7 +139,7 @@ doppler run -- powershell -NoProfile -Command "if ($env:MY_SECRET) { 'MY_SECRET=
 Wrong directory scope:
 
 ```shell
-doppler configure --all
+doppler configure get project config --plain --scope /path/to/wrong/scope
 doppler configure unset project config --scope /path/to/wrong/scope
 ```
 
