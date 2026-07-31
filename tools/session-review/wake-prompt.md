@@ -35,4 +35,8 @@ You are the Session Reviewer. This is your scheduled nightly grading run. Work O
    except this review worktree.
 8. `git add tools/session-review/grades tools/session-review/proposals.md` then
    commit as `nightly review <date>: <N> graded` and `git push`.
-9. Final reply, one line: `<N> graded, <M> failed, <K> mutation candidates`.
+9. **Retrospective phase** (calibrated runs only): follow `retro-prompt.md`. It selects
+   up to 2 of tonight's sessions — mutation candidates first — runs the `retrospective`
+   skill on each, appends learnings to agent-control-plane and target skills, and makes
+   its own commit.
+10. Final reply, one line: `<N> graded, <M> failed, <K> mutation candidates, <R> retros`.
