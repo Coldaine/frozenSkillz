@@ -527,6 +527,8 @@ def _validate_direction(repo_root: Path, destination: Path) -> None:
         raise SyncError("Destination must be outside the frozenSkillz repository")
     if destination in repo_root.parents:
         raise SyncError("Destination must not contain the frozenSkillz repository")
+    if destination.exists() and not destination.is_dir():
+        raise SyncError(f"Destination must be a directory: {destination}")
 
 
 def plan_sync(
@@ -605,7 +607,7 @@ def plan_sync(
                     )
                 )
 
-    if exact and destination.exists():
+    if exact and destination.is_dir():
         known_names = active_names | set(recorded) | {STATE_FILE}
         for entry in sorted(destination.iterdir(), key=lambda item: item.name):
             if entry.name not in known_names:

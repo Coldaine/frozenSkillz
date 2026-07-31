@@ -641,6 +641,23 @@ class SyncFrozenSkillsTests(unittest.TestCase):
         ):
             self._sync(consumer=None, prune=True, deployment="hermes-ops")
 
+    def test_file_destination_is_a_clean_error_not_a_traceback(self):
+        self._write_deployment("hermes-ops", ["alpha"], consumer=None)
+        destination = self.root / "not-a-directory"
+        destination.write_text("i am a file", encoding="utf-8")
+
+        for deployment in ("hermes-ops", None):
+            with self.subTest(deployment=deployment):
+                with self.assertRaisesRegex(
+                    sync_module.SyncError, "Destination must be a directory"
+                ):
+                    self._sync(
+                        consumer=None if deployment else "codex",
+                        prune=True,
+                        deployment=deployment,
+                        destination=destination,
+                    )
+
     def test_deployment_rejects_unpromoted_and_duplicate_skills(self):
         self._write_deployment("subset", ["alpha", "not-active"])
         with self.assertRaisesRegex(sync_module.SyncError, "is not active for consumer"):
