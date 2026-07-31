@@ -83,10 +83,12 @@ class ExternalSkillIntakeContractTests(unittest.TestCase):
     def test_captured_agent_instructions_carry_a_guard(self):
         incubator = REPO_ROOT / "_incubator"
         blanket_guard = incubator / "AGENTS.md"
+        blanket_router = incubator / "CLAUDE.md"
 
         self.assertTrue(blanket_guard.is_file())
         self.assertIn(GUARD_MARKER, blanket_guard.read_text(encoding="utf-8"))
-        self.assertIn("@AGENTS.md", (incubator / "CLAUDE.md").read_text(encoding="utf-8"))
+        self.assertTrue(blanket_router.is_file())
+        self.assertIn("@AGENTS.md", blanket_router.read_text(encoding="utf-8"))
 
         guarded = set()
         for snapshot in sorted(path for path in (incubator / "scout").iterdir() if path.is_dir()):
@@ -99,11 +101,13 @@ class ExternalSkillIntakeContractTests(unittest.TestCase):
                 continue
 
             guard = snapshot / "AGENTS.md"
+            router = snapshot / "CLAUDE.md"
             self.assertTrue(guard.is_file(), f"{snapshot.name} captures {captured} without a guard")
             self.assertIn(GUARD_MARKER, guard.read_text(encoding="utf-8"), snapshot.name)
-            self.assertIn(
-                "@AGENTS.md", (snapshot / "CLAUDE.md").read_text(encoding="utf-8"), snapshot.name
+            self.assertTrue(
+                router.is_file(), f"{snapshot.name} captures {captured} without a CLAUDE.md router"
             )
+            self.assertIn("@AGENTS.md", router.read_text(encoding="utf-8"), snapshot.name)
             guarded.add(snapshot.name)
 
         # Guards against a scan that silently matches nothing.
