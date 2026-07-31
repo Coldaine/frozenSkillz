@@ -127,7 +127,11 @@ not rerunnable from this repository):
   scoped to substantial changes. **Escalated 2026-07-31: owner removed the whole pack
   from the codex cache.** Capabilities that died with it (delegation, planning,
   debugging, git-worktree lanes) get rebuilt without the ceremony register —
-  [#71](https://github.com/Coldaine/frozenSkillz/issues/71).
+  [#71](https://github.com/Coldaine/frozenSkillz/issues/71). Owner nuance, same day:
+  the pack's *auto-fire bootstrap* (`using-superpowers`) was the one part worth
+  keeping — it is why codex out-fires every other harness on skills — so #71 carries a
+  skill-activation-bootstrap lane (owner previously ran a hook for the same job); only
+  the ceremony payload dies unreplaced.
 - `doppler`, `project-docs`, `chat-history` (trigger narrowed to forensic-only
   2026-07-30), `parallel-web-search`, `canvas`, `create-hook` earn their keep.
 - `git-master`: an `oh-my-openagent` built-in, opencode-only — not Codex. Dead since
@@ -148,7 +152,8 @@ sessions each, read by subagents):
   **refuted** (23/44 firing sessions apply its formatting vs 2/127 baseline, zero owner
   complaints); `context7-mcp` when used — prior "meta-inflated" verdict **refuted**, real
   doc pulls shaped work, but 27/39 fires load-and-never-use and the service was
-  quota-blocked in 10+ sessions → narrow trigger, add quota-fallback line;
+  quota-blocked in 10+ sessions → superseded 2026-07-31: owner escalated to a
+  complete rewrite (see Personal lane row);
   `hangar-logbook` — keep, but revise persistence to markdown-first (owner asked
   verbatim 2026-07-27; it still writes into `.ts` files).
 - **IGNORED:** `feature-research` — its sole prescriptive step ran 0 times across all
