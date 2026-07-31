@@ -81,6 +81,13 @@ Parked regardless of reconciler: whole Aidas dump; kubectl-MCP packs;
 clouddrove/Jeffallan/sickn33/wshobson mutate cookbooks; Omni-as-CAPMOX;
 kagent apply-after-generate (revisit after CAPI/CAPMOX/Flux is stable).
 
+Scouts:
+
+- Rylaa/fable5-opus5-orchestrator — scout · adapt-concept-only (2026-07-31).
+  Snapshot at `_incubator/scout/2026-07-31-rylaa-fable5-opus5-orchestrator/`;
+  tmux layer discarded. Live eval under its `evals/runs/` required before any
+  Component A pattern lands in `plugins/` or `docs/`.
+
 ## Fleet effectiveness review
 
 How grading works: a skill's grade comes from subagents reading transcripts around recent
