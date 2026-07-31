@@ -32,7 +32,12 @@ class ExternalSkillIntakeContractTests(unittest.TestCase):
         frontmatter = skill.split("---", 2)[1]
         self.assertRegex(frontmatter, r"(?m)^name: external-skill-intake$")
         self.assertRegex(frontmatter, r"(?m)^description: .+$")
-        self.assertNotIn("docs/workflows/", skill)
+        # The intake workflow itself must be bundled and portable: the skill's
+        # rules and steps live in the SKILL.md plus references/ and templates/,
+        # and any repo-local workflow doc is a mirror, not the authority. Other
+        # docs/workflows/ pointers (e.g. the Completion Contract) are allowed.
+        self.assertIn("Follow the bundled workflow below in order", skill)
+        self.assertNotIn("Follow `docs/workflows/external-skill-intake.md`", skill)
 
         bundled_links = re.findall(r"`((?:references|templates)/[^`]+)`", skill)
         self.assertTrue(bundled_links)

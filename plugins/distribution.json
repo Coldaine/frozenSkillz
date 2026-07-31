@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "plugin": "frozen-skills",
+  "version": "2.4.1",
+  "shared": [
+    {
+      "name": "doppler",
+      "path": "frozen-skills/skills/doppler"
+    },
+    {
+      "name": "external-skill-intake",
+      "path": "frozen-skills/skills/external-skill-intake"
+    },
+    {
+      "name": "omc-reference",
+      "path": "frozen-skills/skills/omc-reference"
+    },
+    {
+      "name": "pdm-cli-operations",
+      "path": "frozen-skills/skills/pdm-cli-operations"
+    }
+  ],
+  "consumer_packages": {
+    "claude": [],
+    "codex": ["codex-thread-organizer"],
+    "cursor": [],
+    "gemini": []
+  },
+  "consumers": {
+    "claude": [],
+    "codex": [
+      {
+        "name": "codex-thread-organizer",
+        "path": "codex-thread-organizer/skills/codex-thread-organizer"
+      }
+    ],
+    "cursor": [],
+    "gemini": []
+  }
+}

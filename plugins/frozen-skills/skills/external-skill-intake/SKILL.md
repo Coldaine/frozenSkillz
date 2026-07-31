@@ -11,8 +11,9 @@ Do not use this for ordinary local skill authoring, direct promotion of already-
 
 ## Rules
 
-- Follow the bundled workflow below in order; repo-local documentation may add placement or
-  governance constraints when it is available.
+- Follow the bundled workflow below in order; in this repository,
+  `docs/workflows/external-skill-intake.md` mirrors it and may add placement or
+  governance constraints.
 - Keep external source read-only under `_incubator/scout/<YYYY-MM-DD>-<repo>/source/`.
 - Inventory before scoring.
 - Score scoped artifacts before packaging decisions.
@@ -28,6 +29,7 @@ Do not use this for ordinary local skill authoring, direct promotion of already-
 5. Evaluate with `references/evaluation-protocol.md` and the applicable live or forensic template.
 6. Decide packaging with `references/packaging-decision-gate.md` and `templates/decision-log.md`.
 7. Update `docs/skill-review/tracker.md` if status changes.
+8. Land incubator + tracker changes: commit, push, and open a PR unless the operator said live-only. Tracker-only landing is incomplete; see Completion Contract in `docs/workflows/skill-authority-and-frozen-sync.md`.
 
 ## References
 

@@ -14,6 +14,7 @@ The goal is to learn from external work without turning active marketplace conte
 6. Complete at least one live or forensic evaluation before recommending any large pattern for promotion.
 7. Record packaging decisions with rationale and affected paths.
 8. Promote only adapted, reviewed output into `plugins/`, `docs/`, or another active location.
+9. Land `_incubator/` and tracker changes with commit + push + PR in the same session unless the operator said live-only. Files and tracker rows alone are incomplete; see Completion Contract in `docs/workflows/skill-authority-and-frozen-sync.md`.
 
 ## Non-Negotiables
 
@@ -126,7 +127,7 @@ When a candidate passes the gate:
 2. Keep active `SKILL.md` files lean and route heavy detail to `references/` and `templates/`.
 3. Update plugin manifests and versions if adding an active skill.
 4. Update `docs/skill-review/tracker.md`.
-5. Validate JSON manifests and every `skills[].path`.
+5. Validate JSON manifests, every `distribution.json` skill path, and each native manifest component path.
 6. Run `git diff --check` and any relevant repo validation.
 
 ## Related Files
