@@ -85,5 +85,108 @@ class ValidateManifestsTests(unittest.TestCase):
         self.assertIn("reserved for shared skills", output.getvalue())
 
 
+class SkillMetadataValidationTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.plugin = Path(self.temporary.name) / "plugin"
+        self.skill = self.plugin / "skills/alpha"
+        self.skill.mkdir(parents=True)
+        self.manifest = self.plugin / ".codex-plugin/plugin.json"
+        self.manifest.parent.mkdir()
+        self.manifest.write_text(
+            json.dumps(
+                {
+                    "name": "frozen-skills",
+                    "version": "1.0.0",
+                    "description": "test",
+                    "skills": [{"name": "alpha", "path": "skills/alpha"}],
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    def validate(self):
+        with redirect_stdout(io.StringIO()) as output:
+            result = validate_module.validate_manifest(self.manifest)
+        return result, output.getvalue()
+
+    def test_valid_skill_metadata_passes(self):
+        (self.skill / "SKILL.md").write_text(
+            "---\nname: alpha\ndescription: Test skill.\n---\n\n# Alpha\n",
+            encoding="utf-8",
+        )
+
+        result, _ = self.validate()
+        self.assertTrue(result)
+
+    def test_folded_block_scalar_description_passes(self):
+        (self.skill / "SKILL.md").write_text(
+            "---\n"
+            "name: alpha\n"
+            "description: >-\n"
+            "  Use when testing folded block scalars\n"
+            "  across multiple frontmatter lines.\n"
+            "---\n\n# Alpha\n",
+            encoding="utf-8",
+        )
+
+        result, _ = self.validate()
+        self.assertTrue(result)
+
+    def test_missing_frontmatter_fails_manifest_validation(self):
+        (self.skill / "SKILL.md").write_text("# Alpha\n", encoding="utf-8")
+
+        result, output = self.validate()
+        self.assertFalse(result)
+        self.assertIn("missing YAML frontmatter", output)
+
+    def test_frontmatter_name_must_match_manifest_name(self):
+        (self.skill / "SKILL.md").write_text(
+            "---\nname: beta\ndescription: Test skill.\n---\n",
+            encoding="utf-8",
+        )
+
+        result, output = self.validate()
+        self.assertFalse(result)
+        self.assertIn("does not match manifest name", output)
+
+    def test_directory_name_must_match_manifest_name(self):
+        other_skill = self.plugin / "skills/beta"
+        other_skill.mkdir()
+        (other_skill / "SKILL.md").write_text(
+            "---\nname: alpha\ndescription: Test skill.\n---\n",
+            encoding="utf-8",
+        )
+        data = json.loads(self.manifest.read_text(encoding="utf-8"))
+        data["skills"][0]["path"] = "skills/beta"
+        self.manifest.write_text(json.dumps(data), encoding="utf-8")
+
+        result, output = self.validate()
+        self.assertFalse(result)
+        self.assertIn("same-name directory", output)
+
+    def test_missing_bundled_reference_fails(self):
+        (self.skill / "SKILL.md").write_text(
+            "---\nname: alpha\ndescription: Test skill.\n---\n\n"
+            "Read `references/missing.md` first.\n",
+            encoding="utf-8",
+        )
+
+        result, output = self.validate()
+        self.assertFalse(result)
+        self.assertIn("does not exist", output)
+
+    def test_skill_root_string_validates_discovered_skill_metadata(self):
+        data = json.loads(self.manifest.read_text(encoding="utf-8"))
+        data["skills"] = "./skills/"
+        self.manifest.write_text(json.dumps(data), encoding="utf-8")
+        (self.skill / "SKILL.md").write_text("# Alpha\n", encoding="utf-8")
+
+        result, output = self.validate()
+        self.assertFalse(result)
+        self.assertIn("missing YAML frontmatter", output)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,3 +1,8 @@
+---
+name: external-skill-intake
+description: Evaluate an external skill, plugin, agent, command, hook, config, template, eval, or documentation-pattern repo for possible frozenSkillz adoption. Use for external source intake, inventory, rubric scoring, live evals, and packaging decisions before promotion.
+---
+
 # External Skill Intake
 
 Use this skill when evaluating an external skill, plugin, agent, command, hook, config, template, eval, or documentation-pattern repo for possible frozenSkillz adoption.

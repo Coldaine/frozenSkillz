@@ -1,6 +1,11 @@
 import json
 from pathlib import Path
 
+try:
+    from skill_validation import SkillMetadataError, validate_skill_metadata
+except ModuleNotFoundError:  # Imported as part of the scripts package
+    from scripts.skill_validation import SkillMetadataError, validate_skill_metadata
+
 
 PLUGIN_MANIFESTS = [
     ".claude-plugin/plugin.json",
@@ -64,6 +69,10 @@ def validate_skill_entry(plugin_root, skill, seen_names):
         )
     if not (resolved_skill_path / "SKILL.md").is_file():
         raise ValueError(f"Skill {skill_name} has no SKILL.md")
+    try:
+        validate_skill_metadata(resolved_skill_path / "SKILL.md", skill_name)
+    except SkillMetadataError as exc:
+        raise ValueError(f"Skill {skill_name} has invalid metadata: {exc}") from exc
 
 
 def validate_manifest(filepath):
@@ -87,6 +96,13 @@ def validate_manifest(filepath):
             ]
             if not discovered:
                 raise ValueError(f"Skill root contains no skills: {skill_root}")
+            for skill_dir in discovered:
+                try:
+                    validate_skill_metadata(skill_dir / "SKILL.md", skill_dir.name)
+                except SkillMetadataError as exc:
+                    raise ValueError(
+                        f"Skill {skill_dir.name} has invalid metadata: {exc}"
+                    ) from exc
         elif isinstance(skills, list):
             seen_names = set()
             for skill in skills:
