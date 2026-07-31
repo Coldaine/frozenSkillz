@@ -162,7 +162,10 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         self.assertNotIn("not-title-mutable", skill_text)
         self.assertIn("bounded inventory", skill_text)
         self.assertIn("partial coverage", skill_text)
-        self.assertIn("full inventory total", skill_text)
+        # A bounded listing must never be reported as a complete one: the
+        # coverage status travels with the total.
+        self.assertIn("coverage status", skill_text)
+        self.assertNotIn("full inventory total", skill_text)
         self.assertNotIn("Do not apply it to ChatGPT", skill_text)
         self.assertNotIn("do not use for ChatGPT", skill_text.lower())
 
