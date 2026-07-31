@@ -24,7 +24,7 @@ content, scripts actually run, no project-specific leakage, progressive disclosu
 | `stacked-pr-workflow` | gated | Run the 7 PowerShell helpers or cut it. |
 | `skill-manager` | gated | Verify `skills.sh` registry assumptions or cut it. |
 | `session-skill-inferencer` | gated | Produced junk auto-skills in May; fix generation quality or cut. |
-| `icepanel-api` | gated | Closest to ready: live-validate diagram push, diff hand-transcribed schemas against live OpenAPI, trim description to ~300 chars. |
+| `icepanel-api` | gated | Closest to ready: live-validate diagram push, diff hand-transcribed schemas against live OpenAPI, trim description to ~300 chars, rebalance content per owner (less phase-gate execution, more creativity). |
 
 ## Personal lane
 
@@ -34,20 +34,20 @@ de-personalized.
 | Skill | Next action |
 |---|---|
 | `chat-history` | De-personalize paths; fix `while read` missing `-r` in extract-chats.sh; drop unimplemented gemini extractor from docstring. |
-| `retrospective` | De-personalize. |
+| `retrospective` | Live skill half-deleted ~Jul 16 (SKILL.md gone, scripts/ orphaned) — restore deliberately or delete; then de-personalize. |
 | `project-docs` | Gated pending de-personalization. |
 | `skill-install` | Verify recipes. |
 | `run-opencode` | Fix driver.mjs header comment re: profile writes. |
 | `edit-opencode-config` | Fix canonical-root drift. |
 | `phantom-substrate-inheritance` | Review. |
 | `review-claudemd` | Fix frontmatter name mismatch + duplicate find clause; overlap-check vs `claude-md-enhancer`. |
-| `rich-visual-responses` | Review — corpus analysis says cosmetic effect only. |
+| `rich-visual-responses` | Keep — regraded 2026-07-31: formatting applied in 23/44 firing sessions vs 2/127 baseline. |
 | `insight-extractor` | Add YAML frontmatter; fix contradictory `~/.Codex` vs `~/.claude` paths. |
 | `claude-md-enhancer` | Confirm provenance. |
 | `nlm-skill` | Confirm provenance. |
 | `skill-finder` | Confirm provenance. |
 | `google-stitch-ui-designer` | Confirm provenance. |
-| `context7-mcp` | Likely redundant with `~/.claude/rules/context7.md` — decide keep/drop. |
+| `context7-mcp` | Keep but narrow trigger (27/39 fires never call the MCP); add quota-fallback line. |
 | `patrickspowerfulpresentations` | Incubating; stays personal. |
 | `audio-producer` | Incubating; stays personal. Broadside examples are worked evidence — keep. |
 
@@ -64,29 +64,53 @@ Parked / do not adopt: Flux-based skills — wrong reconciler.
 
 ## Fleet effectiveness review
 
-Corpus analysis of ~7,300 sessions across all agents (2026-07-28; instrument and full
-findings live in `D:\_projects\agent-control-plane` — `projects/agent-ceremony-*.md`,
-`tools/ceremony_metrics.py`). Rerun the scorecard after any intervention below and record
-the verdict change here. Verdicts:
+How grading works: a skill's grade comes from subagents reading transcripts around recent
+fires — did the guidance visibly shape the agent's actions, and was the owner's next
+message acceptance or a correction. AgentsView `health_score` is only a thrash detector
+(tool failures / edit churn; 85% of all sessions grade A) — never a success measure. A
+"fire" is usually just a SKILL.md read, so editing or studying a skill counts as usage.
+
+**2026-07-28 corpus analysis** (~7,300 sessions; instrument in
+`D:\_projects\agent-control-plane` — `projects/agent-ceremony-*.md`,
+`tools/ceremony_metrics.py`, `tools/classified.csv` = all 308 skills classified):
 
 - **Superpowers pack is the codex-ceremony driver.** Codex is the heaviest skill user
-  (60% of sessions read SKILL.md files via shell — untagged, so earlier counts missed it),
-  and its top reads are the superpowers pack in `~/.codex/plugins/cache/`:
-  `using-superpowers` (622 sessions), `verification-before-completion` (306 — the
-  "Iron Law" evidence register). Lever: operational-mode override in `~/.codex/AGENTS.md`
-  (applied 2026-07-30, with the PR self-review loop scoped to substantial changes).
-- **Net-negative:** `git-master` (opencode; 5× failure signals, −27 health — slim it),
-  `shared/ulw-plan` (22× loop in one session), `issue-pr-review` (killed 2026-07-28),
-  `code-review` (7× edit churn).
-- **Earning their keep:** `doppler`, `project-docs`, `chat-history` (content good; trigger
-  breadth was the problem — narrowed to forensic-only 2026-07-30, live + mirror),
-  `parallel-web-search`, `canvas`, `create-hook`.
-- **`git-master`:** not a Codex skill — an `oh-my-openagent` built-in, opencode-only. The
-  version that measured −27 health (worktree/prefix ceremony) has since been rewritten; the
-  current shipped version is conservative. Watch the next scorecard run before more surgery.
-- **Cruft:** `rich-visual-responses` (cosmetic), `context7-mcp` (counts inflated by
-  meta-review sessions), 46% of all skills fired exactly once, ~10 re-implementations of
-  the same planning skill (ralplan/hyperplan/ulw-plan/ultragoal) — consolidate.
+  (60% of sessions read SKILL.md via shell — untagged, so earlier counts missed it); top
+  reads are `~/.codex/plugins/cache/` superpowers: `using-superpowers` (622 sessions),
+  `verification-before-completion` (306 — the "Iron Law" register). Lever applied
+  2026-07-30: operational-mode override in `~/.codex/AGENTS.md`, PR self-review loop
+  scoped to substantial changes. If codex still preaches iron laws in ~2 weeks, prune the
+  skill from the cache.
+- `doppler`, `project-docs`, `chat-history` (trigger narrowed to forensic-only
+  2026-07-30), `parallel-web-search`, `canvas`, `create-hook` earn their keep.
+- `git-master`: an `oh-my-openagent` built-in, opencode-only — not Codex. Dead since
+  Jul 1 (opencode lane fading); its bad numbers came from long thrashy sessions in a
+  harness no longer used, and the shipped version has since been rewritten. Ignore.
+- `issue-pr-review` zombie fixed 2026-07-30: cursor kept loading it from `_disabled`
+  *inside* the discovery root. Quarantine is now `~/.agents/skills-disabled/` (outside
+  every scan root) — use it for all future kills.
+- Long tail: 46% of all skills fired exactly once; ~10 re-implementations of the same
+  planning skill (ralplan/hyperplan/ulw-plan/ultragoal) — consolidate.
+
+**2026-07-31 transcript regrade** of the live 30-day roster (12 skills × 3 recent
+sessions each, read by subagents):
+
+- **EARNS:** `babysit`, `unity-editor-ops`, `create-skill`, `skill-install`,
+  `external-skill-intake`; `rich-visual-responses` — prior "cosmetic cruft" verdict
+  **refuted** (23/44 firing sessions apply its formatting vs 2/127 baseline, zero owner
+  complaints); `context7-mcp` when used — prior "meta-inflated" verdict **refuted**, real
+  doc pulls shaped work, but 27/39 fires load-and-never-use and the service was
+  quota-blocked in 10+ sessions → narrow trigger, add quota-fallback line;
+  `hangar-logbook` — but revise persistence markdown-first (owner asked verbatim
+  2026-07-27; it still writes into `.ts` files).
+- **IGNORED:** `feature-research` — its sole prescriptive step ran 0 times across all
+  examined sessions; pure context tax. **Disabled 2026-07-31** (moved to quarantine).
+- **META-ONLY:** `icepanel-api` — recent fires are self-study/rewrite; fold in the
+  owner's creativity-vs-phase-gates complaint before promotion.
+- **INSUFFICIENT DATA:** `unity` — old "sole mutator" text caused the 2026-07-21 blowup;
+  rewritten text unproven, re-grade after a real Editor session. `retrospective` — live
+  skill half-deleted ~Jul 16 (SKILL.md gone, `scripts/` orphaned): restore deliberately
+  or delete the remnant.
 
 ## Loose ends
 
