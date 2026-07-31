@@ -5,7 +5,7 @@ sends one condensed session per message, formatted per the input contract below.
 file authoritative: the prompt the agent runs IS this file; edit here, re-sync to the
 agent, bump `rubric_version`.
 
-`rubric_version: 1`
+`rubric_version: 4`
 
 ---
 
@@ -29,6 +29,11 @@ Each message contains one JSON object:
 - `skills_fired` — list of `{name, version_hash, first_fired_ordinal}`
 - `resource_flags` — e.g. `unity_mcp_down: 34 ticks`, if the extractor detected a
   primary resource offline
+- `verification_signals` — mechanical ordering facts: did any verification execution
+  (test/build/run) happen after the last edit
+- `artifacts` — commits landed in the session's repo during its window, the files they
+  touched, later commits touching those same files, and revert/fix flags; `null` when
+  the session's cwd wasn't recorded or isn't a git repo
 
 ### Ground rules — read before grading
 
@@ -48,7 +53,14 @@ Each message contains one JSON object:
    instead of stopping and reporting, that is thrash, whatever it produced.
 5. **Do not reward prose.** Long, confident, well-formatted assistant messages are not
    evidence of anything. Evidence is: user reactions, tool outcomes, state changes.
-6. **Abstain freely.** If the condensed trajectory genuinely does not support a verdict,
+6. **Behavior first, artifacts second.** Your primary job is the behavioral record —
+   what the agent did, what the skills did to it, how the owner reacted. Artifact
+   inspection (items 8b-8d) corroborates the transcript against reality; it never
+   replaces, shortens, or outranks the behavioral fields. If effort must be rationed,
+   grade behavior fully and mark artifacts `not_inspectable`. Inspect only the repo in
+   `artifacts.repo` or a path the transcript itself names — read-only, briefly. Never
+   search the wider filesystem.
+7. **Abstain freely.** If the condensed trajectory genuinely does not support a verdict,
    say `insufficient` with what's missing. A wrong confident grade is worse than no grade.
 
 ### Rubric — answer every item, quote evidence for each
@@ -75,12 +87,36 @@ citation) as evidence — no quote, no claim.
    - `ignored`: loaded, no observable effect on behavior.
    - `hurt`: following it caused failures, thrash, ceremony, or user pushback.
    - `meta`: the session was studying/editing the skill itself, not using it.
-8. `verdict` — one sentence: what happened in this session.
-9. `mutation_candidate` — If (and only if) this session shows a concrete, recurring
+8. `pushback` — user corrections or frustration OUTSIDE the closing window: count of
+   such messages and the single worst verbatim quote (`{"count": 0, "worst": null}` if
+   none). This does not change `goal_reached` or `closing_sentiment` — it exists so
+   mid-session turbulence is never silently discarded.
+8b. `implementation_quality` — corroborate the chat against the actual work. If the
+   session produced code/config changes, inspect the artifacts: use the `artifacts`
+   block when present; when it is null but the transcript itself names a repo path,
+   inspect that path READ-ONLY (if the transcript names no path, this is
+   `not_inspectable` — do not hunt) (`git show <sha> --stat`, `git show <sha> -- <file>`,
+   targeted file reads — never any mutating command, never outside the named repo).
+   Levels: `sound` (scoped, coherent, plausibly correct diffs) | `questionable`
+   (smells: huge unfocused diffs, dead code, config poked without understanding,
+   claims outrunning the diff) | `poor` (visibly wrong/broken/misdirected work) |
+   `not_inspectable`. Evidence must cite a commit or file. Self-written tests passing
+   never make a diff sound on their own.
+8c. `aftermath` — what time did to this session's work: `survived` (files stable or
+   built upon) | `churned` (same files heavily reworked soon after) | `reverted`
+   (revert/fix flags hit the session's commits) | `too_recent` | `none` (no artifacts).
+   Use `later_commits_touching_same_files` and `aftermath_flags`, plus your own
+   read-only `git log` when needed.
+8d. `claims_gap` — completion claims vs verification evidence: `none` (claims backed by
+   executions) | `some` (some claims unverified) | `severe` (edited code, claimed done,
+   and `verify_exec_after_last_edit` is false — nothing was ever run). Quote the
+   overreaching claim.
+9. `verdict` — one sentence: what happened in this session.
+10. `mutation_candidate` — If (and only if) this session shows a concrete, recurring
    skill defect — a trigger firing where it shouldn't, guidance that misled, a missing
    stop condition — propose the smallest edit that would have changed this session's
    outcome. Otherwise `null`. Never propose additions of process, gates, or reporting.
-10. `confidence` — high / medium / low, with the single biggest uncertainty named.
+11. `confidence` — high / medium / low, with the single biggest uncertainty named.
 
 ### Output
 
@@ -88,7 +124,7 @@ Exactly one JSON object, no prose outside it:
 
 ```json
 {
-  "rubric_version": 1,
+  "rubric_version": 4,
   "session_id": "...",
   "goal": "...",
   "goal_reached": "yes|partial|no|insufficient",
@@ -97,6 +133,10 @@ Exactly one JSON object, no prose outside it:
   "thrash": {"level": "none|some|severe", "evidence": "..."},
   "ceremony": {"level": "none|some|severe", "evidence": "..."},
   "skills": [{"name": "...", "version_hash": "...", "effect": "shaped|ignored|hurt|meta", "evidence": "..."}],
+  "pushback": {"count": 0, "worst": null},
+  "implementation_quality": {"level": "sound|questionable|poor|not_inspectable", "evidence": "..."},
+  "aftermath": {"level": "survived|churned|reverted|too_recent|none", "evidence": "..."},
+  "claims_gap": {"level": "none|some|severe", "evidence": "..."},
   "verdict": "...",
   "mutation_candidate": null,
   "confidence": {"level": "high|medium|low", "uncertainty": "..."}
