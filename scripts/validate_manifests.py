@@ -1,5 +1,34 @@
+import importlib.util
 import json
+import sys
 from pathlib import Path
+
+
+def _load_skill_validation():
+    """Load skill_validation from this script's directory.
+
+    Anchoring to ``__file__`` guarantees the sibling module wins even when a
+    third-party ``skill_validation`` package is installed in site-packages or
+    this script is imported from an arbitrary working directory.
+    """
+
+    module_name = "frozenskillz_skill_validation"
+    cached = sys.modules.get(module_name)
+    if cached is not None:
+        return cached
+    module_path = Path(__file__).resolve().parent / "skill_validation.py"
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load skill_validation from {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+_skill_validation = _load_skill_validation()
+SkillMetadataError = _skill_validation.SkillMetadataError
+validate_skill_metadata = _skill_validation.validate_skill_metadata
 
 
 PLUGIN_MANIFESTS = [
@@ -64,6 +93,10 @@ def validate_skill_entry(plugin_root, skill, seen_names):
         )
     if not (resolved_skill_path / "SKILL.md").is_file():
         raise ValueError(f"Skill {skill_name} has no SKILL.md")
+    try:
+        validate_skill_metadata(resolved_skill_path / "SKILL.md", skill_name)
+    except SkillMetadataError as exc:
+        raise ValueError(f"Skill {skill_name} has invalid metadata: {exc}") from exc
 
 
 def validate_manifest(filepath):
@@ -87,6 +120,13 @@ def validate_manifest(filepath):
             ]
             if not discovered:
                 raise ValueError(f"Skill root contains no skills: {skill_root}")
+            for skill_dir in discovered:
+                try:
+                    validate_skill_metadata(skill_dir / "SKILL.md", skill_dir.name)
+                except SkillMetadataError as exc:
+                    raise ValueError(
+                        f"Skill {skill_dir.name} has invalid metadata: {exc}"
+                    ) from exc
         elif isinstance(skills, list):
             seen_names = set()
             for skill in skills:
