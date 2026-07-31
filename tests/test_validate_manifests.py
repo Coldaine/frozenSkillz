@@ -85,6 +85,115 @@ class ValidateManifestsTests(unittest.TestCase):
             self.assertFalse(validate_module.validate_frozen_consumer_contract())
         self.assertIn("reserved for shared skills", output.getvalue())
 
+    def _contract_with_deployments(self, deployments):
+        distribution = validate_module.load_json(validate_module.FROZEN_DISTRIBUTION)
+        distribution["deployments"] = deployments
+        real_load_json = validate_module.load_json
+
+        def load_with_patched_distribution(path):
+            if path == validate_module.FROZEN_DISTRIBUTION:
+                return distribution
+            return real_load_json(path)
+
+        output = io.StringIO()
+        with (
+            mock.patch.object(
+                validate_module,
+                "load_json",
+                side_effect=load_with_patched_distribution,
+            ),
+            redirect_stdout(output),
+        ):
+            valid = validate_module.validate_frozen_consumer_contract()
+        return valid, output.getvalue()
+
+    def test_contract_rejects_a_deployment_skill_the_consumer_does_not_carry(self):
+        valid, output = self._contract_with_deployments(
+            {
+                "hermes-ops": {
+                    "description": "test",
+                    "consumer": "claude",
+                    "skills": ["codex-thread-organizer"],
+                }
+            }
+        )
+        self.assertFalse(valid)
+        self.assertIn("is not active for consumer claude", output)
+
+    def test_contract_rejects_a_malformed_deployment_entry(self):
+        for deployments, expected in (
+            ({"hermes-ops": {"consumer": "codex", "skills": ["doppler"]}}, "no description"),
+            (
+                {
+                    "hermes-ops": {
+                        "description": "t",
+                        "consumer": "not-a-client",
+                        "skills": ["doppler"],
+                    }
+                },
+                "must name one consumer",
+            ),
+            ({"hermes-ops": {"description": "t", "consumer": "codex", "skills": []}}, "has no skills"),
+            (
+                {
+                    "hermes-ops": {
+                        "description": "t",
+                        "consumer": "codex",
+                        "skills": ["doppler", "doppler"],
+                    }
+                },
+                "duplicates skill",
+            ),
+            (
+                {"../outside": {"description": "t", "consumer": "codex", "skills": ["doppler"]}},
+                "Unsafe deployment name",
+            ),
+        ):
+            with self.subTest(expected=expected):
+                valid, output = self._contract_with_deployments(deployments)
+                self.assertFalse(valid)
+                self.assertIn(expected, output)
+
+    def test_contract_accepts_a_consumer_less_runtime_deployment(self):
+        valid, output = self._contract_with_deployments(
+            {
+                "hermes-ops": {
+                    "description": "bare-SKILL.md service runtime, not a client",
+                    "skills": ["doppler", "pdm-cli-operations"],
+                }
+            }
+        )
+        self.assertTrue(valid, output)
+        self.assertIn("1 deployment subset(s) are aligned", output)
+
+    def test_contract_rejects_a_restricted_package_in_a_consumer_less_deployment(self):
+        valid, output = self._contract_with_deployments(
+            {
+                "hermes-ops": {
+                    "description": "bare-SKILL.md service runtime, not a client",
+                    "skills": ["doppler", "codex-thread-organizer"],
+                }
+            }
+        )
+        self.assertFalse(valid)
+        self.assertIn(
+            "declares no consumer, so it may only select shared skills", output
+        )
+        self.assertIn("codex-thread-organizer", output)
+
+    def test_contract_accepts_a_valid_deployment(self):
+        valid, output = self._contract_with_deployments(
+            {
+                "hermes-ops": {
+                    "description": "test",
+                    "consumer": "codex",
+                    "skills": ["doppler", "codex-thread-organizer"],
+                }
+            }
+        )
+        self.assertTrue(valid, output)
+        self.assertIn("1 deployment subset(s) are aligned", output)
+
 
 class SkillMetadataValidationTests(unittest.TestCase):
     def setUp(self):
