@@ -1,11 +1,10 @@
 ---
 name: codex-thread-organizer
 description: >-
-  Use when Codex sidebar titles are unclear, recent related tasks need completion or
+  Use when Codex sidebar titles are unclear, related tasks need completion or
   supersession review, important unfinished work is hard to find, or a periodic
   Codex organization pass is requested. Covers every conversation the Codex app's
-  sidebar exposes, including ChatGPT conversations shown there. Codex-only packaging;
-  do not use for Claude Code, Cursor, Gemini, or browser tab history.
+  sidebar exposes, including ChatGPT conversations shown there.
 ---
 
 # Codex Thread Organizer
@@ -15,7 +14,7 @@ Organize the conversations the Codex app exposes from their actual conversation 
 ## Boundary
 
 - This skill covers what the Codex app's sidebar exposes, including ChatGPT conversations that appear there. Conversations the native title operation cannot act on are still inventoried and classified; they are reported honestly rather than renamed.
-- Do not organize history owned by another client that the Codex app does not expose, for example Claude Code, Cursor, Gemini, or browser tabs.
+- Anything the Codex sidebar does not expose is out of scope; there is no other client's history to reach from here.
 - Packaging is Codex-only: the source lives in frozenSkillz's dedicated Codex package and is not auto-installed with every skill.
 - A periodic Codex automation is the mechanism for recurring organization; the skill is not a background daemon.
 
