@@ -72,15 +72,44 @@ If any of this is ever mechanized, check for the fields, not the size. Note the 
 >
 > **Authority.** Yours: error wording, test structure, where the check sits in the middleware chain. Mine: the status code, the error key, anything touching token TTL.
 
-## Prior art
+## Evidence
 
-This is not novel, and it converges with published guidance — which is reassuring rather than disappointing.
+### The failure data says specification is the biggest single category
 
-Anthropic's [multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system) writeup reports that **objective + output format + tool guidance + task boundaries** produced their largest single quality lift, and that without detailed task descriptions "agents duplicate work, leave gaps, or fail to find necessary information." Those four map onto fields 1, 6, 4, and 5 here. Fields **2 (the why), 3 (non-inferable context), and 7 (authority)** are additions.
+[Cemri et al., *Why Do Multi-Agent LLM Systems Fail?*](https://arxiv.org/abs/2503.13657) (NeurIPS 2025, Datasets & Benchmarks) is the strongest empirical grounding available: 1,600+ annotated execution traces across 7 multi-agent frameworks, taxonomy built from 150 traces with κ = 0.88 inter-annotator agreement. It produces 14 failure modes in 3 categories:
 
-Field 7 is independently corroborated: good hierarchical systems "give subordinates autonomy within clear boundaries, only escalating on failures or ambiguous requirements" ([Addy Osmani](https://addyosmani.com/blog/code-agent-orchestra/)). A supervisor that micromanages becomes the bottleneck — which is the same claim as *don't over-script*, seen from the top.
+| Category | Share | Addressed by |
+|---|---:|---|
+| Specification & system design | **41.8%** | this contract |
+| Inter-agent misalignment | **36.9%** | **not this contract** — see below |
+| Task verification | **21.3%** | the candidate's fresh-eyes verifier + `V.` item |
 
-The sharpest justification for field 3 is the mechanical one: a subagent begins with a **fresh, isolated context window** that cannot see conversation history, previously read files, or prior tool results. The delegation string is its *entire* briefing. Nothing you know reaches it except what you write.
+Their headline conclusion is that failures "stem from poor system design, not model performance" — agents operating on incorrect assumptions, ignoring peer input, failing to verify. Roughly **79% traces to bad specification plus broken coordination.** That is direct empirical support for treating the send-side briefing as load-bearing rather than incidental, and it is the reason this document exists.
+
+### Vendor guidance converges on the same fields
+
+Anthropic's [multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system) writeup reports **objective + output format + tool guidance + task boundaries** as their largest single quality lift, with vague instructions causing duplication and silent gaps. Those map to fields 1, 6, 4, 5. Fields **2 (the why), 3 (non-inferable context), 7 (authority)** are additions here.
+
+Field 7 is corroborated independently: give subordinates "autonomy within clear boundaries, only escalating on failures or ambiguous requirements" ([Osmani](https://addyosmani.com/blog/code-agent-orchestra/)); a micromanaging supervisor becomes the bottleneck.
+
+The mechanical justification for field 3: a subagent begins with a **fresh, isolated context window** — no conversation history, no prior reads, no earlier tool results. The delegation string is its entire briefing.
+
+## What this contract does NOT fix
+
+The strongest objection comes from [Cognition, *Don't Build Multi-Agents*](https://cognition.com/blog/dont-build-multi-agents), and it lands squarely on the limits of this document:
+
+> Even if you give each sub-agent the full initial task description, they won't have each other's ongoing intermediate decisions or assumptions.
+
+That is correct, and no send-side contract can fix it. **This contract is a briefing at t=0.** Inter-agent misalignment — the 36.9% band above — happens at t>0, when parallel workers make assumptions their siblings never see. A perfect prompt does not transfer a decision that has not been made yet.
+
+So: writing all seven fields well should reduce the 41.8% specification band. It will do close to nothing for the 36.9% misalignment band. Claiming otherwise would be the same overreach as claiming a ledger's existence proves its fidelity.
+
+Cognition's answer is architectural, not prompt-level — share full agent traces rather than individual messages, and keep **writes single-threaded** while letting multiple agents contribute intelligence. That is worth reading against the candidate, which does both shapes:
+
+- Its **research pipeline** — many readers fan out, one synthesizer writes — is exactly the endorsed shape.
+- Its **parallel editors with `isolation: "worktree"`** is exactly the shape Cognition warns about: concurrent writers, each blind to the others' intermediate decisions, reconciled only at merge.
+
+If you adopt one pattern from the candidate and reject another, that is the line to draw it on — and it is an architecture decision, not something a better spawn prompt reaches.
 
 ## Provenance
 
