@@ -62,7 +62,7 @@ The Codex marketplace separately exposes the valid `codex-thread-organizer` plug
 - `omc-reference`: maintain Oh My ClaudeCode as a separate Claude Code plugin from Codex without importing OMC workflow rules into ordinary Codex work.
 - `pdm-cli-operations`: inspect and operate Proxmox fleets through the official PDM client, with exact target selection and terminal task proof for mutations.
 
-The dedicated `codex-thread-organizer` package is available to Codex only. It reviews Codex task bodies, proposes sparse semantic titles, compares related tasks for supersession, and supports periodic Codex organization runs.
+The dedicated `codex-thread-organizer` package is available to Codex only. It reads related task bodies, renames Codex tasks with sparse semantic titles, identifies the current owner of unfinished work, and supports periodic Codex organization runs.
 
 ## External Skill Intake
 

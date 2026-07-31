@@ -14,7 +14,7 @@ content, scripts actually run, no project-specific leakage, progressive disclosu
 | `external-skill-intake` | active | None. |
 | `omc-reference` | active | None. |
 | `pdm-cli-operations` | active | None — live-qualified 2026-07-20. |
-| `codex-thread-organizer` | active | Codex-only dedicated package. |
+| `codex-thread-organizer` | active | Codex-only dedicated package; direct-rename contract (invocation = authorization; proposal gate removed 2026-07-31). |
 | `skill-injector` | registered, dormant/untested | Qualify end-to-end or de-register; internal rename from skill-classifier unfinished. |
 | `plugin-authoring-guide` | gated | Rework; re-verify against current Claude Code docs. |
 | `mcp-deployment-guide` | gated | Re-verify config paths + `mcp/` templates at repo root. |
