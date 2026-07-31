@@ -65,8 +65,10 @@ Parked / do not adopt: Flux-based skills — wrong reconciler.
 ## Fleet effectiveness review
 
 How grading works: a skill's grade comes from subagents reading transcripts around recent
-fires — did the guidance visibly shape the agent's actions, and was the owner's next
-message acceptance or a correction. AgentsView `health_score` is only a thrash detector
+fires — (1) did the guidance visibly shape the agent's actions, (2) was the owner's next
+message acceptance or a correction, and (3) did the session end with an owner-visible
+outcome — the owner's *closing* reaction is the ground truth, and self-written tests
+passing is not an outcome. AgentsView `health_score` is only a thrash detector
 (tool failures / edit churn; 85% of all sessions grade A) — never a success measure. A
 "fire" is usually just a SKILL.md read, so editing or studying a skill counts as usage.
 
@@ -95,7 +97,8 @@ message acceptance or a correction. AgentsView `health_score` is only a thrash d
 **2026-07-31 transcript regrade** of the live 30-day roster (12 skills × 3 recent
 sessions each, read by subagents):
 
-- **EARNS:** `babysit`, `unity-editor-ops`, `create-skill`, `skill-install`,
+- **EARNS:** `babysit` (note: never user-invoked — cursor auto-fires it on "land the
+  PRs"-type prompts), `create-skill`, `skill-install`,
   `external-skill-intake`; `rich-visual-responses` — prior "cosmetic cruft" verdict
   **refuted** (23/44 firing sessions apply its formatting vs 2/127 baseline, zero owner
   complaints); `context7-mcp` when used — prior "meta-inflated" verdict **refuted**, real
@@ -111,6 +114,14 @@ sessions each, read by subagents):
   rewritten text unproven, re-grade after a real Editor session. `retrospective` — live
   skill half-deleted ~Jul 16 (SKILL.md gone, `scripts/` orphaned): restore deliberately
   or delete the remnant.
+- **Owner-overturned (2026-07-31): `unity-editor-ops` EARNS → NOT PROVEN.** The graded
+  "success" session was a 100-tick /loop that ran with Unity/MCP down almost the whole
+  time; the batch-mode recipe let it keep generating self-written, self-graded green work
+  ("196/196 passed") while nothing owner-visible changed. Owner in-session: "you can
+  barely even see the ships"; closing message: "I feel like we never really made any
+  progress did we?" Rubric fix baked in below: skill compliance ≠ session success — every
+  grade must include an outcome check (owner's closing reaction + something owner-visible
+  changed), and self-written tests passing is not an outcome.
 
 ## Loose ends
 
