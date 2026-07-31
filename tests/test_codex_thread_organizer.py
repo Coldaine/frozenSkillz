@@ -89,7 +89,7 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         self.assertNotIn("proposes sparse semantic titles", readme_text.lower())
         self.assertNotIn("proposed markers", review_text.lower())
 
-    def test_skill_is_active_for_codex_only(self):
+    def test_skill_is_packaged_for_codex_only(self):
         skill_text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         openai_metadata = (SKILL_ROOT / "agents" / "openai.yaml").read_text(
             encoding="utf-8"
@@ -98,9 +98,12 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        self.assertIn("Codex-only", skill_text)
+        self.assertIn("Packaging is Codex-only", skill_text)
         self.assertIn("$codex-thread-organizer", openai_metadata)
-        self.assertIn("Codex-only", tracker_text)
+        self.assertIn(
+            "| `codex-thread-organizer` | active | Codex-only dedicated package;",
+            tracker_text,
+        )
 
         manifests = {
             "claude": ROOT / "plugins" / "frozen-skills" / ".claude-plugin" / "plugin.json",
@@ -146,6 +149,53 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         self.assertIn(SKILL_NAME, selected["codex"])
         for consumer in ("claude", "cursor", "gemini"):
             self.assertNotIn(SKILL_NAME, selected[consumer])
+
+    def test_skill_inventories_all_accessible_sidebar_conversations(self):
+        skill_text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        evals = json.loads(
+            (SKILL_ROOT / "evals" / "triggers.json").read_text(encoding="utf-8")
+        )
+
+        self.assertIn("every accessible sidebar conversation", skill_text)
+        self.assertIn("title-mutable", skill_text)
+        self.assertIn("not title-mutable", skill_text)
+        self.assertNotIn("not-title-mutable", skill_text)
+        self.assertIn("bounded inventory", skill_text)
+        self.assertIn("partial coverage", skill_text)
+        # A bounded listing must never be reported as a complete one: the
+        # coverage status travels with the total.
+        self.assertIn("coverage status", skill_text)
+        self.assertNotIn("full inventory total", skill_text)
+        self.assertNotIn("Do not apply it to ChatGPT", skill_text)
+        self.assertNotIn("do not use for ChatGPT", skill_text.lower())
+
+        # The 60 UTF-16 ceiling keeps its provenance; it is the only evidence
+        # for the number, and it is verified for Codex targets specifically.
+        self.assertIn("60 UTF-16 code units", skill_text)
+        self.assertIn("literal trailing ellipsis", skill_text)
+
+        chatgpt_queries = {
+            item["query"]: item["should_trigger"]
+            for split in ("train", "validation", "held_out")
+            for item in evals[split]
+            if "chatgpt" in item["query"].lower()
+        }
+        for query in (
+            "Organize my ChatGPT web conversation history",
+            "Organize my ChatGPT web conversation history that appears in the Codex sidebar",
+        ):
+            self.assertIn(query, chatgpt_queries)
+            self.assertTrue(chatgpt_queries[query], query)
+
+        other_client_negatives = {
+            item["query"]: item["should_trigger"]
+            for split in ("train", "validation", "held_out")
+            for item in evals[split]
+            if not item["should_trigger"]
+        }
+        self.assertIn("Add emoji names to my Claude Code sessions", other_client_negatives)
+        self.assertIn("Rename this Git branch and clean up stale files", other_client_negatives)
+        self.assertIn("Build a browser extension that renames chat tabs", other_client_negatives)
 
     def test_real_distribution_smoke_installs_organizer_only_for_codex(self):
         shared = {
