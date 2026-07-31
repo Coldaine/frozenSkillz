@@ -34,7 +34,9 @@ jobs:
           if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]]; then
             BASE_SHA=HEAD^
           fi
-          git diff --check "$BASE_SHA" HEAD
+          # Scout source trees are verbatim third-party snapshots (read-only evidence);
+          # style gates do not apply to them.
+          git diff --check "$BASE_SHA" HEAD -- . ':(exclude)_incubator/scout/*/source/**'
 
       - name: Validate plugin manifests
         run: python scripts/validate_manifests.py

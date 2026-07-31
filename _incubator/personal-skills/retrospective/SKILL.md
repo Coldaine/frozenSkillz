@@ -3,7 +3,7 @@ name: retrospective
 description: Run a session retrospective to capture learnings, failures, and updates to relevant skills
 metadata:
   author: pmacl
-  version: "0.1.0"
+  version: "0.2.0"
   argument-hint: <optional session focus>
 ---
 
@@ -14,6 +14,22 @@ Session retrospective for continual learning. Reviews conversation, extracts lea
 ## When to Use
 
 Run at end of coding sessions to capture learnings before context is lost. Invoke via `/retrospective` or when user says "let's do a retro".
+
+## Triggering
+
+The known failure mode was forgetting to run this at all. **Settled 2026-07-31 (owner):
+the Letta Session Reviewer runs it** — no human in the trigger loop. The nightly
+pipeline's wake runbook now has a retrospective phase — `tools/session-review/retro-prompt.md`
+on this repo's `review/nightly-grades` branch (the reviewer's dedicated worktree),
+rationale file alongside: on
+calibrated runs the reviewer selects up to 2 of the night's sessions — its own
+`mutation_candidate` flags first — runs this skill on each via
+`session_timeline.py --db`, and escalates repeat observations across runs
+(Hypothesis → Corroborated) using its persistent memory of the project's whole history.
+Append-only skill-Learnings writes are made directly; structural skill changes route to
+the pipeline's `proposals.md` for the owner. This skill remains manually invocable
+(`/retrospective`) for same-session freshness whenever wanted; the Letta agent is
+discovery-wired via the `~/.letta/skills/retrospective` symlink.
 
 ## Process
 
@@ -65,18 +81,30 @@ Review the entire conversation and identify:
 - Configuration quirks
 - Edge cases found
 
-Use the bundled timeline helper before synthesizing a session:
+Use the bundled timeline helper before synthesizing a session. The `--db` mode
+reads the AgentsView archive (`~\.agentsview\sessions.db`, read-only) and covers
+every harness it ingests — claude, codex, cursor, opencode, kilo, gemini, and the
+rest — so start there:
 
 ```powershell
 $env:PYTHONUTF8='1'
+# Find sessions containing an exact phrase (lists agent / project / date / id):
+python "$HOME\.agents\skills\retrospective\scripts\session_timeline.py" `
+  --db --find "exact user phrase from the session"
+
+# Emit the timeline for one of the matches:
+python "$HOME\.agents\skills\retrospective\scripts\session_timeline.py" `
+  --db --session-id SESSION_ID --format markdown
+```
+
+The original codex-JSONL mode still works for rollout files AgentsView has not
+ingested yet, or when you need the raw event stream:
+
+```powershell
 python "$HOME\.agents\skills\retrospective\scripts\session_timeline.py" `
   --find "exact user phrase from the session" `
   --format markdown
-```
 
-For a known rollout file:
-
-```powershell
 python "$HOME\.agents\skills\retrospective\scripts\session_timeline.py" `
   --session "C:\Users\pmacl\.codex\sessions\YYYY\MM\DD\rollout-SESSION.jsonl" `
   --format jsonl
@@ -118,16 +146,22 @@ inverse: a *non-empty* result doesn't mean a match.)
 ### 2. Skill Identification
 
 Determine which skills were used or could benefit:
-- Personal skills live in `~/.agents/skills/` (Claude Code reads them via the
-  mirror at `~/.claude/skills/`); project skills in `.claude/skills/`.
-- The skill that triggered the retrospective is the primary update target (§0).
+- Personal skills live in `~/.agents/skills/`; project skills in `.claude/skills/`.
+  There is no full mirror at `~/.claude/skills/` — as of 2026-07-31 it holds only a
+  couple of entries, and `~/.agents/skills/` skills appear there one at a time via
+  per-skill symlinks (currently just `project-docs`). A skill Claude Code should
+  discover needs its own entry there.
+- The skill that *executed* the workflow — re-derived from the transcript per §0 —
+  is the primary update target; the invoked/trigger skill is just the lens.
   Split the rest: process/method lessons → `retrospective`; domain helpers → the
   domain skill that will execute them.
 - Scaffold a new skill only when no existing skill owns the workflow.
 
 ### 3. Learning Extraction — three documents, proposals not principles
 
-Use the **chat-history skill** as the mandatory method: treat transcripts as evidence, search exact phrases, and **separate direct evidence from inference**. Do not answer from memory or compaction summaries.
+Use the **chat-history skill** as the mandatory method: treat transcripts as evidence, search exact phrases, and **separate direct evidence from inference**. Do not answer from memory or compaction summaries. (chat-history's trigger was narrowed to forensic-only on 2026-07-30; retrospective transcript work is forensic, so the reference stays valid.)
+
+Redact secrets and personal data from any transcript-derived quote before it lands in a durable document, whatever the source — local codex/cursor/claude session files carry the same risk as authenticated surfaces. Prefer transcript IDs or short sanitized excerpts over raw quotes.
 
 Write to **`D:\_projects\agent-control-plane\projects\`** (flat layout, project as filename prefix; templates in `agent-control-plane/templates/`). Do **not** put session retros in project repos — only promoted product facts belong there.
 
@@ -190,7 +224,7 @@ Report to user:
 ## Session Retrospective
 
 ### Skills Updated
-- `~/.Codex/skills/[name]/skill.md` — added [X] learnings
+- `~/.agents/skills/[name]/SKILL.md` — added [X] learnings
 
 ### Key Takeaways
 1. [Most important learning]
@@ -214,7 +248,7 @@ Report to user:
 
 ## Example Skill Update
 
-Adding to `~/.Codex/skills/pdf-generation/skill.md`:
+Adding to `~/.agents/skills/pdf-generation/SKILL.md`:
 
 ```markdown
 ## Known Issues
@@ -304,4 +338,3 @@ Can be combined with:
 #### What failed
 - **"Improved the skill" that was only prose.** Edited `SKILL.md` and rubber-stamped a script (`session_timeline.py`) unread for two turns. A skill is a directory — audit and run the scripts.
 - **Over-built the method on n=1.** Wrote a 5-lane hunt architecture for a hunt one Pieces call actually cracked, and added net length while claiming "shorter." Match the method's weight to what solves the task.
-

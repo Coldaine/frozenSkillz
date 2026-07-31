@@ -11,7 +11,7 @@ content, scripts actually run, no project-specific leakage, progressive disclosu
 | Skill | Status | Next action |
 |---|---|---|
 | `delegation-contract` | active | None — adapted doctrine validated for contract compliance and single-writer coordination; outcome-quality evidence remains intentionally limited to the recorded n=1 eval. |
-| `doppler` | active | None — reference standard. |
+| `doppler` | active | Verify content is still current (owner 2026-07-31); otherwise reference standard. |
 | `external-skill-intake` | active | None. |
 | `omc-reference` | active | None. |
 | `pdm-cli-operations` | active | None — live-qualified 2026-07-20. |
@@ -34,23 +34,29 @@ de-personalized.
 
 | Skill | Next action |
 |---|---|
-| `chat-history` | De-personalize paths; drop unimplemented gemini extractor from docstring. |
-| `retrospective` | Live skill half-deleted ~Jul 16 (SKILL.md gone, scripts/ orphaned) — restore deliberately or delete; then de-personalize. |
+| `chat-history` | Content update needed (owner 2026-07-31); de-personalize paths; drop unimplemented gemini extractor from docstring. |
+| `retrospective` | Revived 2026-07-31 (owner overruled deletion — key skill): timeline script now covers all harnesses via AgentsView `--db` mode; needs trigger decision (see SKILL.md Triggering); then de-personalize. |
 | `project-docs` | Gated pending de-personalization. |
 | `skill-install` | Verify recipes. |
 | `run-opencode` | Fix driver.mjs header comment re: profile writes. |
 | `edit-opencode-config` | Fix canonical-root drift. |
 | `phantom-substrate-inheritance` | Review. |
-| `review-claudemd` | Fix frontmatter name mismatch + duplicate find clause; overlap-check vs `claude-md-enhancer`. |
 | `rich-visual-responses` | Keep — regraded 2026-07-31: formatting applied in 23/44 firing sessions vs 2/127 baseline. |
 | `insight-extractor` | Add YAML frontmatter; fix contradictory `~/.Codex` vs `~/.claude` paths. |
-| `claude-md-enhancer` | Confirm provenance. |
 | `nlm-skill` | Confirm provenance. |
-| `skill-finder` | Confirm provenance. |
 | `google-stitch-ui-designer` | Confirm provenance. |
-| `context7-mcp` | Keep but narrow trigger (27/39 fires never call the MCP); add quota-fallback line. |
+| `context7-mcp` | Complete rewrite (owner 2026-07-31) — the MCP is useful, the skill isn't. Supersedes the narrow-trigger fix; 27/39 fires never called the MCP. |
 | `patrickspowerfulpresentations` | Incubating; stays personal. |
 | `audio-producer` | Incubating; stays personal. Broadside examples are worked evidence — keep. |
+| `explore` | Already deleted from the live root (noticed 2026-07-31; not in quarantine — 155 codex sessions had read it, owner unaware it existed). The explorer-subagent lane in [#71](https://github.com/Coldaine/frozenSkillz/issues/71) is its replacement. |
+
+Deleted forever 2026-07-31 (owner order): `review-claudemd`, `claude-md-enhancer`,
+`skill-finder` — live dirs were already broken (empty or missing SKILL.md) and their
+incubator copies are removed in the same change; git history is the only archive.
+`retrospective` was in the original deletion order, but the owner reversed that the
+same day — it is a key skill. Revived from a recovered copy with the timeline script
+extended to all harnesses (see Personal lane row). Also removed the empty
+`~/.codex/skills/codex-primary-runtime/` dir (live only, never tracked here).
 
 ## Intake queue
 
@@ -88,6 +94,18 @@ clouddrove/Jeffallan/sickn33/wshobson mutate cookbooks; Omni-as-CAPMOX;
 kagent apply-after-generate (revisit after CAPI/CAPMOX/Flux is stable).
 
 Scouts:
+
+- danilo-aguiar-br/context7-cli — scout · **adopt-as-external-tool** (2026-07-31,
+  owner-requested). Snapshot at `_incubator/scout/2026-07-31-context7-cli/` pinned to
+  v0.5.2 / `e2f1935`. Rust CLI for the Context7 REST API with multi-key rotation
+  (`CONTEXT7_API_KEYS=a,b,c` → shuffle + exponential backoff) — directly fixes the
+  quota-blocking that sank `context7-mcp`. Security read clean: sole endpoint
+  `context7.com/api`, zero process execution, no build.rs, zeroize'd keys, crates.io
+  package matches repo. Young/unvetted (0 stars, single-day upload) → binary built from
+  the reviewed snapshot, version pinned, re-review any update. Consumed by the
+  `context7-mcp` full rewrite in
+  [#71](https://github.com/Coldaine/frozenSkillz/issues/71); key rotation is ToS-gray
+  (multiplies free-tier quota) — owner's call, recorded in the scout's `analysis.md`.
 
 - Rylaa/fable5-opus5-orchestrator — scout · adapt-concept-only (2026-07-31).
   Snapshot at `_incubator/scout/2026-07-31-rylaa-fable5-opus5-orchestrator/`;
@@ -127,7 +145,11 @@ not rerunnable from this repository):
   scoped to substantial changes. **Escalated 2026-07-31: owner removed the whole pack
   from the codex cache.** Capabilities that died with it (delegation, planning,
   debugging, git-worktree lanes) get rebuilt without the ceremony register —
-  [#71](https://github.com/Coldaine/frozenSkillz/issues/71).
+  [#71](https://github.com/Coldaine/frozenSkillz/issues/71). Owner nuance, same day:
+  the pack's *auto-fire bootstrap* (`using-superpowers`) was the one part worth
+  keeping — it is why codex out-fires every other harness on skills — so #71 carries a
+  skill-activation-bootstrap lane (owner previously ran a hook for the same job); only
+  the ceremony payload dies unreplaced.
 - `doppler`, `project-docs`, `chat-history` (trigger narrowed to forensic-only
   2026-07-30), `parallel-web-search`, `canvas`, `create-hook` earn their keep.
 - `git-master`: an `oh-my-openagent` built-in, opencode-only — not Codex. Dead since
@@ -148,7 +170,8 @@ sessions each, read by subagents):
   **refuted** (23/44 firing sessions apply its formatting vs 2/127 baseline, zero owner
   complaints); `context7-mcp` when used — prior "meta-inflated" verdict **refuted**, real
   doc pulls shaped work, but 27/39 fires load-and-never-use and the service was
-  quota-blocked in 10+ sessions → narrow trigger, add quota-fallback line;
+  quota-blocked in 10+ sessions → superseded 2026-07-31: owner escalated to a
+  complete rewrite (see Personal lane row);
   `hangar-logbook` — keep, but revise persistence to markdown-first (owner asked
   verbatim 2026-07-27; it still writes into `.ts` files).
 - **IGNORED:** `feature-research` — its sole prescriptive step ran 0 times across all
@@ -158,7 +181,8 @@ sessions each, read by subagents):
 - **INSUFFICIENT DATA:** `unity` — old "sole mutator" text caused the 2026-07-21 blowup;
   rewritten text unproven, re-grade after a real Editor session. `retrospective` — live
   skill half-deleted ~Jul 16 (SKILL.md gone, `scripts/` orphaned): restore deliberately
-  or delete the remnant.
+  or delete the remnant. **Resolved 2026-07-31: deleted, then revived the same day by
+  owner order** (see Personal lane).
 - **Owner-overturned (2026-07-31): `unity-editor-ops` EARNS → NOT PROVEN.** The graded
   "success" session was a 100-tick /loop that ran with Unity/MCP down almost the whole
   time; the batch-mode recipe let it keep generating self-written, self-graded green work
@@ -167,6 +191,18 @@ sessions each, read by subagents):
   progress did we?" Rubric fix baked in below: skill compliance ≠ session success — every
   grade must include an outcome check (owner's closing reaction + something owner-visible
   changed), and self-written tests passing is not an outcome.
+
+**2026-07-31 owner review of the OpenAI codex pack** (`~/.codex/plugins/cache/openai-curated-remote/github/` — OpenAI-managed, version-pinned: override via AGENTS.md routing or a competing skill, never edit in place):
+
+- `github` (296 codex sessions): a triage router — classify → route → resolve-context gates
+  before any action, and its publish path deliberately ends at a **draft** PR. Owner verdict:
+  too many gates; superseded by the ship-to-merged skill lane in
+  [#71](https://github.com/Coldaine/frozenSkillz/issues/71).
+- `yeet` (117): sound commit → push → open-PR mechanics (branch naming, scoped staging), but
+  stops at a draft PR and interviews the user about scope. Seed material for ship-to-merged.
+- `gh-address-comments` (120) / `gh-fix-ci`: keep — the checks-fixing loop feeds
+  ship-to-merged.
+- `project-docs` (208): owner affirmed keep.
 
 ## Loose ends
 
