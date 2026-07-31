@@ -1,6 +1,6 @@
 # Project Agent Configuration (v1 convention)
 
-> **Status:** proposed workflow (pairs with [REFINED-V1](../platform/REFINED-V1.md)).
+> **Status:** active convention (adopted 2026-07-31; pairs with [REFINED-V1](../platform/REFINED-V1.md)).
 > Does not replace [skill-authority-and-frozen-sync.md](skill-authority-and-frozen-sync.md).
 
 ## Purpose

@@ -1,8 +1,10 @@
 # Refined v1: Persist and Manage Agent Configurations
 
-> **Status:** proposed refinement of the July 16 planning pack.
-> **Authority:** still draft. Does not amend tracker, manifests, or active skills until approved and implemented.
-> **Date:** 2026-07-21
+> **Status:** adopted 2026-07-31 (operator direction). RV1-01…07 are the standing
+> decisions; reversing one requires an explicit edit here, not incremental drift.
+> **Authority:** governs the agent-config direction. Tracker, manifests, and
+> active skills remain governed by their own sources per `AGENTS.md`.
+> **Date:** 2026-07-21; adopted 2026-07-31
 
 ## What this is for
 
@@ -70,7 +72,7 @@ skills + manifests        agent config for            + managed skill copies
 | **Each project repo** | Native files agents actually read: `AGENTS.md`, `.cursor/`, `.claude/`, `.codex/`, project `.agents/skills/` (local/fork), committed MCP config the team chose | Global skill distribution; other repos’ configs |
 | **Each machine** | `~/.agents/skills` managed copies via sync script; client trust/approval; secrets (Doppler/env); host tools on PATH | Project capability selection |
 
-### Explicit v1 decisions (proposed for approval)
+### Explicit v1 decisions (adopted 2026-07-31)
 
 | ID | Decision | Rationale |
 |---|---|---|
@@ -96,7 +98,7 @@ transport), DR-031–032 (cross-repo PRs), filename bikeshed `config.yaml` vs
 - Land `docs/platform/` on `main` as **non-authoritative** planning + this refine.
 - Router states: current authority remains tracker + skill-authority workflow;
   platform plans are not an authority transition.
-- This file is the proposed critical path; July 16 phase plans are appendix/backlog.
+- This file is the critical path; the July 16 phase plans are archived in git history.
 
 ### D2 — Project config convention (docs in this PR; examples may follow)
 
@@ -131,7 +133,7 @@ fixture matrix, cross-repo update automation, GHCR skill catalog, Project Skill 
 
 | Old phase plan | Refined treatment |
 |---|---|
-| Plan 1 design closure | **Shrink:** approve RV1-01…07; keep evidence pack. Do not require full DR closure. |
+| Plan 1 design closure | **Shrink:** RV1-01…07 adopted; evidence pack archived. Full DR closure not required. |
 | Plan 2 local control plane | **Replace critical path** with D2+D3. Full Plan 2 becomes backlog `BL-platform-later`. |
 | Plan 3 conformance/integrations/pilot | **Defer entire plan** until a real multi-machine drift problem appears. |
 
@@ -147,17 +149,15 @@ Further evidence churn is not progress.
 | Native files diverge across clients with no schema | Accept in v1; document “commit what your clients read.” Add schema only after painful drift. |
 | Projects forget to commit MCP/skills | Convention + review checklist in project-docs/AGENTS; not a central renderer. |
 | Agents still invent `config.yaml` | This doc + router: meta-manifest is non-goal unless RV1-01 is explicitly reversed. |
-| Losing useful July 16 security thinking | Keep evidence pack and supplemental review as appendix; do not delete. |
+| Losing useful July 16 security thinking | Evidence pack archived in git history ([PR #49](https://github.com/Coldaine/frozenSkillz/pull/49), last on `main` at `069aeea`); recover it only if a deferred decision genuinely reopens. |
 
 ---
 
-## Approval asks (bounded)
+## Adoption record
 
-Please confirm or correct:
-
-1. **RV1-01** — native committed files are project intent for v1 (no required meta-manifest)?
-2. **RV1-04 / RV1-05** — Obot, machine.yaml, managed proxy, Renovator out of v1?
-3. **RV1-06** — extend `sync_frozen_skills.py` rather than invent `frozenctl`?
-4. Should **D2** (`project-agent-config` workflow) land in this PR or immediately after?
-
-Until those are answered, treat this file as the proposed direction, not repository law.
+Adopted 2026-07-31 by operator direction: RV1-01 through RV1-07 stand as
+written. D1 (doctrine) and D2 (`project-agent-config` workflow) are landed;
+D3 (sync-lane hardening) triggers only on measured operator friction; D4
+(non-goals) is enforced by this file and `docs/platform/README.md`.
+The July 16 evidence pack and phase plans are archived in git history
+([PR #49](https://github.com/Coldaine/frozenSkillz/pull/49)).
