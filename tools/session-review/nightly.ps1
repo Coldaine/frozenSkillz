@@ -13,6 +13,12 @@ $ErrorActionPreference = "Stop"
 $here = $PSScriptRoot
 $cfg = Get-Content (Join-Path $here "config.json") -Raw | ConvertFrom-Json
 if ($cfg.agent_id -match "PENDING") { throw "config.json agent_id is not set — create the cloud reviewer agent first." }
+if (-not $env:LETTA_API_KEY) {
+    try { $env:LETTA_API_KEY = (doppler secrets get LETTA_API_KEY --plain 2>$null) } catch {}
+}
+if (-not $env:LETTA_API_KEY) {
+    throw "LETTA_API_KEY not set — headless cloud calls require it. Mint one at https://chat.letta.com/preferences/api-keys and set the env var (or store as LETTA_API_KEY in Doppler)."
+}
 
 # Rubric = the Prompt section of reviewer-prompt.md
 $doc = Get-Content (Join-Path $here "reviewer-prompt.md") -Raw
@@ -34,7 +40,8 @@ foreach ($f in $files) {
     $traj = Get-Content $f -Raw
     $sid = ($traj | ConvertFrom-Json).session_id
     Write-Host "grading $sid"
-    $prompt = $rubric + "`n`nSession to grade:`n```json`n" + $traj + "`n```"
+    $fence = [string][char]96 * 3
+    $prompt = $rubric + "`n`nSession to grade:`n" + $fence + "json`n" + $traj + "`n" + $fence
     $raw = $prompt | letta -a $cfg.agent_id -p --new --output-format json --max-turns 6 2>$null | Out-String
     $verdict = $null
     try {
@@ -42,7 +49,10 @@ foreach ($f in $files) {
         $inner = $outer.result -replace '(?s)^.*?```json\s*', '' -replace '(?s)```.*$', ''
         $verdict = $inner | ConvertFrom-Json
     } catch {
-        Write-Warning "unparseable verdict for $sid — raw saved to .work"
+        $verdict = $null
+    }
+    if (-not $verdict -or -not $verdict.session_id) {
+        Write-Warning "no usable verdict for $sid — raw saved to .work"
         Set-Content -Path (Join-Path $here ".work" "FAILED-$([regex]::Replace($sid,'[^A-Za-z0-9_-]','_')).txt") -Value $raw
         continue
     }
