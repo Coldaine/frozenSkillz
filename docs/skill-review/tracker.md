@@ -59,7 +59,12 @@ de-personalized.
   confidence. `dispatching-parallel-agents` revised to B- after an AgentsView audit found
   direct successful and failed Codex uses; confidence is strong for observed Codex
   behavior and moderate cross-harness. Remaining 12 skills are intentionally ungraded
-  pending one-at-a-time review.
+  pending one-at-a-time review. **2026-07-31: the live pack was removed from the codex
+  plugin cache**, so this pinned snapshot is now the only source; the scout's purpose
+  shifts from adopt-review to salvage-mining for the rebuild lanes in
+  [#71](https://github.com/Coldaine/frozenSkillz/issues/71). Leftover
+  `[marketplaces.superpowers-dev]` + `superpowers:*` blocks in `~/.codex/config.toml`
+  may re-sync the pack — cleanup tracked in #71.
 
 Kubernetes adopt shortlist (premise corrected 2026-07-23 — coldaine-homelab
 reconciles via Flux, not Helmfile; re-scored in
@@ -118,8 +123,10 @@ not rerunnable from this repository):
   reads are `~/.codex/plugins/cache/` superpowers: `using-superpowers` (622 sessions),
   `verification-before-completion` (306 — the "Iron Law" register). Lever applied
   2026-07-30: operational-mode override in `~/.codex/AGENTS.md`, PR self-review loop
-  scoped to substantial changes. If codex still preaches iron laws in ~2 weeks, prune the
-  skill from the cache.
+  scoped to substantial changes. **Escalated 2026-07-31: owner removed the whole pack
+  from the codex cache.** Capabilities that died with it (delegation, planning,
+  debugging, git-worktree lanes) get rebuilt without the ceremony register —
+  [#71](https://github.com/Coldaine/frozenSkillz/issues/71).
 - `doppler`, `project-docs`, `chat-history` (trigger narrowed to forensic-only
   2026-07-30), `parallel-web-search`, `canvas`, `create-hook` earn their keep.
 - `git-master`: an `oh-my-openagent` built-in, opencode-only — not Codex. Dead since
