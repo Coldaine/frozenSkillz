@@ -93,11 +93,11 @@ transport), DR-031–032 (cross-repo PRs), filename bikeshed `config.yaml` vs
 
 ## v1 deliverables (what “implemented” would mean)
 
-### D1 — Doctrine (docs only, this PR)
+### D1 — Doctrine (done)
 
-- Land `docs/platform/` on `main` as **non-authoritative** planning + this refine.
-- Router states: current authority remains tracker + skill-authority workflow;
-  platform plans are not an authority transition.
+- This file is **adopted** for the agent-config direction (2026-07-31). It does
+  not transfer skill-lifecycle authority: tracker, workflows, manifests, and
+  active skills remain governed by their own sources per `AGENTS.md`.
 - This file is the critical path; the July 16 phase plans are archived in git history.
 
 ### D2 — Project config convention (docs in this PR; examples may follow)
