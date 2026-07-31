@@ -112,6 +112,14 @@ Pruning removes only previously managed content that still matches its recorded 
 
 `--force` permits overwriting a conflicting active skill or deleting a conflicting retired skill. Review the exact reported skill first. Force is not the normal update path and does not override a target that changes after planning.
 
+## Pinning From a Production Consumer
+
+A deploy script, service unit, or standing runtime that pins a specific
+frozenSkillz commit for its sync must pin a commit reachable from `main`. A pin
+that only resolves on an unmerged or abandoned branch is not reviewed
+distribution: when that branch is deleted the consumer's sync fails, and until
+then it is running content that no review gate ever approved.
+
 ## Editing and Promotion Flow
 
 For an already active skill, make the reusable change in its shared or dedicated package, validate it, review it, merge it, and then synchronize computers outward from that repository revision.
