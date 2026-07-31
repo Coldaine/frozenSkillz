@@ -25,7 +25,7 @@ python scripts/sync_frozen_skills.py --consumer codex --check
 python scripts/sync_frozen_skills.py --consumer codex --apply
 ```
 
-The consumer is required. Codex defaults to its private `~/.codex/skills` root; Claude, Cursor, and Gemini require an explicit `--destination` until a consumer-private default is qualified. The synchronizer:
+Every run selects either `--consumer` or a named `--deployment` subset. Codex defaults to its private `~/.codex/skills` root; Claude, Cursor, and Gemini require an explicit `--destination` until a consumer-private default is qualified. The synchronizer:
 
 - validates that the Claude, Codex, Cursor, and Gemini manifests have the same plugin identity and version;
 - installs or updates the shared package plus only dedicated packages in the selected consumer's distribution;
@@ -35,6 +35,8 @@ The consumer is required. Codex defaults to its private `~/.codex/skills` root; 
 - refuses to overwrite an unmanaged or locally modified destination skill.
 
 Use `--destination <path>` for another local skill root. Use `--prune` to remove unchanged, previously managed skills that have left the selected distribution. `--force` overwrites local conflicts and should be used only after reviewing the reported plan.
+
+A destination that must receive only part of a distribution uses a named deployment from `plugins/distribution.json:deployments`, which requires an explicit `--destination` plus `--prune`. A deployment either names its consumer and selects from that consumer's set, or omits `consumer` because it is a non-client runtime and may then select only shared skills. See [`docs/workflows/skill-authority-and-frozen-sync.md`](docs/workflows/skill-authority-and-frozen-sync.md) → **Deployment Subsets**.
 
 The destination must be disjoint from the repository: it cannot be inside the frozenSkillz checkout or contain that checkout. This enforces outward-only deployment and prevents reverse synchronization into reviewed source.
 

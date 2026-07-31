@@ -141,7 +141,7 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
 
         selected = {}
         for consumer in manifests:
-            _plugin_root, _version, sources = sync_module.load_distribution(
+            _plugin_root, _version, _consumer, sources = sync_module.load_distribution(
                 ROOT, consumer
             )
             selected[consumer] = {source.name for source in sources}
