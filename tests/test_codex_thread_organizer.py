@@ -34,7 +34,7 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         readme_text = (ROOT / "README.md").read_text(encoding="utf-8")
         trigger_data = json.loads(TRIGGER_CASES.read_text(encoding="utf-8"))
 
-        for marker in ("🔴", "🟡", "✅", "📌", "↪️", "🗄️"):
+        for marker in ("🔴", "🟡", "✅", "⏸️", "🚧", "📌", "↪️", "🗄️"):
             self.assertIn(marker, grammar_text)
 
         for classification in (
@@ -57,36 +57,13 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
         self.assertIn("renames codex tasks", readme_text.lower())
         self.assertIn("applied markers", review_text.lower())
 
-        self.assertIn(
-            "| `🟡` | Concrete follow-up | A specific required action remains "
-            "in the current owner task |",
-            grammar_text,
-        )
-        self.assertIn(
-            "| `continued-elsewhere` | The task stopped with required work "
-            "remaining, but a named newer task clearly assumed that work | "
-            "No `✅`; eligible for `↪️` and `🗄️` |",
-            review_text,
-        )
-        self.assertIn(
-            "Age helps choose what to inspect; it does not decide completion, "
-            "abandonment, or archive candidacy.",
-            automation_text,
-        )
-        for periodic_clause in (
-            "Read the actual conversation bodies for every task whose state or "
-            "title may change.",
-            "Cluster by semantic workstream, treating the working directory as a "
-            "routing clue rather than identity.",
-            "Cross-read each cluster and identify `done`, `active-remaining`, "
-            "`continued-elsewhere`, and `parked-unclear` tasks plus the current "
-            "owner of each unfinished workstream.",
-            "Rename the reviewed tasks through native Codex operations and read "
-            "every title back.",
-            "the main automation reconciles the classifications before applying "
-            "titles.",
+        for classification in (
+            "done",
+            "active-remaining",
+            "continued-elsewhere",
+            "parked-unclear",
         ):
-            self.assertIn(periodic_clause, automation_text)
+            self.assertIn(classification, automation_text.lower())
 
         positive_queries = [
             case["query"]

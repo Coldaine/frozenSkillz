@@ -38,6 +38,7 @@ When several project clusters can be reviewed independently, dispatch one subage
 - `✅` means the latest relevant user request was satisfied and no concrete required action remains in that task. It does not claim that the broader project is finished.
 - `🟡` means a concrete required action remains in the current owner task.
 - Use `🔴` sparingly on the clearest highest-priority unfinished task; omit it when the comparison is unclear.
+- `⏸️` means a named user or external response is the next required event; `🚧` means a specific obstacle blocks the required outcome.
 - `🗄️` marks a reasonable archive candidate. It may accompany `✅`, or identify an older unfinished task whose work clearly continued elsewhere.
 - Use `📌` and `↪️` only when cross-reading establishes a canonical task or a named successor.
 
