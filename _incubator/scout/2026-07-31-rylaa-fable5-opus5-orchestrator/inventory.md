@@ -84,10 +84,18 @@ Findings:
 
 So "Windows is not supported" is accurate for the plugin as a whole, and too pessimistic for the ledger-guard concept specifically.
 
+### Why `python3` is missing — and why it is not local to this machine
+
+Worth stating precisely, because "python3 is not on PATH" reads like a broken setup and is not one. This machine has Python 3.13.14. It has no binary *named* `python3`.
+
+`python3` is a Unix convention codified in PEP 394, from the era when `python` meant Python 2 and disambiguation was mandatory. The Windows installer has never shipped a `python3.exe`; it ships `python.exe` plus the `py` launcher (PEP 397). What does answer to `python3` on a stock Windows box is a Microsoft Store *execution-alias stub* under `WindowsApps` — a zero-version shim whose only job is to open the Store listing. That stub is what produced the "Python was not found; run without arguments to install from the Microsoft Store" message during the probe.
+
+Consequence: a hook hardcoding `python3` fails on essentially **every stock Windows machine**, not just this one. That is not a quirk to work around locally — it is the reason upstream declares macOS/Linux only, and any port should invoke `py -3` (version-selecting, Windows-native) rather than `python`.
+
 ## Initial Scope Recommendation
 
 - **Evaluate:** (a) the Requirements-Ledger discipline — ledger-before-delegation, `V.` fresh-eyes verification item, `- [~] deferred` grammar; (b) the progressive-disclosure packaging pattern (slim core + on-demand playbook, size budget asserted in tests); (c) the playbook's subagent output contract (≤40-line reports, >10-line verbatim spills to disk with a path).
-- **Defer:** `ledger_guard_spawn.py` as a possible Windows-portable hook. Attractive but requires porting work and a `python3`→`python` resolution; needs its own decision.
+- **Defer:** ~~`ledger_guard_spawn.py` as a possible Windows-portable hook. Attractive but requires porting work and a `python3`→`python` resolution; needs its own decision.~~ **Portability question resolved:** one interpreter-name change (`python3` → `py -3`) and it runs correctly on Windows, verified in a real session. The open question is no longer *can it run* but *is it worth running* — the eval's solid finding is that default spawn prompts sit below its threshold, so it would fire almost never. Still defer, on different grounds than originally stated.
 - **Discard:** the entire tmux teammate-reaping layer (`cleanup_session_cache.py`, the reaping half of `ledger_guard_stop.py`), the SessionStart profile injector, and the Fable-chair model-routing economics. POSIX-bound, host-backend-bound, or specific to an economy this repo does not share.
 - **Needs more evidence:** whether the ledger discipline actually improves outcomes versus baseline. Upstream ships zero model evals — its own README concedes the hooks check "existence and checkbox state, not fidelity." Per `docs/workflows/external-skill-intake.md`, no promotion of this pattern is allowed without a persisted live eval.
 
