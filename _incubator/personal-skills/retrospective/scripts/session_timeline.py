@@ -61,7 +61,7 @@ def parse_arguments(value: object) -> object:
         return value
     try:
         return json.loads(value)
-    except Exception:
+    except json.JSONDecodeError:
         return value
 
 
@@ -95,7 +95,7 @@ def iter_timeline(path: Path, include_outputs: bool, limit: int) -> list[Timelin
         for line_no, line in enumerate(handle, 1):
             try:
                 obj = json.loads(line)
-            except Exception:
+            except json.JSONDecodeError:
                 continue
 
             payload = obj.get("payload", {})

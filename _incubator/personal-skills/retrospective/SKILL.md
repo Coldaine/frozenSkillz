@@ -337,4 +337,3 @@ Can be combined with:
 #### What failed
 - **"Improved the skill" that was only prose.** Edited `SKILL.md` and rubber-stamped a script (`session_timeline.py`) unread for two turns. A skill is a directory — audit and run the scripts.
 - **Over-built the method on n=1.** Wrote a 5-lane hunt architecture for a hunt one Pieces call actually cracked, and added net length while claiming "shorter." Match the method's weight to what solves the task.
-
