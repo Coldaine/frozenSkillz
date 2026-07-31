@@ -4,16 +4,23 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Any
 from urllib.parse import unquote, urlsplit
+
+try:
+    import yaml
+except ImportError as exc:  # pragma: no cover - environment setup failure
+    # Hard dependency, deliberately not optional: this re-raises instead of
+    # degrading to a weaker check. A validator that silently skips YAML parsing
+    # when PyYAML is absent would report PASSED for frontmatter that no agent
+    # client can load, which is the exact failure this module exists to catch.
+    raise ImportError(
+        "PyYAML is required to validate SKILL.md frontmatter; install it with "
+        "'python -m pip install -r requirements-validation.txt'"
+    ) from exc
 
 
 SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-FRONTMATTER_FIELD_PATTERN = re.compile(
-    r"^([A-Za-z][A-Za-z0-9_-]*):(?:[ \t]*(.*))?$"
-)
-BLOCK_SCALAR_HEADER_PATTERN = re.compile(
-    r"^[>|](?:[1-9][+-]?|[+-][1-9]?|)$"
-)
 RESOURCE_REFERENCE_PATTERN = re.compile(
     r"`((?:references|templates|scripts|assets)/[^`\r\n]+)`"
     r"|\]\(((?:references|templates|scripts|assets)/[^)\s]+)\)"
@@ -34,63 +41,77 @@ class SkillMetadataError(ValueError):
     """Raised when a SKILL.md cannot be discovered safely by agent clients."""
 
 
-def _plain_scalar(value: str) -> str:
-    """Return a simple quoted or unquoted YAML scalar for required metadata."""
+class _StrictSafeLoader(yaml.SafeLoader):
+    """``SafeLoader`` that rejects duplicate mapping keys.
 
-    value = value.strip()
-    if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
-        return value[1:-1].strip()
-    return value
-
-
-def _parse_frontmatter_fields(lines: list[str]) -> dict[str, str]:
-    """Parse top-level frontmatter fields, folding block scalars to one line.
-
-    Folded (``>``) and literal (``|``) block scalars are accepted for any
-    field; their continuation lines are joined with single spaces because the
-    validation below only cares about the assembled text, not the exact YAML
-    line-break semantics.
+    PyYAML silently keeps the last of a set of duplicate keys. Agent clients
+    disagree about which value wins, so treat duplicates as an authoring error
+    rather than letting the ambiguity ship.
     """
 
-    fields: dict[str, str] = {}
-    block_key: str | None = None
-    block_parts: list[str] = []
-
-    def flush_block() -> None:
-        nonlocal block_key, block_parts
-        if block_key is not None:
-            fields[block_key] = " ".join(block_parts).strip()
-            block_key = None
-            block_parts = []
-
-    for line in lines:
-        if block_key is not None:
-            if not line.strip():
+    def construct_mapping(self, node, deep: bool = False):
+        seen: set[Any] = set()
+        for key_node, _ in node.value:
+            key = self.construct_object(key_node, deep=deep)
+            try:
+                duplicate = key in seen
+            except TypeError:  # unhashable key; construct_mapping reports it
                 continue
-            if line[0].isspace():
-                block_parts.append(line.strip())
-                continue
-            flush_block()
-        if not line.strip() or line.lstrip().startswith("#"):
-            continue
-        if line[0].isspace():
-            raise SkillMetadataError(
-                f"unexpected indented line in frontmatter: {line!r}"
-            )
-        match = FRONTMATTER_FIELD_PATTERN.fullmatch(line)
-        if not match:
-            raise SkillMetadataError(f"invalid YAML frontmatter line: {line!r}")
-        key, value = match.groups()
-        if key in fields:
-            raise SkillMetadataError(f"duplicate {key!r} frontmatter field")
-        value = (value or "").strip()
-        if BLOCK_SCALAR_HEADER_PATTERN.fullmatch(value):
-            block_key = key
-            block_parts = []
-        else:
-            fields[key] = value
-    flush_block()
-    return fields
+            if duplicate:
+                raise SkillMetadataError(
+                    f"duplicate {key!r} frontmatter field"
+                )
+            seen.add(key)
+        return super().construct_mapping(node, deep=deep)
+
+
+def _parse_frontmatter_fields(block: str, offset: int) -> dict[str, Any]:
+    """Parse the frontmatter block with a real YAML parser.
+
+    ``block`` is the text between the ``---`` delimiters and ``offset`` is the
+    1-based file line number it starts on. The block is padded with leading
+    newlines so that line/column numbers in PyYAML errors point at the real
+    location in the SKILL.md rather than at an offset inside the slice.
+    """
+
+    padded = "\n" * (offset - 1) + block
+    try:
+        # _StrictSafeLoader subclasses SafeLoader, so this is not yaml.unsafe_load.
+        document = yaml.load(padded, Loader=_StrictSafeLoader)
+    except yaml.YAMLError as exc:
+        detail = " ".join(str(exc).split())
+        raise SkillMetadataError(f"invalid YAML frontmatter: {detail}") from exc
+
+    if document is None:
+        return {}
+    if not isinstance(document, dict):
+        raise SkillMetadataError(
+            "YAML frontmatter must be a mapping of fields, got "
+            f"{type(document).__name__}"
+        )
+
+    non_string_keys = sorted(
+        repr(key) for key in document if not isinstance(key, str)
+    )
+    if non_string_keys:
+        raise SkillMetadataError(
+            "frontmatter field name(s) must be strings: "
+            + ", ".join(non_string_keys)
+        )
+    return document
+
+
+def _required_text(fields: dict[str, Any], key: str) -> str:
+    """Return a required string field, or '' when absent or explicitly null."""
+
+    value = fields.get(key)
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        raise SkillMetadataError(
+            f"frontmatter {key!r} must be a string, got {type(value).__name__}"
+        )
+    return value.strip()
 
 
 def validate_skill_metadata(skill_md: Path, expected_name: str) -> None:
@@ -110,10 +131,12 @@ def validate_skill_metadata(skill_md: Path, expected_name: str) -> None:
     except ValueError as exc:
         raise SkillMetadataError("YAML frontmatter has no closing --- delimiter") from exc
 
-    fields = _parse_frontmatter_fields(lines[1:closing_index])
+    fields = _parse_frontmatter_fields(
+        "\n".join(lines[1:closing_index]), offset=2
+    )
 
-    name = _plain_scalar(fields.get("name", ""))
-    description = _plain_scalar(fields.get("description", ""))
+    name = _required_text(fields, "name")
+    description = _required_text(fields, "description")
     unexpected_fields = set(fields) - ALLOWED_FIELDS
     if unexpected_fields:
         raise SkillMetadataError(

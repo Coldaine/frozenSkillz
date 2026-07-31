@@ -104,6 +104,11 @@ For the source-to-computer authority model and synchronization process, see
 This repo does not use a single package manager. Validate the touched surface directly:
 
 ```powershell
+# One-time: install the packages the validators need (currently PyYAML, used to
+# parse SKILL.md frontmatter the same way agent clients do). CI installs the
+# same pinned file, so a check that passes locally cannot silently skip there.
+python -m pip install -r requirements-validation.txt
+
 # JSON manifests
 Get-Content .claude-plugin/marketplace.json -Raw | ConvertFrom-Json | Out-Null
 Get-Content .codex-plugin/marketplace.json -Raw | ConvertFrom-Json | Out-Null
