@@ -19,8 +19,9 @@ Run at end of coding sessions to capture learnings before context is lost. Invok
 
 The known failure mode was forgetting to run this at all. **Settled 2026-07-31 (owner):
 the Letta Session Reviewer runs it** — no human in the trigger loop. The nightly
-pipeline's wake runbook now has a retrospective phase
-(`frozenSkillz-review/tools/session-review/retro-prompt.md`, rationale alongside): on
+pipeline's wake runbook now has a retrospective phase — `tools/session-review/retro-prompt.md`
+on this repo's `review/nightly-grades` branch (the reviewer's dedicated worktree),
+rationale file alongside: on
 calibrated runs the reviewer selects up to 2 of the night's sessions — its own
 `mutation_candidate` flags first — runs this skill on each via
 `session_timeline.py --db`, and escalates repeat observations across runs
