@@ -2,25 +2,57 @@
 
 ## Purpose
 
-Make adjacent Codex tasks recognizable in a narrow sidebar. Symbols are compact semantics, not a completeness checklist.
+Make adjacent Codex tasks recognizable in a narrow sidebar. Symbols communicate useful state; they are not a checklist and do not need to fill five positions.
 
 ## Prefix Shape
 
-Use between one and five leading symbols:
+Use one to five leading symbols, normally one to three. Build the prefix in this order:
 
-1. **Project or domain** — the stable family marker when the mapping is known.
-2. **Work type** — optional; add it when neighboring tasks in the family need differentiation.
-3. **Lifecycle** — optional; add it only when the body contains clear state evidence.
-4. **Subsystem or exception** — rare; use only when it prevents a real collision.
-5. **Additional exception** — very rare; never add it merely because five are allowed.
+1. left-edge markers: attention, then retention, then relationship when present;
+2. project or domain;
+3. optional work type;
+4. lifecycle marker last.
 
-Most good titles use one or two symbols. A verified lifecycle marker commonly makes three.
+Attention is `🔴` or `🟡`; retention is `🗄️` or `📌`; relationship is `↪️`. This keeps the actionable state visible at the left edge while preserving forms such as `🌊 🧹 ✅` and `🗄️ ↪️ 🧛`. Omit a symbol when the words already communicate it or the evidence is uncertain.
 
-Do not invent a project-symbol mapping from a single ambiguous task. Reuse a stable mapping already present in the reviewed cohort or propose the mapping for owner review.
+## Status and Relationship Markers
+
+| Symbol | Meaning | Use when |
+|---|---|---|
+| `✅` | Done | The latest relevant user request was satisfied and no concrete required action remains in that task |
+| `🟡` | Concrete follow-up | A specific required action remains in the current owner task |
+| `🔴` | Highest-priority unfinished task | Use sparingly on the clearest priority after comparing relevant current owners; omit when unclear |
+| `⏸️` | Waiting | A named user or external response is the next required event |
+| `🚧` | Blocked | A specific obstacle prevents the required outcome |
+| `📌` | Canonical task or durable reference | Cross-reading identifies the task to retain or continue |
+| `↪️` | Continued or superseded elsewhere | A named successor carries the older task's unfinished work or replaces its operative result |
+| `🗄️` | Archive candidate | The task is done with little continuing value, duplicated, or fully carried by a named successor |
+
+At most one attention marker (`🔴`/`🟡`) and at most one lifecycle marker
+(`✅`/`⏸️`/`🚧`) per title, placed per the Prefix Shape order (attention at the
+left edge, lifecycle last). Retention (`🗄️`/`📌`) and relationship (`↪️`)
+markers may accompany them but never contradict them — `✅` with `⏸️` or `🚧`
+is invalid; `🗄️ ↪️ 🧛` remains a valid form.
+
+`✅` and `🗄️` can coexist: one says the task is finished, the other says it is a reasonable archive candidate. A `continued-elsewhere` task can receive `↪️` and `🗄️` without receiving `✅`.
+
+## Definition of Done
+
+Add `✅` when the latest relevant user request has been satisfied with adequate evidence from the conversation or resulting state and no concrete required action remains.
+
+Completion evidence depends on what the user asked for:
+
+- an explanation or review covers the requested question;
+- a requested artifact or change was delivered;
+- requested tests, publication, merge, cleanup, or real-world operation occurred when those were part of the scope;
+- the user accepted or confirmed a result when their observation was needed;
+- later turns did not extend the task or leave a dispute unresolved.
+
+Judge the task, not the broader project. Optional recommendations and deferred future phases do not block `✅`. A requested plan may be complete while implementation remains future work. If implementation was requested, producing only the plan is incomplete.
+
+An explicit remaining statement such as “next I need to push,” “C-05 through C-08 remain,” or “waiting for the user's answer” blocks `✅` when that action belongs to the current request.
 
 ## Work-Type Symbols
-
-Treat these as defaults, not an exhaustive universal taxonomy:
 
 | Symbol | Meaning | Use when |
 |---|---|---|
@@ -28,45 +60,29 @@ Treat these as defaults, not an exhaustive universal taxonomy:
 | `🔍` | Research, audit, or investigation | The outcome is primarily findings or diagnosis |
 | `🛠️` | Implementation or repair | The task materially changes a system or artifact |
 | `🧭` | Planning or orientation | The durable outcome is a plan, scope, or decision frame |
-| `📝` | Documentation | Documentation is the primary deliverable, not a side effect |
+| `📝` | Documentation | Documentation is the primary deliverable |
 
-Omit the work-type symbol when the natural-language title already distinguishes the task or the classification is uncertain.
-
-## Verified Completion
-
-Use `✅` only when the scoped outcome has direct completion evidence, such as:
-
-- the requested artifact exists in its final location and was read back;
-- relevant tests or verification commands passed against the final state;
-- a commit, push, merge, issue state, or pull request state was checked when that was part of the requested outcome;
-- a native Codex mutation was independently read back exactly;
-- the user explicitly confirmed that the scoped outcome is complete.
-
-Do not use `✅` merely because:
-
-- the assistant used “done,” “completed,” or similar language;
-- a plan was written but not executed;
-- files were changed but required validation, publication, review, or cleanup remains;
-- one intermediate command succeeded;
-- a newer task exists.
-
-If the task reached a clear non-completion final state, describe that state in words unless the owner has approved a stable lifecycle symbol for it. Do not improvise a lifecycle vocabulary during a batch.
+Treat these as defaults rather than an exhaustive taxonomy. Use other clear project or domain symbols when they are easier to recognize.
 
 ## Construction Pass
 
-1. Write a plain title from the dominant final work.
-2. Put the most distinctive words early.
+1. Read and cross-task classify the task.
+2. Write a plain title from the dominant final work.
 3. Add the known project or domain symbol.
-4. Add one work-type symbol only if it speeds recognition.
-5. Add `✅` only after the completion test above.
-6. Critique the result for ambiguity, redundancy, decoration, and truncation.
-7. Revise once and measure the final title in UTF-16 code units. Treat 60 units as an empirical Codex title-operation ceiling, observed when longer titles persisted with a literal trailing ellipsis in a verified 2026-07-20 batch, rather than as a documented API guarantee.
+4. Add a work-type symbol only when it distinguishes nearby tasks.
+5. Add attention, relationship, and archive markers at the left edge, and the lifecycle marker last.
+6. Keep one to five symbols, normally one to three.
+7. Revise once for ambiguity, decoration, and truncation.
+8. Measure the final title in UTF-16 code units and keep it within the empirical 60-unit Codex ceiling.
 
-Examples:
+## Examples
 
 | Evidence | Title |
 |---|---|
-| Project known; action already clear | `🌊 Crest Research Pruning` |
-| Cleanup distinction helps | `🌊 🧹 Crest Research Pruning` |
-| Cleanup completed and final state verified | `🌊 🧹 ✅ Crest Research Pruning` |
-| Work still pending verification | `🌊 🧹 Crest Research Pruning` |
+| Project known; cleanup underway | `🌊 🧹 Crest Research Pruning` |
+| Latest pruning request finished; nothing required remains | `🌊 🧹 ✅ Crest Research Pruning` |
+| Current implementation owner has a concrete next action | `🟡 🌊 🛠️ Broadside Implementation Continuation` |
+| Older unfinished task is fully carried by a successor | `🗄️ ↪️ 🧛 Vampire Survivors Continuation` |
+| Completed one-off is an archive candidate | `🗄️ ✅ Techdeals PR #84 Review` |
+
+The sparse examples are intentional. Do not add five symbols when two or three make the task recognizable.

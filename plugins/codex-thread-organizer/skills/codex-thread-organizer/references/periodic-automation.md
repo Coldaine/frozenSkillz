@@ -2,35 +2,35 @@
 
 ## Mechanism
 
-The organizer is a Codex skill. Continuous maintenance is a periodic Codex automation that explicitly invokes `$codex-thread-organizer`; it is not a background daemon inside the skill.
+Recurring organization is a periodic Codex automation that explicitly invokes `$codex-thread-organizer`. The frozenSkillz package remains Codex-only and is not installed automatically merely because the repository contains it. Creating the automation is a separate operator action.
 
-The frozenSkillz source is active only in its dedicated Codex plugin package. A Codex-targeted synchronization or native Codex install may install it; the package must remain absent from Claude, Cursor, and Gemini catalogs. Repository landing or installation alone does not create an automation.
+## Each Run
 
-## Safe Default Run
+1. Inventory tasks changed since the previous successful run and the related recent tasks needed to understand their workstreams.
+2. Read the actual conversation bodies for every task whose state or title may change.
+3. Cluster by semantic workstream, treating the working directory as a routing clue rather than identity.
+4. Cross-read each cluster and identify `done`, `active-remaining`, `continued-elsewhere`, and `parked-unclear` tasks plus the current owner of each unfinished workstream.
+5. Construct sparse titles with `✅`, `🟡`, `🗄️`, and other useful markers.
+6. Rename only tasks whose bodies were actually read and classified; inaccessible
+   and `parked-unclear` tasks keep their titles and go to the report instead.
+   Apply through native Codex operations and read every title back.
+7. Report renamed tasks, important unfinished current owners, tasks continued elsewhere, archive candidates, parked uncertainties, and coverage gaps.
 
-Unless the automation definition contains a narrower pre-authorized mutation scope:
+Use subagents when multiple independent project clusters make the review large enough to parallelize. Each subagent reads the actual conversation bodies for its assigned cluster and returns evidence; the main automation reconciles the classifications before applying titles.
 
-On the first run, after checkpoint loss, or whenever no valid checkpoint exists, perform a full inventory. Keep the previous checkpoint if a run fails before its frozen manifest and audit report are successfully generated. Persist the next checkpoint only after successful report generation, and after mutation read-back when the run includes authorized writes.
+Run an occasional wider inventory so an older current owner or successor does not fall outside the incremental window. Age helps choose what to inspect; it does not decide completion, abandonment, or archive candidacy.
 
-1. inventory tasks changed since the previous successful run;
-2. read the changed bodies and any related family members needed for context;
-3. propose sparse title or relationship updates;
-4. write or return a frozen manifest;
-5. make no title, archive, pin, delete, or content mutation.
+## Checkpoint
 
-If title mutations are pre-authorized, the automation must still freeze the manifest, check for concurrent changes, enforce the title-length limit, apply with native Codex operations, and independently read back every result.
+Record the most recent successfully reviewed update boundary after the run finishes and the renamed titles have been read back. If a run stops early, reuse the prior successful boundary next time.
 
-Archive and pin changes are never implied by title authorization.
+## Report
 
-## Suggested Cadence
+Every run returns:
 
-Use an incremental frequent pass for newly changed tasks and a less frequent repository-family review for supersession. Cadence is an operator decision recorded in the automation definition, not hard-coded in the skill.
-
-Every run should report:
-
-- inventory and coverage totals;
-- changed, unchanged, inaccessible, and ambiguous tasks;
-- proposals and applied mutations as separate counts;
-- exact verification results for applied mutations;
-- whether any task was skipped due to concurrent change;
-- the next review boundary or unresolved owner decision.
+- inventory and body-reading coverage;
+- old and resulting titles;
+- completion state and current-owner relationships;
+- concrete remaining actions for `🟡` tasks;
+- archive-candidate reasons;
+- inaccessible or `parked-unclear` tasks needing review.

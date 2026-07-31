@@ -14,6 +14,7 @@ _incubator/scout/<YYYY-MM-DD>-<repo>/
   evals/
     cases/
     runs/
+    forensic/
   extracted-patterns/
 ```
 
@@ -26,6 +27,7 @@ _incubator/scout/<YYYY-MM-DD>-<repo>/
 - `decisions.md` records packaging decisions and affected frozenSkillz paths; create it from `templates/decision-log.md` when starting a new scout.
 - `evals/cases/` holds reusable eval case definitions.
 - `evals/runs/` holds prompts, inputs, outputs, and scorer notes from executed evals.
+- `evals/forensic/` holds sourced findings reconstructed from real-agent and real-user evidence.
 - `extracted-patterns/` holds small adapted ideas, never raw wholesale source dumps.
 
 ## Naming
