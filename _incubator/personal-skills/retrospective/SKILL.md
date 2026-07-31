@@ -153,7 +153,8 @@ Determine which skills were used or could benefit:
   couple of entries, and `~/.agents/skills/` skills appear there one at a time via
   per-skill symlinks (currently just `project-docs`). A skill Claude Code should
   discover needs its own entry there.
-- The skill that triggered the retrospective is the primary update target (§0).
+- The skill that *executed* the workflow — re-derived from the transcript per §0 —
+  is the primary update target; the invoked/trigger skill is just the lens.
   Split the rest: process/method lessons → `retrospective`; domain helpers → the
   domain skill that will execute them.
 - Scaffold a new skill only when no existing skill owns the workflow.
@@ -161,6 +162,8 @@ Determine which skills were used or could benefit:
 ### 3. Learning Extraction — three documents, proposals not principles
 
 Use the **chat-history skill** as the mandatory method: treat transcripts as evidence, search exact phrases, and **separate direct evidence from inference**. Do not answer from memory or compaction summaries. (chat-history's trigger was narrowed to forensic-only on 2026-07-30; retrospective transcript work is forensic, so the reference stays valid.)
+
+Redact secrets and personal data from any transcript-derived quote before it lands in a durable document, whatever the source — local codex/cursor/claude session files carry the same risk as authenticated surfaces. Prefer transcript IDs or short sanitized excerpts over raw quotes.
 
 Write to **`D:\_projects\agent-control-plane\projects\`** (flat layout, project as filename prefix; templates in `agent-control-plane/templates/`). Do **not** put session retros in project repos — only promoted product facts belong there.
 

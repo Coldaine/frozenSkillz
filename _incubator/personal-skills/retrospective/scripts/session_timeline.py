@@ -163,11 +163,11 @@ def find_sessions(root: Path, phrase: str) -> list[Path]:
     phrase_lower = phrase.lower()
     for path in root.rglob("*.jsonl"):
         try:
-            text = path.read_text(encoding="utf-8", errors="replace")
+            with path.open("r", encoding="utf-8", errors="replace") as handle:
+                if any(phrase_lower in line.lower() for line in handle):
+                    matches.append((path.stat().st_mtime, path))
         except OSError:
             continue
-        if phrase_lower in text.lower():
-            matches.append((path.stat().st_mtime, path))
     return [path for _, path in sorted(matches, reverse=True)]
 
 
@@ -178,7 +178,9 @@ def find_sessions(root: Path, phrase: str) -> list[Path]:
 def open_db(db_path: Path) -> sqlite3.Connection:
     if not db_path.exists():
         raise SystemExit(f"AgentsView DB not found: {db_path}")
-    return sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    # as_uri() yields file:///C:/... — the leading slash before the drive letter
+    # is required for SQLite URI filenames on Windows.
+    return sqlite3.connect(db_path.resolve().as_uri() + "?mode=ro", uri=True)
 
 
 def db_find_sessions(con: sqlite3.Connection, phrase: str, limit: int) -> list[dict]:
@@ -190,7 +192,7 @@ def db_find_sessions(con: sqlite3.Connection, phrase: str, limit: int) -> list[d
         FROM messages_fts f
         JOIN messages m ON m.id = f.rowid
         JOIN sessions s ON s.id = m.session_id
-        WHERE messages_fts MATCH ?
+        WHERE f.messages_fts MATCH ?
           AND s.deleted_at IS NULL
         GROUP BY s.id
         ORDER BY s.started_at DESC
@@ -261,8 +263,8 @@ def db_timeline(
         (session_id,),
     ):
         if is_system and not include_system:
-            pass
-        elif content and content.strip():
+            continue  # suppresses the message AND its attached tool-calls
+        if content and content.strip():
             items.append(
                 TimelineItem(ordinal, timestamp or "", "message", role, "",
                              compact(content, limit))
