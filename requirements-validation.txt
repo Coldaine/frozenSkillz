@@ -1,0 +1,10 @@
+# Third-party packages required to run repository validation.
+#
+# Keep this the single source of truth for both local runs and the `validate`
+# workflow so a check that passes locally cannot silently skip in CI. Install
+# with: python -m pip install -r requirements-validation.txt
+#
+# PyYAML parses SKILL.md frontmatter in scripts/skill_validation.py. The
+# validator must fail on frontmatter that a real agent client cannot load, so
+# it uses the same parser those clients use rather than approximating YAML.
+PyYAML==6.0.3

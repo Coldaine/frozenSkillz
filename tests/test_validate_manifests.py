@@ -260,7 +260,14 @@ class SkillMetadataValidationTests(unittest.TestCase):
                 result, output = self.validate()
                 self.assertTrue(result, output)
 
-    def test_stray_indented_line_outside_block_scalar_fails(self):
+    def test_indented_continuation_of_plain_scalar_passes(self):
+        """An indented line after a plain scalar is a legal multi-line scalar.
+
+        The hand-rolled parser used to reject this as an "unexpected indented
+        line"; PyYAML folds it into the description, and so does every real
+        client, so the validator must agree.
+        """
+
         (self.skill / "SKILL.md").write_text(
             "---\n"
             "name: alpha\n"
@@ -271,8 +278,20 @@ class SkillMetadataValidationTests(unittest.TestCase):
         )
 
         result, output = self.validate()
+        self.assertTrue(result, output)
+
+    def test_indented_mapping_key_fails(self):
+        (self.skill / "SKILL.md").write_text(
+            "---\n"
+            "name: alpha\n"
+            "  description: Test skill.\n"
+            "---\n",
+            encoding="utf-8",
+        )
+
+        result, output = self.validate()
         self.assertFalse(result)
-        self.assertIn("unexpected indented line", output)
+        self.assertIn("invalid YAML frontmatter", output)
 
     def test_empty_description_fails(self):
         (self.skill / "SKILL.md").write_text(
@@ -337,6 +356,97 @@ class SkillMetadataValidationTests(unittest.TestCase):
         self.assertFalse(result)
         self.assertIn("does not exist", output)
 
+    def test_invalid_yaml_frontmatter_fails(self):
+        """Frontmatter that PyYAML refuses to load must fail validation.
+
+        Every case here passed the hand-rolled parser while raising in PyYAML,
+        so the skill would have shipped and then failed to load in a client.
+        """
+
+        cases = {
+            "unquoted colon in value": "description: does x: then y\n",
+            "tab indented block body": "description: >-\n\tUse when tabs sneak in.\n",
+            "unterminated double quote": 'description: "unterminated\n',
+            "reserved indicator": "description: @reserved\n",
+            "unclosed flow sequence": (
+                "description: Test skill.\nallowed-tools: [Read, Write\n"
+            ),
+        }
+        for label, frontmatter in cases.items():
+            with self.subTest(case=label):
+                (self.skill / "SKILL.md").write_text(
+                    f"---\nname: alpha\n{frontmatter}---\n",
+                    encoding="utf-8",
+                )
+
+                result, output = self.validate()
+                self.assertFalse(result, output)
+                self.assertIn("invalid YAML frontmatter", output)
+
+    def test_optional_fields_accept_block_and_flow_styles(self):
+        """``metadata`` and ``allowed-tools`` are allowed, so both YAML styles work.
+
+        Block style used to trip the "unexpected indented line" rule, making
+        ALLOWED_FIELDS advertise shapes the parser rejected.
+        """
+
+        cases = {
+            "metadata block": "metadata:\n  version: 1\n",
+            "metadata flow": "metadata: {version: 1}\n",
+            "allowed-tools block": "allowed-tools:\n  - Read\n  - Write\n",
+            "allowed-tools flow": "allowed-tools: [Read, Write]\n",
+        }
+        for label, frontmatter in cases.items():
+            with self.subTest(case=label):
+                (self.skill / "SKILL.md").write_text(
+                    f"---\nname: alpha\ndescription: Test skill.\n{frontmatter}"
+                    "---\n\n# Alpha\n",
+                    encoding="utf-8",
+                )
+
+                result, output = self.validate()
+                self.assertTrue(result, output)
+
+    def test_duplicate_frontmatter_field_fails(self):
+        (self.skill / "SKILL.md").write_text(
+            "---\nname: alpha\nname: beta\ndescription: Test skill.\n---\n",
+            encoding="utf-8",
+        )
+
+        result, output = self.validate()
+        self.assertFalse(result)
+        self.assertIn("duplicate 'name' frontmatter field", output)
+
+    def test_non_mapping_frontmatter_fails(self):
+        (self.skill / "SKILL.md").write_text(
+            "---\n- alpha\n- beta\n---\n",
+            encoding="utf-8",
+        )
+
+        result, output = self.validate()
+        self.assertFalse(result)
+        self.assertIn("must be a mapping", output)
+
+    def test_non_string_name_fails(self):
+        (self.skill / "SKILL.md").write_text(
+            "---\nname: 123\ndescription: Test skill.\n---\n",
+            encoding="utf-8",
+        )
+
+        result, output = self.validate()
+        self.assertFalse(result)
+        self.assertIn("must be a string", output)
+
+    def test_yaml_error_reports_the_skill_md_line_number(self):
+        (self.skill / "SKILL.md").write_text(
+            "---\nname: alpha\ndescription: does x: then y\n---\n",
+            encoding="utf-8",
+        )
+
+        result, output = self.validate()
+        self.assertFalse(result)
+        self.assertIn("line 3", output)
+
     def test_skill_root_string_validates_discovered_skill_metadata(self):
         data = json.loads(self.manifest.read_text(encoding="utf-8"))
         data["skills"] = "./skills/"
@@ -346,6 +456,26 @@ class SkillMetadataValidationTests(unittest.TestCase):
         result, output = self.validate()
         self.assertFalse(result)
         self.assertIn("missing YAML frontmatter", output)
+
+
+class ShippedSkillFrontmatterTests(unittest.TestCase):
+    """Every SKILL.md that ships under plugins/ must load in a real client."""
+
+    PLUGINS_ROOT = Path(__file__).resolve().parents[1] / "plugins"
+
+    def test_shipped_skill_frontmatter_parses_cleanly(self):
+        shipped = sorted(self.PLUGINS_ROOT.rglob("SKILL.md"))
+        self.assertEqual(
+            6,
+            len(shipped),
+            "expected 6 shipped SKILL.md files; update this test if a skill "
+            "was promoted or retired",
+        )
+        for skill_md in shipped:
+            with self.subTest(skill=skill_md.relative_to(self.PLUGINS_ROOT)):
+                validate_module.validate_skill_metadata(
+                    skill_md, skill_md.parent.name
+                )
 
 
 class DopplerReferenceHygieneTests(unittest.TestCase):
