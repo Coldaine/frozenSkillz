@@ -49,14 +49,28 @@ def sweep():
 
 
 def current_hash(name: str) -> str:
-    """Latest live hash for a skill name, for condense.py."""
+    """Latest live hash for a skill name, for condense.py.
+
+    Ties on last_seen (same skill in several roots/caches) resolve to the
+    canonical root first (ROOTS order), then newest first_seen — not file order.
+    """
     if not LEDGER.exists():
         return "unknown"
-    best = None
+
+    def root_rank(path: str) -> int:
+        for i, root in enumerate(ROOTS):
+            if path.startswith(str(root)):
+                return len(ROOTS) - i
+        return 0
+
+    best, best_key = None, None
     for line in LEDGER.read_text(encoding="utf-8").splitlines():
         r = json.loads(line)
-        if r["name"] == name and (best is None or r["last_seen"] >= best["last_seen"]):
-            best = r
+        if r["name"] != name:
+            continue
+        key = (r["last_seen"], root_rank(r["path"]), r["first_seen"])
+        if best is None or key > best_key:
+            best, best_key = r, key
     return best["sha256"] if best else "unknown"
 
 

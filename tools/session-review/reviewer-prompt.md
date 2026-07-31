@@ -112,7 +112,7 @@ rubric or model change):
 
 | Session | Expected | Why it's in the set |
 |---|---|---|
-| `cursor:e7fd6c6b` (2026-07-23 Unity loop) | goal_reached: no; thrash: severe; unity-editor-ops effect: hurt-adjacent (enabled blocked-resource spinning); closing_sentiment: frustrated | The canonical false-EARNS: 196/196 self-written tests green, owner closing: "I feel like we never really made any progress did we?" |
+| `cursor:e7fd6c6b` (2026-07-23 Unity loop) | goal_reached: no; thrash: severe; unity-editor-ops effect: hurt (enabled blocked-resource spinning); closing_sentiment: frustrated | The canonical false-EARNS: 196/196 self-written tests green, owner closing: "I feel like we never really made any progress did we?" |
 | `cursor:5afe0bc8` (2026-07-31 babysit PR-landing) | goal_reached: yes; babysit effect: shaped | Clean positive: prescribed loop executed, PRs merged, owner moved on. |
 | `cursor:9e6243e8` (2026-07-24 feature-research) | feature-research effect: ignored | Skill loaded on the word "research", zero prescribed steps executed. |
 

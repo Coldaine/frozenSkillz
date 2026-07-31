@@ -7,3 +7,6 @@ __pycache__/
 .opencode/
 tools/session-review/.work/
 tools/session-review/state.json
+tools/session-review/skill-versions.jsonl
+tools/session-review/grades/
+tools/session-review/proposals.md
