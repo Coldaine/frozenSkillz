@@ -20,6 +20,11 @@ recovered evidence
 
 ## Phase map
 
+> **Deferred — not the v1 path.** `PHASE-0` through `PHASE-7` describe the full
+> control-plane roadmap retained as backlog. The current critical path is
+> [REFINED-V1](../REFINED-V1.md); nothing in this map is the v1 implementation
+> sequence.
+
 | Phase ID | Purpose and outputs | Entry gate | Exit gate | Must not happen in this phase |
 |---|---|---|---|---|
 | `PHASE-0-EVIDENCE` | Build the source ledger, classify corrections/superseded proposals, inspect current frozenSkillz lifecycle/authority, verify current repository state, re-verify dynamic client/Docker/Obot claims, and recover or reject the SHA-identified claimed foundation. | Recovered transcript available and treated as untrusted evidence. | Every transcript claim has a status and destination; current authority sources are identified; `REQ-022` is verified or recorded unrecovered. | No transcript proposal is promoted to architecture merely because it is detailed or repeated. |

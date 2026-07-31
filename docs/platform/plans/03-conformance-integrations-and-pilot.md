@@ -44,9 +44,10 @@ the pilot as a conformance exercise rather than a design exercise.
 **Exit gate:** the harness produces deterministic, independently interpretable
 evidence and no successful connection is mistaken for full correctness.
 
-## Phase 3B: Optional central observation integration
+## Phase 3B: Post-v1 central observation integration
 
-Only if retained by the approved v1 design:
+Only after a later reviewed post-v1 scope decision — central observation sinks are
+excluded from v1 (REFINED-V1 `RV1-04`) and this phase is not part of v1:
 
 1. Implement submission as a separate consumer of complete local scan output.
 2. Add authentication, privacy classification, payload limits, idempotency, retries,
@@ -85,7 +86,9 @@ Freeze the pilot contract before deployment:
 - exact frozenSkillz and fixture repository commits;
 - proposed minimum topology of one Python repository and one infrastructure
   repository, subject to explicit approval;
-- one declared Windows 11 machine and one declared Linux machine;
+- one declared Windows machine and one declared Linux machine, each pinned to an
+  exact OS build or distribution release, architecture, and runtime versions
+  before execution;
 - exact supported client versions rather than the phrase "all five clients";
 - one portable MCP and one host-bound MCP with pinned versions;
 - required local and integration acceptance/failure IDs;

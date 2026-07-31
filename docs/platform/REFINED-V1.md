@@ -98,10 +98,10 @@ transport), DR-031–032 (cross-repo PRs), filename bikeshed `config.yaml` vs
   platform plans are not an authority transition.
 - This file is the proposed critical path; July 16 phase plans are appendix/backlog.
 
-### D2 — Project config convention (docs + examples, follow-on PR ok)
+### D2 — Project config convention (docs in this PR; examples may follow)
 
-A short workflow: `docs/workflows/project-agent-config.md` (follow-on if not in
-this PR) that says:
+A short workflow, `docs/workflows/project-agent-config.md` (included in this PR),
+that says:
 
 1. Commit the native files your clients actually load for this repo.
 2. Prefer project-local or vendored skills under the project when the skill is

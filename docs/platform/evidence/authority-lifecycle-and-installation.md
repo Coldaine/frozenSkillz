@@ -46,7 +46,7 @@ The following is current repository truth, not a proposal:
    `plugins/frozen-skills/skills/<skill-name>/` and must be registered in the
    supported plugin manifests.
 8. On the documented Windows workstation, personal shared skills are currently
-   authored and installed under `C:\Users\pmacl\.agents\skills`.
+   authored and installed under `%USERPROFILE%\.agents\skills`.
 9. The frozen copy is currently the reviewed, publishable copy, while the live
    `.agents` copy remains the source for ordinary personal-skill edits. An active
    frozen skill with no live counterpart is an explicit exception for which
@@ -183,10 +183,10 @@ from any future project-configuration adapter matrix.
 
 | Surface | Current documented role |
 |---|---|
-| `C:\Users\pmacl\.agents\skills` | Canonical live personal skill root and real installed copy |
-| `C:\Users\pmacl\.claude\skills` | Claude compatibility mirror; personal skills should normally be junctions to `.agents\skills` |
-| `C:\Users\pmacl\.config\opencode\skills` | OpenCode-specific real root, normally empty unless intentionally tool-only |
-| `C:\Users\pmacl\.codex\skills` | Codex system/runtime surface; not a personal authoring root |
+| `%USERPROFILE%\.agents\skills` | Canonical live personal skill root and real installed copy |
+| `%USERPROFILE%\.claude\skills` | Claude compatibility mirror; personal skills should normally be junctions to `.agents\skills` |
+| `%USERPROFILE%\.config\opencode\skills` | OpenCode-specific real root, normally empty unless intentionally tool-only |
+| `%USERPROFILE%\.codex\skills` | Codex system/runtime surface; not a personal authoring root |
 | `.gemini\skills`, `.cursor\skills`, `.kilo\skills` | Tool-specific roots; independent copies are possible drift unless intentionally tool-only |
 
 **Proposed extension:** if active reusable authority moves to frozenSkillz, an install

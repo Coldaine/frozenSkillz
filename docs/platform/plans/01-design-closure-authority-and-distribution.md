@@ -51,7 +51,7 @@ it as approved:
    machine state rather than project or publication authority.
 
 The alternative is to retain the current personal-live-first model, where ordinary
-personal edits begin in `C:\Users\pmacl\.agents\skills` and reviewed reusable deltas
+personal edits begin in `%USERPROFILE%\.agents\skills` and reviewed reusable deltas
 flow into frozenSkillz for publication. The user must explicitly select or modify the
 steady-state model; the migration cannot be inferred.
 

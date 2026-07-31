@@ -29,7 +29,7 @@ central renderer rewriting the tree.
 
 | Need | Mechanism |
 |---|---|
-| Same reviewed skill on every machine | `python scripts/sync_frozen_skills.py --check` / `--apply` after pull |
+| Same reviewed skill on every machine | From a frozenSkillz checkout (the script lives there, not in each project): `python scripts/sync_frozen_skills.py --check` / `--apply` after pull |
 | This repo’s operating contract | Commit native files in **this** repo |
 | Experimental personal skill | Author under `~/.agents/skills`; mirror to `_incubator/` when tracked |
 

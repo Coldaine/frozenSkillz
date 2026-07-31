@@ -51,15 +51,12 @@ history and later backlog), not the v1 critical path:
 ## Relationship to current repository authority
 
 Until REFINED-V1 (or a successor) is explicitly approved and its changes are
-implemented, the existing authority order remains unchanged:
-
-1. `docs/skill-review/tracker.md` governs active, gated, scout, and promotion status.
-2. `docs/workflows/external-skill-intake.md` governs external evaluation.
-3. Active files under `plugins/frozen-skills/skills/` define installable behavior.
-4. `docs/workflows/skill-authority-and-frozen-sync.md` describes the current
-   personal-live-to-reviewed-frozen relationship and the sync script contract.
-5. Current plugin manifests and marketplace catalogs define repository metadata and
-   publication claims; verified install/discovery support remains a separate matrix.
+implemented, current repository authority is unchanged. The root `AGENTS.md`
+documentation router defines which source governs each task (tracker for skill
+status, skill-authority/sync workflow for distribution, external-intake workflow
+for evaluation, active skill files and manifests for installable behavior and
+metadata). This directory does not restate that routing and must not be read as a
+competing authority chain.
 
 The planning evidence pack may identify a needed authority transition, but it cannot
 perform one. An approved transition must update the router, tracker, external-intake

@@ -8,7 +8,7 @@
 
 | Field | Value |
 |---|---|
-| Captured source | `C:\Users\pmacl\.codex\attachments\678c4dad-dc18-43cb-b6cc-427ed13b86d7\pasted-text.txt` |
+| Captured source | `%USERPROFILE%\.codex\attachments\678c4dad-dc18-43cb-b6cc-427ed13b86d7\pasted-text.txt` |
 | Size | 1,132 lines; 35,335 characters |
 | SHA-256 | `113fcf645f52d9d8eb56efcb39040c744c146e7ff41b46ff717a8ec91b9cf237` |
 | Evidence notation | `pasted-text.txt:Lx-Ly`, using one-based line numbers |
@@ -114,7 +114,7 @@ The transcript says to preserve the repository's reviewed marketplace/incubator 
 
 ### Global live installation was not designed
 
-The transcript names `C:\Users\pmacl\.agents\skills` while proposing a new authority order (`pasted-text.txt:L89-L105`), but its concrete materialization design copies skills only into consuming projects and client adapters (`pasted-text.txt:L297-L315`, `pasted-text.txt:L643-L666`). It never defines how reviewed frozenSkillz skills are published or installed into the machine-global discovery directory agents actually use.
+The transcript names `%USERPROFILE%\.agents\skills` while proposing a new authority order (`pasted-text.txt:L89-L105`), but its concrete materialization design copies skills only into consuming projects and client adapters (`pasted-text.txt:L297-L315`, `pasted-text.txt:L643-L666`). It never defines how reviewed frozenSkillz skills are published or installed into the machine-global discovery directory agents actually use.
 
 The missing contract includes at least: install command/trigger, source revision, destination layout, copy/link policy, collision handling, update and rollback behavior, drift detection, removal semantics, and how the existing frozenSkillz lifecycle feeds global installation. This omission is **open**, not evidence that live directories become irrelevant.
 

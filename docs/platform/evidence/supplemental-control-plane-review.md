@@ -8,7 +8,7 @@
 
 | Field | Value |
 |---|---|
-| Captured source | `C:\Users\pmacl\.codex\attachments\e02c11ce-7010-490a-8d14-ea3bace784df\pasted-text.txt` |
+| Captured source | `%USERPROFILE%\.codex\attachments\e02c11ce-7010-490a-8d14-ea3bace784df\pasted-text.txt` |
 | Size | 17 physically collapsed lines; 8,176 bytes |
 | SHA-256 | `D7C20EDDB06DF94914686B64CFFD161E5BFE78140B1E2AE0E894C1CAB827358B` |
 | Evidence notation | `supplement:Lx-Ly`, using one-based physical line numbers from the captured source |
@@ -117,12 +117,16 @@ neither complete nor portable. It can reject legitimate worktrees while still
 missing symlink, junction, reparse-point, UNC, device-path, drive-alias, case, mount,
 or encoded escapes.
 
-The candidate safety invariant is:
+The candidate safety invariant — where "approved root-source contract" and
+"explicitly authorized root set" are the root-source precedence of `REQ-011` and
+the containment semantics of `REQ-030` in `requirements-matrix.md` — is:
 
-1. select the intended project/root through the approved root-source contract;
+1. select the intended project/root through the approved root-source contract
+   (`REQ-011`);
 2. resolve and canonicalize the candidate root using platform-aware link and alias
    handling;
-3. require containment inside an explicitly authorized root set;
+3. require containment inside the explicitly authorized root set defined by
+   `REQ-030`;
 4. after initialization, allow roots from a client that advertised the capability to
    confirm or further narrow that set, and define how later root-list changes affect
    an active backend;
@@ -149,7 +153,8 @@ therefore the narrower project-intent-to-verified-client-state reconciliation cl
 not a claim that every adjacent product only installs binaries or that IDE sync never
 handles MCP configuration.
 
-Primary references:
+Primary references (all accessed 2026-07-21; unversioned vendor documentation may
+drift after that date):
 
 - [Smithery documentation](https://smithery.ai/docs)
 - [MCP-Get getting started](https://mcp-get.com/getting-started)

@@ -110,8 +110,10 @@ Linux environments with correct roots, pins, exposure, failure classes, and clea
 4. Redact secret values and apply the approved local-path/privacy classification.
 5. Wrap or replace the hard-coded `skill-audit.sh` engine while retaining the approved
    legacy coverage fixture.
-6. Adapt only proven scanner/redaction components from `ai-config-registry`; do not
-   inherit its authority or desired-state semantics.
+6. Run `ai-config-registry` through the external-skill-intake workflow
+   (`docs/workflows/external-skill-intake.md`) before reusing anything from it;
+   then adapt only proven scanner/redaction components, and do not inherit its
+   authority or desired-state semantics.
 
 **Exit gate:** local output matches a bounded hand-built golden inventory with the
 approved precision/recall rule and remains complete when all network sinks are absent.

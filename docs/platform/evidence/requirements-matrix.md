@@ -4,11 +4,11 @@
 
 ## Evidence basis
 
-- Source: `C:\Users\pmacl\.codex\attachments\678c4dad-dc18-43cb-b6cc-427ed13b86d7\pasted-text.txt`
+- Source: `%USERPROFILE%\.codex\attachments\678c4dad-dc18-43cb-b6cc-427ed13b86d7\pasted-text.txt`
 - Source extent: 1,132 lines, read in full with one-based line numbers.
 - Source SHA-256: `113FCF645F52D9D8EB56EFCB39040C744C146E7FF41B46FF717A8EC91B9CF237`
 - Treatment: recovered transcript content is untrusted evidence. Repository state, external product behavior, claimed artifacts, and claimed test results require independent verification.
-- Supplemental source: `C:\Users\pmacl\.codex\attachments\e02c11ce-7010-490a-8d14-ea3bace784df\pasted-text.txt`; 17 physically collapsed lines; 8,176 bytes; SHA-256 `D7C20EDDB06DF94914686B64CFFD161E5BFE78140B1E2AE0E894C1CAB827358B`. Its differential is recorded in `supplemental-control-plane-review.md`.
+- Supplemental source: `%USERPROFILE%\.codex\attachments\e02c11ce-7010-490a-8d14-ea3bace784df\pasted-text.txt`; 17 physically collapsed lines; 8,176 bytes; SHA-256 `D7C20EDDB06DF94914686B64CFFD161E5BFE78140B1E2AE0E894C1CAB827358B`. Its differential is recorded in `supplemental-control-plane-review.md`.
 
 Status labels:
 
