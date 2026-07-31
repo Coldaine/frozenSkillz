@@ -34,23 +34,26 @@ de-personalized.
 | Skill | Next action |
 |---|---|
 | `chat-history` | Content update needed (owner 2026-07-31); de-personalize paths; drop unimplemented gemini extractor from docstring. |
-| `retrospective` | Live skill half-deleted ~Jul 16 (SKILL.md gone, scripts/ orphaned) — restore deliberately or delete; then de-personalize. |
 | `project-docs` | Gated pending de-personalization. |
 | `skill-install` | Verify recipes. |
 | `run-opencode` | Fix driver.mjs header comment re: profile writes. |
 | `edit-opencode-config` | Fix canonical-root drift. |
 | `phantom-substrate-inheritance` | Review. |
-| `review-claudemd` | Fix frontmatter name mismatch + duplicate find clause; overlap-check vs `claude-md-enhancer`. |
 | `rich-visual-responses` | Keep — regraded 2026-07-31: formatting applied in 23/44 firing sessions vs 2/127 baseline. |
 | `insight-extractor` | Add YAML frontmatter; fix contradictory `~/.Codex` vs `~/.claude` paths. |
-| `claude-md-enhancer` | Confirm provenance. |
 | `nlm-skill` | Confirm provenance. |
-| `skill-finder` | Confirm provenance. |
 | `google-stitch-ui-designer` | Confirm provenance. |
 | `context7-mcp` | Complete rewrite (owner 2026-07-31) — the MCP is useful, the skill isn't. Supersedes the narrow-trigger fix; 27/39 fires never called the MCP. |
 | `patrickspowerfulpresentations` | Incubating; stays personal. |
 | `audio-producer` | Incubating; stays personal. Broadside examples are worked evidence — keep. |
 | `explore` | Already deleted from the live root (noticed 2026-07-31; not in quarantine — 155 codex sessions had read it, owner unaware it existed). The explorer-subagent lane in [#71](https://github.com/Coldaine/frozenSkillz/issues/71) is its replacement. |
+
+Deleted forever 2026-07-31 (owner order): `review-claudemd`, `claude-md-enhancer`,
+`skill-finder`, `retrospective` — live dirs were already broken (empty or missing
+SKILL.md) and their incubator copies are removed in the same change; git history is the
+only archive. `retrospective` judged not worth restoring: broken six weeks unnoticed,
+superseded by kcap recap + the nightly session-reviewer. Also removed the empty
+`~/.codex/skills/codex-primary-runtime/` dir (live only, never tracked here).
 
 ## Intake queue
 
@@ -175,7 +178,7 @@ sessions each, read by subagents):
 - **INSUFFICIENT DATA:** `unity` — old "sole mutator" text caused the 2026-07-21 blowup;
   rewritten text unproven, re-grade after a real Editor session. `retrospective` — live
   skill half-deleted ~Jul 16 (SKILL.md gone, `scripts/` orphaned): restore deliberately
-  or delete the remnant.
+  or delete the remnant. **Resolved 2026-07-31: deleted forever** (see Personal lane).
 - **Owner-overturned (2026-07-31): `unity-editor-ops` EARNS → NOT PROVEN.** The graded
   "success" session was a 100-tick /loop that ran with Unity/MCP down almost the whole
   time; the batch-mode recipe let it keep generating self-written, self-graded green work
