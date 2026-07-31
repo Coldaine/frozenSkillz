@@ -28,17 +28,23 @@ Sub-minute lookups — one grep, one read, one fetch — are exempt. They are no
 
 ## The seven fields
 
-**1 · Objective.** One sentence, the finished state, not the activity. "Auth middleware rejects expired tokens with 401 and a structured body" — not "look at the auth middleware." A worker that cannot tell when it is done will either stop early or never stop.
+**1 · Objective, and what you'll do with the result.** One sentence, the finished state, not the activity. "Auth middleware rejects expired tokens with 401 and a structured body" — not "look at the auth middleware." A worker that cannot tell when it is done will either stop early or never stop.
+
+State the downstream use too: *"Find where auth is implemented; I need the pattern to add OAuth"* beats *"search for auth files."* Knowing what the answer feeds lets the worker judge what counts as relevant — a judgment you cannot pre-encode as a step.
 
 **2 · Ledger items, with the why.** Cite the item numbers this worker owns *and* restate the reasoning behind them. Ledger lines are one-line checkboxes; they carry the WHAT and almost never the WHY. The item says "reject expired tokens." The why — "a prior incident let 30-day-stale tokens through and we chose explicit rejection over silent refresh" — is what stops the worker from solving it the wrong way. **This is the field most often dropped and the one that most often causes rework.**
 
 **3 · Context the worker cannot infer.** Anything decided in conversation, rejected earlier, or true-but-unwritten. Constraints that exist for reasons not visible in the code. Approaches already tried and abandoned, and why. A worker starts with the repo and your prompt — nothing else. Everything you know that the repo does not say is invisible to it unless you write it here.
 
-**4 · Where to look.** Concrete entry points: paths, symbols, commands, URLs, the ledger path, prior work-product paths. Not "the auth code" but `src/middleware/auth.ts` and `tests/auth/expiry.test.ts`. Save the worker the rediscovery you have already paid for.
+**4 · Where to look — and what to skip.** Concrete entry points: paths, symbols, commands, URLs, the ledger path, prior work-product paths. Not "the auth code" but `src/middleware/auth.ts` and `tests/auth/expiry.test.ts`. Save the worker the rediscovery you have already paid for.
+
+Name the dead ends too — the source that looks authoritative and is stale, the tool that will time out, the directory that is vendored. Steering *away* is as cheap to write and saves as much as steering toward.
 
 **5 · Out of scope.** State explicitly what NOT to touch. Adjacent code that looks broken but is deliberate. Refactors that are someone else's phase. Files another parallel worker owns right now. Without this, a capable worker will helpfully expand until it collides with a sibling or with a decision you already made.
 
-**6 · Expected output.** What you need back to make the next decision — a diff, a brief, a verdict, a path. Point at the return contract rather than restating it. If the shape is unusual, say so here.
+**6 · Expected output, with a size bound.** What you need back to make the next decision — a diff, a brief, a verdict, a path. Point at the return contract rather than restating it. If the shape is unusual, say so here.
+
+Bound it: *"return only the failing tests with their error messages"* beats *"report the test run."* Say who consumes it, and that it is not addressing the user — a worker unsure of its audience writes a status update instead of a deliverable.
 
 **7 · Authority.** What the worker may decide alone versus what it must return for a ruling. "Pick the error-message wording; do not change the status code without asking." Silence here produces one of two failures: a worker that stalls on trivia, or one that quietly makes a call that was yours.
 
@@ -66,6 +72,16 @@ If any of this is ever mechanized, check for the fields, not the size. Note the 
 >
 > **Authority.** Yours: error wording, test structure, where the check sits in the middleware chain. Mine: the status code, the error key, anything touching token TTL.
 
+## Prior art
+
+This is not novel, and it converges with published guidance — which is reassuring rather than disappointing.
+
+Anthropic's [multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system) writeup reports that **objective + output format + tool guidance + task boundaries** produced their largest single quality lift, and that without detailed task descriptions "agents duplicate work, leave gaps, or fail to find necessary information." Those four map onto fields 1, 6, 4, and 5 here. Fields **2 (the why), 3 (non-inferable context), and 7 (authority)** are additions.
+
+Field 7 is independently corroborated: good hierarchical systems "give subordinates autonomy within clear boundaries, only escalating on failures or ambiguous requirements" ([Addy Osmani](https://addyosmani.com/blog/code-agent-orchestra/)). A supervisor that micromanages becomes the bottleneck — which is the same claim as *don't over-script*, seen from the top.
+
+The sharpest justification for field 3 is the mechanical one: a subagent begins with a **fresh, isolated context window** that cannot see conversation history, previously read files, or prior tool results. The delegation string is its *entire* briefing. Nothing you know reaches it except what you write.
+
 ## Provenance
 
-Derived during intake of `Rylaa/fable5-opus5-orchestrator` (commit `828974b`). Fields 2, 3, 5, and 7 have no counterpart in the candidate; fields 1, 4, and 6 generalize hints scattered across its playbook and profiles. The candidate's return contract is unchanged and worth taking as-is.
+Derived during intake of `Rylaa/fable5-opus5-orchestrator` (commit `828974b`). Fields 2, 3, 5, and 7 have no counterpart in the candidate; fields 1, 4, and 6 generalize hints scattered across its playbook and profiles, then were refined against the prior art above. The candidate's return contract is unchanged and worth taking as-is.
