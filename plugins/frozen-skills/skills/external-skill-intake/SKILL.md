@@ -22,6 +22,7 @@ Do not use this for ordinary local skill authoring, direct promotion of already-
 5. Run evals with `references/live-eval-protocol.md` and `templates/eval-case.md`.
 6. Decide packaging with `references/packaging-decision-gate.md` and `templates/decision-log.md`.
 7. Update `docs/skill-review/tracker.md` if status changes.
+8. Land incubator + tracker changes: commit, push, and open a PR unless the operator said live-only. Tracker-only landing is incomplete; see Completion Contract in `docs/workflows/skill-authority-and-frozen-sync.md`.
 
 ## References
 

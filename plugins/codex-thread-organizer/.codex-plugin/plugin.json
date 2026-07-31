@@ -1,0 +1,24 @@
+{
+  "name": "codex-thread-organizer",
+  "version": "2.4.0",
+  "description": "Organize Codex task history with evidence-based titles, cross-task relevance review, and periodic maintenance workflows.",
+  "author": {
+    "name": "Coldaine",
+    "url": "https://github.com/Coldaine"
+  },
+  "repository": "https://github.com/Coldaine/frozenSkillz",
+  "license": "MIT",
+  "keywords": ["codex", "tasks", "history", "organization"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Thread Organizer",
+    "shortDescription": "Organize Codex task history",
+    "longDescription": "Review Codex task bodies, apply evidence-based sidebar titles, and identify related or superseded work.",
+    "developerName": "Coldaine",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Review my related Codex tasks and propose clearer titles."
+    ]
+  }
+}

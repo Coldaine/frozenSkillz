@@ -6,8 +6,8 @@
 
 **Established:** 2026-05-28
 **Gate decision:** strict — `doppler`, `external-skill-intake`, `omc-reference`, and
-`pdm-cli-operations` are active and on the marketplace menu; older reference/workflow skills remain
-gated pending review.
+`pdm-cli-operations` are active in the shared lane; `codex-thread-organizer` is active only in the
+Codex lane. Older reference/workflow skills remain gated pending review.
 **Holding location:** `_incubator/` (in-repo, easy to promote back; not installable).
 **Linear:** planning lives in Linear — project **frozenSkillz** (under the *ClaudeReconfigurations*
 initiative, team Moosegoose/MOO), parent intake [MOO-561](https://linear.app/moosegoose/issue/MOO-561)
@@ -21,9 +21,9 @@ This file stays the in-repo source of truth for required work; Linear tracks sta
 
 1. Gated skills live under `_incubator/` and are **not** listed in any marketplace catalog, so they cannot be installed.
 2. Each skill below has a status and a list of required work. Take a pass at one, do the work, then **promote** it.
-3. **Promote** = move the skill dir back to its plugin's `skills/` folder, re-add it to the relevant manifests
-   (the three root marketplace catalogs + the plugin's own `plugin.json` / `gemini-extension.json` `skills[]` array),
-   and bump the plugin version.
+3. **Promote** = move the skill into the shared package or a dedicated consumer package, register it in
+   `plugins/distribution.json`, reconcile the relevant native plugin and marketplace manifests
+   and four root marketplace catalogs, and bump the plugin version.
 4. Update this tracker when status changes.
 5. Scout snapshots live under `_incubator/scout/` until they are reconciled into the skill rows below or deleted.
 
@@ -55,8 +55,9 @@ A skill may be promoted when it meets the bar set by `doppler` (the reference st
 | `stacked-pr-workflow` | B | MOO-566 | 🛑 gated | `_incubator/frozen-skills/skills/` | Run + verify the 7 PowerShell helpers; decide if niche is worth keeping. |
 | `skill-manager` | B | MOO-567 | 🛑 gated | `_incubator/skill-manager/` | Verify scripts + registry assumptions (`skills.sh`, `~/.agents/skills`). |
 | `session-skill-inferencer` | C | MOO-569 | 🛑 gated · **highest concern** | `_incubator/frozen-skills/skills/` | Fix generation quality before any promotion (see below). |
-| `skill-injector` (was skill-classifier) | C | MOO-570 | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Test end-to-end before enabling; finish internal rename (scripts/module + ADR/doc prose still say "classifier"). |
+| `skill-injector` (was skill-classifier) | C | MOO-570 | 🧪 **registered · experimental/UNTESTED** | `plugins/skill-injector/` | Revisit a Codex-native adapter now that Codex hook execution has matured; qualify it end-to-end before enabling, keep remote-model fallback opt-in, and finish the internal rename. |
 | `icepanel-api` | A | — | 🛑 gated · **incubating** | `_incubator/frozen-skills/skills/icepanel-api/` | Live-validate diagram push on a real landscape; attach PNG/share proof to examples; run layout/push scripts; trim description to the ~300-char bar before promotion. |
+| `codex-thread-organizer` | B | — | ✅ **ACTIVE · Codex-only · title-qualified** | `plugins/codex-thread-organizer/skills/codex-thread-organizer/` | Dedicated package listed only in the Codex lane/catalog; physically outside the shared auto-discovery package. Native title workflow is live-qualified; exercise cross-task review and a proposal-only periodic dry run before enabling automation. |
 
 Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental · Tier A = strong reference, B = functional/narrow, C = rework.
 
@@ -72,6 +73,8 @@ Legend: ✅ active · 🛑 gated (in `_incubator/`) · 🧪 inert/experimental �
 | 2. LukasNiessen/kubernetes-skill → **core workflow + failure-mode refs** (324 stars) | adopt · adapt | _(not snapshotted)_ | Manifest prove-before-mutate layer before Helmfile commit/apply. Drop cloud CRR dumps (EKS/GKE/AKS) unless a real intent appears. |
 | 3. Coldaine **k8s-platform-operator** (author) + CAPMOX seed | author · design | _(not authored)_ | Thin glue skill: prove → helmfile diff → P0 → intentional apply → live verify. Seed CAPMOX from [ionos-cloud/cluster-api-provider-proxmox AGENTS.md](https://github.com/ionos-cloud/cluster-api-provider-proxmox/blob/main/AGENTS.md) (463 stars). Not an external install. |
 | Concept-mine only (no scout package) | deferred | — | [siderolabs/docs](https://github.com/siderolabs/docs) public/skill.md (11 stars): no-SSH / talosctl facts (strip Omni). wcygan read-only talosctl guardrails (192 stars). ConfigHub ApplyGates wording (2 stars). Optional: CNPG CRD table from Aidas later. |
+| patrickspowerfulpresentations `.skill` ZIP (SHA256 `89F0CF6A…165097`) | scout · incubating personal (2026-07-23) | `_incubator/scout/2026-07-23-patrickspowerfulpresentations/` | Whole-skill rubric ~4.43 → **incubate personal / stay gated**. Live `~/.agents/skills/patrickspowerfulpresentations/` + mirror `_incubator/personal-skills/patrickspowerfulpresentations/`. No plugins/manifests. Optional case `evals/cases/visual-deliverable-route.md`. |
+| audio-producer `.skill` ZIP (SHA256 `FF25FF85…2A53FC`) | scout · incubating personal (2026-07-23) | `_incubator/scout/2026-07-23-audio-producer/` | Whole-skill rubric ~4.36 → **incubate personal / stay gated** (not `_incubator/frozen-skills/` marketplace lane). Broadside `assets/example-*-broadside.md` = worked evidence. Live + `_incubator/personal-skills/audio-producer/`. Optional case `evals/cases/moment-reasoning-gate.md`. |
 | Parked / do not adopt | discarded · noted 2026-07-21 | — | **Flux skills** (
 luxcd/agent-skills, Aidas
 lux router, gitops-cluster-debug) — wrong reconciler for coldaine-k8cluster. Whole Aidas dump; kubectl-MCP packs; clouddrove/Jeffallan/sickn33/wshobson mutate cookbooks; Omni-as-CAPMOX; kagent apply-after-generate. |
@@ -176,8 +179,15 @@ UPID. Exact power, snapshot, migration, and task commands are in the shipped ref
   `skill-injector`. Re-registered in all four marketplace catalogs, flagged `experimental` / UNTESTED.
 - **Still NOT installed or enabled** anywhere (`~/.claude/settings.json`, `~/.claude.json`, this repo — no
   `enabledPlugins`). The hooks do **not** run; it is dormant code until someone installs + enables the plugin.
-- **TODO before relying on it:** test end-to-end; then finish the rename internally — the Python scripts/module
-  (`skill_classifier.py`), the env vars (`SKILL_CLASSIFIER_*`), the ADRs, and the SKILL.md/README prose still say
+- **Owner revisit decision (2026-07-27):** Codex has recently been launching hooks reliably enough that a
+  Codex-native `skill-injector` adapter is worth reevaluating. This is future qualification work, not evidence that
+  the current Claude-oriented hook wiring works in Codex and not authorization to install or enable it yet.
+- **Codex revisit gates:** inspect the then-current Codex hook contract and payloads; implement a dedicated Codex
+  adapter instead of assuming Claude event names or `CLAUDE_PLUGIN_ROOT`; prove actual execution with prompt-routing
+  and subagent-review fixtures; keep local-only inference as the safe default and require explicit opt-in before any
+  prompt or transcript context can reach a remote model; then decide whether Codex marketplace exposure is justified.
+- **TODO before relying on it:** complete that end-to-end qualification and finish the rename internally — the Python
+  scripts/module (`skill_classifier.py`), env vars (`SKILL_CLASSIFIER_*`), ADRs, and SKILL.md/README prose still say
   "classifier". Left as-is for now to avoid breaking the untested hook wiring.
 
 ### `icepanel-api` — incubating
@@ -190,6 +200,24 @@ UPID. Exact power, snapshot, migration, and task commands are in the shipped ref
 - **Fidelity gap (adversarial review 2026-07-16):** `schemas.md` enums/required-field lists and the response keys in
   `examples.md` (`{url,defaultUrl,shareLink}`, `.diagramExportImage.id`, `fileUrls.png`) are hand-transcribed and not
   yet diffed against the live IcePanel OpenAPI. Verify each against a real response before promotion.
+
+### `codex-thread-organizer` — active, Codex-only
+
+- Native Codex workflow for body-derived sidebar titles, same-repository relevance review, and periodic organization.
+- Sparse prefix grammar: one to five semantic symbols, normally one to three; never pad to five. `✅` requires direct
+  completion evidence and is not inferred from an assistant's claim.
+- **Packaging decision:** active for the Codex consumer only. Source lives in the dedicated
+  `plugins/codex-thread-organizer/` package, the Codex lane/package list in `plugins/distribution.json` selects it, and
+  only the Codex marketplace exposes that package. It is physically outside the shared `frozen-skills` package, so
+  Claude, Cursor, and Gemini must not receive it. Installation still requires an explicit
+  Codex-targeted sync or Codex-native installer; repository landing does not create its periodic automation.
+- **Title qualification:** a 2026-07-18 user-authorized two-task Unicode trial persisted both semantic emoji titles
+  exactly. A 2026-07-20 body-reviewed batch inspected 50 tasks, renamed 49, and independently matched 50/50 final
+  titles; it also established the empirical 60 UTF-16-unit ceiling. No archive, pin, content, or direct-store change
+  occurred. The owner confirmed satisfaction and directed Codex-only promotion on 2026-07-27.
+- **Residual before enabling periodic automation:** run the trigger eval protocol, complete
+  one proposal-only repository-family relevance review, and complete one proposal-only periodic dry run with checkpoint
+  recovery. Keep the skill Codex-only unless the owner explicitly changes that boundary.
 
 ---
 
@@ -237,8 +265,30 @@ marketplace-promoted — not “leave uncommitted.” Full contract: `docs/workf
 | `skill-finder` | **provenance unconfirmed** | 🛑 gated · confirm origin | Confirm authored vs downloaded. |
 | `context7-mcp` | **provenance unconfirmed** | 🛑 gated · thin/redundant? | Likely overlaps global `~/.claude/rules/context7.md` — decide keep/drop. |
 | `google-stitch-ui-designer` | **provenance unconfirmed** | 🛑 gated · confirm origin | External-tool guide; confirm authored vs downloaded. |
+| `patrickspowerfulpresentations` | `.skill` ZIP intake 2026-07-23 (Downloads; scout `2026-07-23-patrickspowerfulpresentations`; SHA256 `89F0CF6A…165097`) | 🛑 gated · **incubating** (2026-07-23) | Stay personal/gated. Optional live visual-deliverable eval. De-brand + ~300-char description only if later considering broader reuse. Stay out of marketplace manifests and `_incubator/frozen-skills/`. |
+| `audio-producer` | `.skill` ZIP intake 2026-07-23 (Downloads; scout `2026-07-23-audio-producer`; SHA256 `FF25FF85…2A53FC`); Broadside examples = worked evidence | 🛑 gated · **incubating** (2026-07-23) | Stay personal/gated. Live Unity+ElevenLabs sound-pass later. Keep Broadside `assets/example-*-broadside.md` as worked evidence. De-personalize / second-project proof only if considering broader reuse. Do **not** move to `_incubator/frozen-skills/`. |
 
-Next pass: confirm provenance on the 5 unconfirmed, fix `insight-extractor` frontmatter, then decide which earn promotion toward active (each needs de-personalization + manifest entries + version bump per the promotion bar).
+Next pass: confirm provenance on the 5 unconfirmed, fix `insight-extractor` frontmatter, then decide which earn promotion toward active (each needs de-personalization, an approved shared/dedicated package, a `plugins/distribution.json` entry, and version bump per the promotion bar).
+
+
+### `patrickspowerfulpresentations` — incubating (`.skill` intake, 2026-07-23)
+
+- **Source:** local package `local Downloads/patrickspowerfulpresentations.skill` (ZIP handoff; 40568 bytes). SHA256 `89F0CF6AC9F2A305B337BFDC6F303B4AAE7FB075D6BDFB2452FBBBBBF1165097`. License undeclared. No public git URL in package.
+- **Scout:** `_incubator/scout/2026-07-23-patrickspowerfulpresentations/` — inventory, whole-skill rubric, decision log, optional case `evals/cases/visual-deliverable-route.md` (no three-way promotion eval).
+- **Rubric:** whole-skill average **~4.43** (band 3.5–4.4: useful; cleanup/eval before any active packaging). Strong triggers, Phase 0 decline path, progressive disclosure; brand name + large style-brief argue against marketplace.
+- **Packaging decision:** **incubate personal / stay gated**. Landed identical trees at live `~/.agents/skills/patrickspowerfulpresentations/` and `_incubator/personal-skills/patrickspowerfulpresentations/`. **Not** `_incubator/frozen-skills/`; no plugin/marketplace manifests.
+- **Stay-gated rationale:** personal visual-deliverable workflow (branded title, web-toolchain preferences, maintenance surface). Operator evaluation ownership in frozenSkillz without catalog promotion.
+- **Required before any promotion attempt:** live visual-deliverable case; de-brand; trim description to ~300-char bar; three-way eval if considering active packaging.
+
+### `audio-producer` — incubating (`.skill` intake, 2026-07-23)
+
+- **Source:** local package `local Downloads/audio-producer.skill` (ZIP handoff; 26607 bytes). SHA256 `FF25FF85760E3474BE9B978C0E218B3BCCD5049A8C87B5861AF965A4A62A53FC`. License undeclared.
+- **Scout:** `_incubator/scout/2026-07-23-audio-producer/` — inventory, whole-skill rubric, decision log, optional case `evals/cases/moment-reasoning-gate.md` (no three-way promotion eval).
+- **Rubric:** whole-skill average **~4.36**. High gate quality (six-field reasoning before generate; Master Log + Review Checklist); honestly Unity + ElevenLabs MCP locked.
+- **Broadside evidence:** `assets/example-walk-broadside.md`, `example-profile-broadside.md`, and `example-sound-design-broadside.md` are **worked evidence** from Project Broadside (same operator pattern as `unity-editor-mcp`), not portable defaults to strip this pass.
+- **Packaging decision:** **incubate personal / stay gated**. Live `~/.agents/skills/audio-producer/` + `_incubator/personal-skills/audio-producer/`. Explicitly **not** the `_incubator/frozen-skills/` marketplace-candidate lane; no manifests; do not run `sync_frozen_skills.py` for this skill.
+- **Stay-gated rationale:** MCP/tool lock + Broadside-coupled examples make catalog promotion premature; personal lane matches authority model for gated skills under evaluation.
+- **Required before any broader-reuse attempt:** live Unity+ElevenLabs sound-pass; second-project proof before de-personalization; keep Broadside examples labeled as evidence.
 
 ### PR #35 review findings (routed 2026-07-06)
 
