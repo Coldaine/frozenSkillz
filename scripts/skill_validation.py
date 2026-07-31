@@ -11,7 +11,9 @@ SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 FRONTMATTER_FIELD_PATTERN = re.compile(
     r"^([A-Za-z][A-Za-z0-9_-]*):(?:[ \t]*(.*))?$"
 )
-BLOCK_SCALAR_HEADER_PATTERN = re.compile(r"^[>|][+-]?$")
+BLOCK_SCALAR_HEADER_PATTERN = re.compile(
+    r"^[>|](?:[1-9][+-]?|[+-][1-9]?|)$"
+)
 RESOURCE_REFERENCE_PATTERN = re.compile(
     r"`((?:references|templates|scripts|assets)/[^`\r\n]+)`"
     r"|\]\(((?:references|templates|scripts|assets)/[^)\s]+)\)"
@@ -69,8 +71,12 @@ def _parse_frontmatter_fields(lines: list[str]) -> dict[str, str]:
                 block_parts.append(line.strip())
                 continue
             flush_block()
-        if not line.strip() or line.lstrip().startswith("#") or line[0].isspace():
+        if not line.strip() or line.lstrip().startswith("#"):
             continue
+        if line[0].isspace():
+            raise SkillMetadataError(
+                f"unexpected indented line in frontmatter: {line!r}"
+            )
         match = FRONTMATTER_FIELD_PATTERN.fullmatch(line)
         if not match:
             raise SkillMetadataError(f"invalid YAML frontmatter line: {line!r}")

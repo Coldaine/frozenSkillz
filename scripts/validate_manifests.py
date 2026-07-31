@@ -1,10 +1,34 @@
+import importlib.util
 import json
+import sys
 from pathlib import Path
 
-try:
-    from skill_validation import SkillMetadataError, validate_skill_metadata
-except ModuleNotFoundError:  # Imported as part of the scripts package
-    from scripts.skill_validation import SkillMetadataError, validate_skill_metadata
+
+def _load_skill_validation():
+    """Load skill_validation from this script's directory.
+
+    Anchoring to ``__file__`` guarantees the sibling module wins even when a
+    third-party ``skill_validation`` package is installed in site-packages or
+    this script is imported from an arbitrary working directory.
+    """
+
+    module_name = "frozenskillz_skill_validation"
+    cached = sys.modules.get(module_name)
+    if cached is not None:
+        return cached
+    module_path = Path(__file__).resolve().parent / "skill_validation.py"
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load skill_validation from {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+_skill_validation = _load_skill_validation()
+SkillMetadataError = _skill_validation.SkillMetadataError
+validate_skill_metadata = _skill_validation.validate_skill_metadata
 
 
 PLUGIN_MANIFESTS = [

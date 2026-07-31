@@ -1,6 +1,7 @@
 import importlib.util
 import io
 import json
+import re
 import sys
 import tempfile
 import unittest
@@ -134,6 +135,56 @@ class SkillMetadataValidationTests(unittest.TestCase):
         result, _ = self.validate()
         self.assertTrue(result)
 
+    def test_block_scalar_with_indentation_indicator_passes(self):
+        for header in (">2-", "|2", ">-2", "|+1"):
+            with self.subTest(header=header):
+                (self.skill / "SKILL.md").write_text(
+                    "---\n"
+                    "name: alpha\n"
+                    f"description: {header}\n"
+                    "  Use when testing block scalar headers\n"
+                    "  with explicit indentation indicators.\n"
+                    "---\n\n# Alpha\n",
+                    encoding="utf-8",
+                )
+
+                result, output = self.validate()
+                self.assertTrue(result, output)
+
+    def test_stray_indented_line_outside_block_scalar_fails(self):
+        (self.skill / "SKILL.md").write_text(
+            "---\n"
+            "name: alpha\n"
+            "description: Test skill.\n"
+            "  stray continuation line\n"
+            "---\n",
+            encoding="utf-8",
+        )
+
+        result, output = self.validate()
+        self.assertFalse(result)
+        self.assertIn("unexpected indented line", output)
+
+    def test_empty_description_fails(self):
+        (self.skill / "SKILL.md").write_text(
+            "---\nname: alpha\ndescription:\n---\n",
+            encoding="utf-8",
+        )
+
+        result, output = self.validate()
+        self.assertFalse(result)
+        self.assertIn("'description'", output)
+
+    def test_unexpected_frontmatter_field_fails(self):
+        (self.skill / "SKILL.md").write_text(
+            "---\nname: alpha\ndescription: Test skill.\nauthor: someone\n---\n",
+            encoding="utf-8",
+        )
+
+        result, output = self.validate()
+        self.assertFalse(result)
+        self.assertIn("unexpected frontmatter field", output)
+
     def test_missing_frontmatter_fails_manifest_validation(self):
         (self.skill / "SKILL.md").write_text("# Alpha\n", encoding="utf-8")
 
@@ -186,6 +237,31 @@ class SkillMetadataValidationTests(unittest.TestCase):
         result, output = self.validate()
         self.assertFalse(result)
         self.assertIn("missing YAML frontmatter", output)
+
+
+class DopplerReferenceHygieneTests(unittest.TestCase):
+    BANNED_CONFIGURE_PATTERN = re.compile(
+        r"doppler configure(?!\s+(?:get|unset)\b)"
+    )
+
+    def test_doppler_docs_avoid_token_revealing_configure_commands(self):
+        doppler_root = (
+            Path(__file__).resolve().parents[1]
+            / "plugins/frozen-skills/skills/doppler"
+        )
+        offenders = []
+        for markdown in sorted(doppler_root.rglob("*.md")):
+            for line_number, line in enumerate(
+                markdown.read_text(encoding="utf-8").splitlines(), start=1
+            ):
+                if self.BANNED_CONFIGURE_PATTERN.search(line):
+                    offenders.append(f"{markdown}:{line_number}: {line.strip()}")
+        self.assertEqual(
+            [],
+            offenders,
+            "bare/debug/--all configure display commands can reveal the saved "
+            "CLI token; query non-secret options explicitly",
+        )
 
 
 if __name__ == "__main__":
