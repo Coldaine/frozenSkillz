@@ -74,13 +74,16 @@ the verdict change here. Verdicts:
   and its top reads are the superpowers pack in `~/.codex/plugins/cache/`:
   `using-superpowers` (622 sessions), `verification-before-completion` (306 — the
   "Iron Law" evidence register). Lever: operational-mode override in `~/.codex/AGENTS.md`
-  (**not yet applied**) or prune the skill from the cache.
+  (applied 2026-07-30, with the PR self-review loop scoped to substantial changes).
 - **Net-negative:** `git-master` (opencode; 5× failure signals, −27 health — slim it),
   `shared/ulw-plan` (22× loop in one session), `issue-pr-review` (killed 2026-07-28),
   `code-review` (7× edit churn).
 - **Earning their keep:** `doppler`, `project-docs`, `chat-history` (content good; trigger
-  breadth was the problem — narrowing **not yet applied**), `parallel-web-search`, `canvas`,
-  `create-hook`.
+  breadth was the problem — narrowed to forensic-only 2026-07-30, live + mirror),
+  `parallel-web-search`, `canvas`, `create-hook`.
+- **`git-master`:** not a Codex skill — an `oh-my-openagent` built-in, opencode-only. The
+  version that measured −27 health (worktree/prefix ceremony) has since been rewritten; the
+  current shipped version is conservative. Watch the next scorecard run before more surgery.
 - **Cruft:** `rich-visual-responses` (cosmetic), `context7-mcp` (counts inflated by
   meta-review sessions), 46% of all skills fired exactly once, ~10 re-implementations of
   the same planning skill (ralplan/hyperplan/ulw-plan/ultragoal) — consolidate.

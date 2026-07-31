@@ -1,6 +1,6 @@
 ---
 name: chat-history
-description: Use when the user asks to find, reconstruct, audit, compare, or evaluate prior AI chat transcripts, session logs, rollout history, or what happened earlier in a conversation.
+description: Use for forensic work on prior AI session transcripts - reconstructing disputed or unclear past events, auditing or comparing completed agent runs, or evaluating session logs as evidence. Not for casual recall of recent context ("what did we do last week") - answer those directly.
 ---
 
 # Chat History
