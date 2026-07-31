@@ -5,3 +5,5 @@ __pycache__/
 # Local agent/tooling state — never committed
 .omc/
 .opencode/
+tools/session-review/.work/
+tools/session-review/state.json
