@@ -89,6 +89,18 @@ kagent apply-after-generate (revisit after CAPI/CAPMOX/Flux is stable).
 
 Scouts:
 
+- danilo-aguiar-br/context7-cli — scout · **adopt-as-external-tool** (2026-07-31,
+  owner-requested). Snapshot at `_incubator/scout/2026-07-31-context7-cli/` pinned to
+  v0.5.2 / `e2f1935`. Rust CLI for the Context7 REST API with multi-key rotation
+  (`CONTEXT7_API_KEYS=a,b,c` → shuffle + exponential backoff) — directly fixes the
+  quota-blocking that sank `context7-mcp`. Security read clean: sole endpoint
+  `context7.com/api`, zero process execution, no build.rs, zeroize'd keys, crates.io
+  package matches repo. Young/unvetted (0 stars, single-day upload) → binary built from
+  the reviewed snapshot, version pinned, re-review any update. Consumed by the
+  `context7-mcp` full rewrite in
+  [#71](https://github.com/Coldaine/frozenSkillz/issues/71); key rotation is ToS-gray
+  (multiplies free-tier quota) — owner's call, recorded in the scout's `analysis.md`.
+
 - Rylaa/fable5-opus5-orchestrator — scout · adapt-concept-only (2026-07-31).
   Snapshot at `_incubator/scout/2026-07-31-rylaa-fable5-opus5-orchestrator/`;
   tmux layer discarded. Live eval under its `evals/runs/` required before any
