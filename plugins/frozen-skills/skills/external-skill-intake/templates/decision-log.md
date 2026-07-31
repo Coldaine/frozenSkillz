@@ -12,7 +12,7 @@
 
 - Inventory summary:
 - Rubric score summary:
-- Eval run paths:
+- Evaluation mode and evidence paths:
 - Safety notes:
 - Maintenance notes:
 
