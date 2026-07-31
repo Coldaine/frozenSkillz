@@ -53,6 +53,14 @@ de-personalized.
 
 ## Intake queue
 
+- `obra/superpowers` `v6.1.1` (`d884ae04edebef577e82ff7c4e143debd0bbec99`) — scout,
+  forensic review in progress at `_incubator/scout/2026-07-23-obra-superpowers/`.
+  Pinned 172-file source and 14-skill doctree. `brainstorming` reviewed B- with moderate
+  confidence. `dispatching-parallel-agents` revised to B- after an AgentsView audit found
+  direct successful and failed Codex uses; confidence is strong for observed Codex
+  behavior and moderate cross-harness. Remaining 12 skills are intentionally ungraded
+  pending one-at-a-time review.
+
 Kubernetes adopt shortlist (premise corrected 2026-07-23 — coldaine-homelab
 reconciles via Flux, not Helmfile; re-scored in
 [coldaine-homelab#92](https://github.com/Coldaine/coldaine-homelab/issues/92),
@@ -72,6 +80,13 @@ closed 2026-07-25). Every external repo below goes through
 Parked regardless of reconciler: whole Aidas dump; kubectl-MCP packs;
 clouddrove/Jeffallan/sickn33/wshobson mutate cookbooks; Omni-as-CAPMOX;
 kagent apply-after-generate (revisit after CAPI/CAPMOX/Flux is stable).
+
+Scouts:
+
+- Rylaa/fable5-opus5-orchestrator — scout · adapt-concept-only (2026-07-31).
+  Snapshot at `_incubator/scout/2026-07-31-rylaa-fable5-opus5-orchestrator/`;
+  tmux layer discarded. Live eval under its `evals/runs/` required before any
+  Component A pattern lands in `plugins/` or `docs/`.
 
 ## Fleet effectiveness review
 
