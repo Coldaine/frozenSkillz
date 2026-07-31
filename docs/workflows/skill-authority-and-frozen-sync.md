@@ -118,7 +118,7 @@ A deploy script, service unit, or standing runtime that pins a specific
 frozenSkillz commit for its sync must pin a commit reachable from `main`. A pin
 that only resolves on an unmerged or abandoned branch is not reviewed
 distribution: when that branch is deleted the consumer's sync fails, and until
-then it is running content no review gate approved.
+then it is running content that no review gate ever approved.
 
 ## Editing and Promotion Flow
 
