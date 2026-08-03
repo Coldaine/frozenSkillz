@@ -32,6 +32,12 @@ class SyncCodexGlobalConfigTests(unittest.TestCase):
             'developer_instructions = "Use Chrome."\n',
             encoding="utf-8",
         )
+        (self.source / "agents/history-researcher.toml").write_text(
+            'name = "history_researcher"\n'
+            'description = "History worker"\n'
+            'developer_instructions = "Localize, then analyze."\n',
+            encoding="utf-8",
+        )
         self.codex_home = self.root / ".codex"
         self.codex_home.mkdir()
 
@@ -47,13 +53,17 @@ class SyncCodexGlobalConfigTests(unittest.TestCase):
 
         changes, transaction = self._apply()
 
-        self.assertEqual(2, len(changes))
+        self.assertEqual(3, len(changes))
         self.assertIsNotNone(transaction)
         result = target.read_text(encoding="utf-8")
         self.assertIn("# Existing policy", result)
         self.assertIn(sync_module.START_MARKER, result)
         state = sync_module._load_state(self.codex_home)
         self.assertIn("AGENTS.md#browser-delegation", state["managed"])
+        self.assertIn("agents/history-researcher.toml", state["managed"])
+        self.assertTrue(
+            (self.codex_home / "agents/history-researcher.toml").is_file()
+        )
 
     def test_apply_adopts_matching_unmarked_fragment_without_duplication(self):
         target = self.codex_home / "AGENTS.md"
@@ -102,7 +112,7 @@ class SyncCodexGlobalConfigTests(unittest.TestCase):
         changes, conflicts, _state = sync_module.plan(self.source, self.codex_home)
 
         self.assertEqual([], conflicts)
-        self.assertEqual(2, len(changes))
+        self.assertEqual(3, len(changes))
         self.assertEqual("unchanged\n", target.read_text(encoding="utf-8"))
 
     def test_rollback_restores_shared_file_and_removes_created_agent(self):
@@ -115,6 +125,7 @@ class SyncCodexGlobalConfigTests(unittest.TestCase):
 
         self.assertEqual("original\n", target.read_text(encoding="utf-8"))
         self.assertFalse((self.codex_home / "agents/chrome-pilot.toml").exists())
+        self.assertFalse((self.codex_home / "agents/history-researcher.toml").exists())
         self.assertFalse(
             (self.codex_home / sync_module.MANAGEMENT_ROOT / sync_module.STATE_FILE).exists()
         )

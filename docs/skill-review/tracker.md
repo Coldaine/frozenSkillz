@@ -34,7 +34,7 @@ de-personalized.
 
 | Skill | Next action |
 |---|---|
-| `chat-history` | Current personal skill; thin semantic-localization router outlined 2026-08-03. Pieces localizes unknown/browser chats; KCap provides repo/project reasoning; AgentsView provides broad local/fleet retrieval and heuristic signals; large semantic review delegates bounded session sets. Live copy synchronized; forward-test the completed reference routes before promotion. |
+| `chat-history` | Current personal skill; staged semantic-localization router implemented 2026-08-03. One or two `history_researcher` workers localize through KCap, AgentsView, and Pieces, return brief candidate maps, then resume for bounded analysis written to temporary Markdown artifacts. Live copy synchronized; custom-agent profile uses Luna/medium/fast and the reviewed global-config lane. Forward-test the installed named agent before promotion. |
 | `retrospective` | Revived 2026-07-31 (owner overruled deletion — key skill): timeline script now covers all harnesses via AgentsView `--db` mode; needs trigger decision (see SKILL.md Triggering); then de-personalize. |
 | `project-docs` | Gated pending de-personalization. |
 | `skill-install` | Verify recipes. |

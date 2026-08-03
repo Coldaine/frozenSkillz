@@ -25,6 +25,7 @@ END_MARKER = "<!-- frozenSkillz:browser-delegation:end -->"
 MANAGEMENT_ROOT = Path(".frozenSkillz/codex-global-config")
 STATE_FILE = "state.json"
 STATE_SCHEMA = 1
+AGENT_FILES = ("chrome-pilot.toml", "history-researcher.toml")
 
 
 class ConfigError(RuntimeError):
@@ -150,18 +151,21 @@ def _source_revision(source: Path) -> str:
 
 def plan(source: Path, codex_home: Path) -> tuple[list[Change], list[str], dict]:
     fragment = _read(source / "AGENTS.browser-delegation.md")
-    agent = _read(source / "agents/chrome-pilot.toml")
-    try:
-        agent_config = tomllib.loads(agent)
-    except tomllib.TOMLDecodeError as exc:
-        raise ConfigError(f"Cannot parse chrome-pilot.toml: {exc}") from exc
     required_agent_keys = {"name", "description", "developer_instructions"}
-    missing_agent_keys = required_agent_keys - agent_config.keys()
-    if missing_agent_keys:
-        raise ConfigError(
-            "chrome-pilot.toml is missing required keys: "
-            + ", ".join(sorted(missing_agent_keys))
-        )
+    agents: dict[str, str] = {}
+    for agent_file in AGENT_FILES:
+        agent = _read(source / "agents" / agent_file)
+        try:
+            agent_config = tomllib.loads(agent)
+        except tomllib.TOMLDecodeError as exc:
+            raise ConfigError(f"Cannot parse {agent_file}: {exc}") from exc
+        missing_agent_keys = required_agent_keys - agent_config.keys()
+        if missing_agent_keys:
+            raise ConfigError(
+                f"{agent_file} is missing required keys: "
+                + ", ".join(sorted(missing_agent_keys))
+            )
+        agents[f"agents/{agent_file}"] = agent
     state = _load_state(codex_home)
     recorded = state["managed"]
 
@@ -189,26 +193,32 @@ def plan(source: Path, codex_home: Path) -> tuple[list[Change], list[str], dict]
             )
         )
 
-    agent_target = codex_home / "agents/chrome-pilot.toml"
-    _reject_symlink_path(agent_target, codex_home)
     _reject_symlink_path(codex_home / MANAGEMENT_ROOT / STATE_FILE, codex_home)
-    current_agent = _read(agent_target) if agent_target.exists() else None
-    prior_agent_digest = recorded.get("agents/chrome-pilot.toml")
-    if current_agent != agent:
-        if current_agent is not None and (
-            prior_agent_digest is None or _digest(current_agent) != prior_agent_digest
-        ):
-            conflicts.append(f"unmanaged or locally modified agent file: {agent_target}")
-        changes.append(Change("agents/chrome-pilot.toml", agent_target, current_agent, agent))
+    for key, agent in agents.items():
+        agent_target = codex_home / key
+        _reject_symlink_path(agent_target, codex_home)
+        current_agent = _read(agent_target) if agent_target.exists() else None
+        prior_agent_digest = recorded.get(key)
+        if current_agent != agent:
+            if current_agent is not None and (
+                prior_agent_digest is None or _digest(current_agent) != prior_agent_digest
+            ):
+                conflicts.append(
+                    f"unmanaged or locally modified agent file: {agent_target}"
+                )
+            changes.append(Change(key, agent_target, current_agent, agent))
+
+    managed = {"AGENTS.md#browser-delegation": _digest(desired_block)}
+    managed.update({key: _digest(agent) for key, agent in agents.items()})
+    source_content = [fragment]
+    for key, agent in agents.items():
+        source_content.extend((key, agent))
 
     next_state = {
         "schema": STATE_SCHEMA,
         "source_revision": _source_revision(source),
-        "source_digest": _digest(fragment + "\0" + agent),
-        "managed": {
-            "AGENTS.md#browser-delegation": _digest(desired_block),
-            "agents/chrome-pilot.toml": _digest(agent),
-        },
+        "source_digest": _digest("\0".join(source_content)),
+        "managed": managed,
     }
     return changes, conflicts, next_state
 
