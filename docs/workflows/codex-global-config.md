@@ -88,6 +88,13 @@ and configured model. Treat a generic child whose task is merely named
 If the active adapter exposes no named-agent selector, report that runtime boundary;
 do not claim that the profile was used based only on its filename or task label.
 
+Runtime activation was verified on 2026-08-03 with Codex CLI 0.146.0 by starting an
+ephemeral `codex exec` session and dispatching a bounded Chrome task to the exact
+`chrome_pilot` custom-agent type. Codex discovered the named profile, spawned that
+type without a full-history fork, and the worker returned the title of the page it
+opened. This confirms the installed profile is runtime-loadable; repeat the bounded
+probe after changing the profile or upgrading Codex.
+
 ## Design references
 
 - [Codex subagents](https://developers.openai.com/codex/subagents/): native custom-agent locations, schema, inheritance, and activation.
