@@ -97,6 +97,12 @@ type without a full-history fork, and the worker returned the title of the page 
 opened. This confirms the installed profile is runtime-loadable; repeat the bounded
 probe after changing the profile or upgrading Codex.
 
+The same runtime was used on 2026-08-03 to dispatch the exact `history_researcher` type in
+`LOCALIZE` mode without a full-history fork. The worker loaded the installed `chat-history` skill,
+wrote the assigned temporary Markdown artifact, and returned only its brief status and path. Named
+custom-agent selection rejected a full-history fork before the successful retry, so coordinator
+instructions must provide a complete brief and use no full-history fork.
+
 ## Design references
 
 - [Codex subagents](https://developers.openai.com/codex/subagents/): native custom-agent locations, schema, inheritance, and activation.

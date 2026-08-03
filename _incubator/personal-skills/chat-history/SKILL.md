@@ -28,6 +28,8 @@ provider reference reached by the route.
 ## Staged delegation contract
 
 Use the `history_researcher` custom agent. It has two modes: `LOCALIZE` and `ANALYZE`.
+Spawn the named custom agent without a full-history fork; give it a complete task brief instead.
+Named custom-agent selection is incompatible with inheriting the parent's full conversation.
 
 Before dispatching, create one temporary run directory outside the repository. Give every worker an
 exact, unique Markdown output path inside that directory. Workers write the substantive candidate
