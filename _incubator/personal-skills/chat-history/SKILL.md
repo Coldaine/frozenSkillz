@@ -1,112 +1,146 @@
 ---
 name: chat-history
-description: Retrieve and analyze prior AI-agent conversations across Codex, Claude Code, Cursor, OpenCode, and other harnesses. Use when a request depends on past sessions, such as locating a decision, reconstructing earlier work, comparing runs, or reviewing recurring outcomes. Prefer AgentsView; use Pieces for web-chat localization and raw transcript parsers only for recovery gaps.
+description: Route retrieval and analysis of prior AI-agent conversations across local harnesses, project-centered monitors, fleet archives, and browser-app history. Use for locating past discussions, recalling decisions or unfinished work, comparing sessions, reconstructing disputed events, reviewing implementation reasoning, or analyzing session patterns. Localize semantically, scope progressively, and delegate large transcript reading.
 ---
 
 # Chat History
 
-## Operating principle
+## Goal
 
-Get the needed context quickly from the indexed conversation archive. Do not manually parse
-per-harness transcript formats when AgentsView can search and retrieve the same sessions.
+Recover the useful part of prior conversations without loading or parsing the whole corpus.
+Treat chat history as a retrieval source, not as automatic audit mode.
 
-Do not add evidence ladders, coverage matrices, durable reports, or forensic labels unless the
-user explicitly requests an audit, acceptance review, or exact reconstruction of a disputed event.
-For recent context already visible in the active conversation, answer directly without invoking
-this skill's retrieval workflow.
+## Routing checklist
 
-## Primary route: AgentsView
+Before searching, classify the request:
 
-Prefer the AgentsView MCP tools when they are available:
+- **Task:** locate a conversation, recall what happened, continue work, compare runs, review why code
+  changed, reconstruct an exact event, or analyze usage/health.
+- **Scope known:** current project/repository, another project, all projects, agent, machine, person,
+  time window, session ID, continuation chain, PR, or file.
+- **Likely surface:** indexed coding-agent session, project monitor, browser-based chat, or unknown.
+- **Retrieval need:** thematic/semantic discovery, known exact anchor, summary, turn map, transcript
+  window, or aggregate metric.
+- **Size:** one turn, one session, a few candidates, or a large corpus.
 
-1. Use `search_content` or `search_sessions` to find candidate sessions.
-2. Use `get_session_overview` to check each candidate's project, agent, time, and scope.
-3. Use `get_messages` around the matching ordinals to read the relevant conversation.
-4. Use `get_usage_summary` only when the request concerns cost or token use.
+Do not silently turn a history lookup into a forensic audit. Add exact reconstruction, quotations,
+proof-of-absence work, or durable artifacts only when the request calls for them.
 
-Otherwise use the AgentsView CLI. Resolve it from `PATH`, then use the standard Windows install
-location if necessary:
+## Decision tree
 
-```powershell
-$agentsView = (Get-Command agentsview -ErrorAction SilentlyContinue).Source
-if (-not $agentsView) {
-    $agentsView = Join-Path $env:LOCALAPPDATA 'AgentsView\agentsview.exe'
-}
-
-& $agentsView session search 'exact phrase or topic' --json --context 3 --include-children
-& $agentsView session list --project 'project-name' --since 30d --json
-& $agentsView session get '<session-id>' --json
-& $agentsView session messages '<session-id>' --around 42 --before 8 --after 12 --json
+```text
+Is the answer already visible in the current conversation?
+├─ yes → answer directly
+└─ no
+   ├─ Known session, PR, file, or continuation chain?
+   │  └─ map summaries/turns first → delegate large reads → open only relevant turns
+   └─ Location unknown
+      ├─ Pieces available or likely browser-app discussion?
+      │  └─ localize app/project/time/title → continue in a transcript index
+      └─ query semantic session indexes
+         ├─ project/repo-centered → Kurrent Capacitor
+         ├─ broad local/fleet/cross-harness → AgentsView
+         └─ use both when coverage is uncertain
+            ↓
+      scope candidates progressively → delegate semantic review → drill into exact turns
+            ↓
+      repair ingestion or use raw recovery only if indexed routes cannot supply the content
 ```
 
-Use the search filters to reduce the result set before reading messages: `--project`, `--agent`,
-`--machine`, `--date`, `--date-from`, `--date-to`, `--since`, `--include-children`,
-`--include-one-shot`, and `--include-automated`. Use `--fts` for fast tokenized search,
-`--regex` for known variants, and `--semantic` or `--hybrid` when exact wording is unknown.
-Keep `--limit` small until the query is well targeted so large JSON responses do not obscure the
-useful matches. If a project filter returns suspiciously few results, run `agentsview projects` or
-search without the filter; project labels can differ by harness and may use hyphens or underscores.
+## Search doctrine
 
-Use `--pg` when the configured PostgreSQL archive has broader fleet coverage than the local
-archive. Do not assume configured enrollment or credentials prove that every machine is actively
-syncing.
+Treat discovery as a semantic problem. The user's current terminology may never appear in the
+relevant conversation, and the important passage may describe the same decision through symptoms,
+actions, corrections, files, people, or outcomes.
 
-If the daemon is performing an initial sync, inspect it with:
+- Start with a natural-language description of what the conversation was *about*.
+- Use semantic or hybrid retrieval and session summaries before exact keyword search.
+- Use exact search only when a stable anchor is known: an error string, PR, issue, file, host,
+  session ID, quoted phrase, or command.
+- Do not begin by running `rg` over raw transcript trees. Raw logs contain nested tool output,
+  duplicated compacted history, system text, and huge false-positive payloads.
+- Scope progressively. Find plausible candidates before narrowing by project, repo, agent, machine,
+  or date; then verify that the scope labels match the harness's naming.
+- Treat every relevance score, health grade, outcome label, semantic rank, and generated summary as
+  routing data. None proves that a session is correct, successful, important, or responsive to the
+  user's present question.
 
-```powershell
-& $agentsView daemon status
-& $agentsView doctor sync
-```
+## Tool routes
 
-Allow normal indexing to finish or query the configured PostgreSQL archive. Do not switch to raw
-JSONL parsing merely because the first daemon-backed query is still warming up.
+| Surface | Use it for | Do not assume |
+|---|---|---|
+| Pieces MCP, when available | Localize an unknown or browser-app conversation by surrounding activity, app, title, time, and project clues | OCR, titles, URLs, or relevance scores are the conversation body |
+| Kurrent Capacitor | Repo/project-centered semantic session search, summaries, turn maps, continuation chains, PR/file reasoning, and exact transcript windows | Projects or analytics are enabled on every server/plan; generated summaries or evals are ground truth |
+| AgentsView | Broad cross-harness local or fleet search, local/PG/remote archives, semantic/hybrid retrieval, message/tool windows, recall, and deterministic session signals | Health/outcome scores measure quality or user-visible success |
+| Raw source/parsers | Recover an unsupported, corrupt, or not-yet-indexed session after indexed routes fail | Raw parsing is a normal first step |
 
-## Reading and synthesis
+Read [AgentsView surface](references/agentsview.md) only when that route is selected.
+Read [Kurrent Capacitor surface](references/kurrent-capacitor.md) only when that route is selected.
 
-For a targeted lookup, read only the matching session and message window. Search snippets locate
-content; the retrieved messages establish what the participants actually said and what happened
-next.
+## Delegation default
 
-For any multi-session comparison, retrospective, or pattern analysis, dispatch subagents by
-default after AgentsView produces a broad candidate set. If the archive narrows the question to two
-or three representative sessions, read them directly. Otherwise partition non-overlapping session
-IDs among subagents and ask each subagent to return:
+Lean on subagents because sessions and candidate sets are often too large for one context.
 
-- which sessions are relevant;
-- the decisions, corrections, actions, and outcomes that matter to the question;
-- the session IDs and message ordinals supporting those observations;
-- uncertainties or nearby false matches.
+After localization, keep candidate discovery and final reconciliation in the primary agent. Give
+subagents non-overlapping scopes by project, time window, session IDs, continuation chain, PR/file,
+or candidate cluster.
 
-Keep candidate discovery in the primary agent so every subagent receives a bounded set. The
-primary agent reconciles the returned summaries and answers the user's actual question. Do not
-dispatch subagents for a single known session, a two-or-three-session sample, or a small
-exact-message lookup.
+Prompt each reader with the semantic question, not only a keyword list. Ask it to return:
+
+- relevant and irrelevant candidate session IDs;
+- what the conversation was about in relation to the task;
+- decisions, corrections, actions, outcomes, and unresolved work;
+- the turns or transcript windows worth opening;
+- contradictions, uncertainty, and the next best candidate if the answer is incomplete.
+
+Use direct reading for one known short turn. For a long session, several candidates, broad
+retrospective, or cross-project question, dispatch readers by default before loading full
+transcripts into the primary context.
+
+## Task branches
+
+### Locate where something was discussed
+
+Localize first. Use Pieces when surrounding browser/desktop activity may identify the app, project,
+title, or time. Then search KCap and/or AgentsView semantically. Return the strongest location and
+why it matches; drill into the transcript only when the user needs the content too.
+
+### Recall, summarize, or continue work
+
+Start with the session summary and turn map. Follow continuation chains. Open the turns concerning
+the requested decision or unfinished work. Do not substitute a generated summary for the relevant
+turn when the distinction matters.
+
+### Compare sessions or run a retrospective
+
+Build a candidate set, then dispatch subagents across non-overlapping session groups. Compare actual
+requests, corrections, actions, and outcomes. Do not rank success from health scores alone.
+
+### Review why code, a PR, or a file changed
+
+Use KCap's PR/file reasoning routes when available, alongside the current diff and repository
+authority. Transcript reasoning explains intent; it does not establish code correctness.
+
+### Reconstruct a disputed or exact event
+
+Retrieve the narrow transcript windows and surrounding turns. Preserve speaker, sequence, session,
+and continuation context. Apply audit-style precision only because this branch requires it.
+
+### Analyze session health, usage, cost, or patterns
+
+Use AgentsView's deterministic signals and aggregate commands, or KCap analytics when the server
+supports them. State the metric definition. Treat heuristics, generated outcomes, semantic ranks,
+and LLM-as-judge evaluations as indicators requiring transcript or runtime interpretation.
 
 ## Fallback order
 
-Use fallbacks only when the preceding route cannot provide the requested content.
+1. Reframe the semantic query and try the alternate session index.
+2. Relax an over-specific project, agent, machine, or date filter.
+3. Check local versus fleet coverage, child sessions, continuation chains, and one-shot/automated
+   sessions.
+4. Repair indexing with the selected tool's sync/import/doctor route.
+5. Export the known raw session through the index.
+6. Use bundled raw parsers only for unsupported or inaccessible material.
 
-1. **Broaden AgentsView retrieval.** Try query variants, session filters, child/one-shot inclusion,
-   semantic or hybrid search, and the local-versus-PostgreSQL archive.
-2. **Repair an indexing gap.** Use `agentsview session sync <path-or-id>` for a known local source,
-   or `agentsview import` for a supported conversation export. Re-run the query afterward.
-3. **Locate external web-app chats with Pieces.** Use Pieces LTM when the conversation lived in
-   ChatGPT, Claude.ai, Gemini, or another browser application that AgentsView does not ingest.
-   Treat Pieces OCR, window titles, and URLs as localization hints. Open the strongest candidate
-   in the authenticated browser only when the actual body is needed.
-4. **Read the raw source through AgentsView.** Use `agentsview session export <session-id>` when an
-   exact source record or parser diagnosis is required.
-5. **Use bundled parsers as recovery tools.** Run `extract_chat_history.py` only when AgentsView is
-   unavailable or cannot ingest the relevant harness. Run `scripts/artifact_hunt.py` when the
-   target may be a nearby file, Chrome-history entry, or other artifact rather than a session.
-
-Do not build a parallel transcript index or rewrite harness parsers during an ordinary history
-lookup. If AgentsView repeatedly misses supported sessions, report the ingestion defect separately
-from the answer the user requested.
-
-## Response discipline
-
-Lead with the recovered information or retrospective conclusion. Include session IDs, timestamps,
-or short excerpts only when they help the user inspect a consequential claim. For negative results,
-briefly name the archive and filters searched plus any known ingestion gap; do not manufacture an
-exhaustive proof-of-absence ceremony.
+If all routes fail, report which indexed surfaces and scopes were tried and the concrete coverage
+gap. Do not manufacture an exhaustive proof-of-absence exercise unless explicitly requested.
