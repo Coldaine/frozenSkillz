@@ -25,7 +25,7 @@ END_MARKER = "<!-- frozenSkillz:browser-delegation:end -->"
 MANAGEMENT_ROOT = Path(".frozenSkillz/codex-global-config")
 STATE_FILE = "state.json"
 STATE_SCHEMA = 1
-AGENT_FILES = ("chrome-pilot.toml", "history-researcher.toml")
+AGENT_FILES = ("chrome-pilot.toml", "chat-history-researcher.toml")
 
 
 class ConfigError(RuntimeError):
@@ -37,7 +37,7 @@ class Change:
     key: str
     target: Path
     current: str | None
-    desired: str
+    desired: str | None
 
 
 def _read(path: Path) -> str:
@@ -79,6 +79,20 @@ def _reject_symlink_path(path: Path, root: Path) -> None:
         current /= part
         if current.is_symlink():
             raise ConfigError(f"Refusing symlinked managed path: {current}")
+
+
+def _retired_agent_target(codex_home: Path, key: str) -> Path:
+    relative = Path(key)
+    if (
+        relative.is_absolute()
+        or len(relative.parts) != 2
+        or relative.parts[0] != "agents"
+        or relative.suffix != ".toml"
+    ):
+        raise ConfigError(f"Invalid retired managed agent key: {key!r}")
+    target = codex_home / relative
+    _reject_symlink_path(target, codex_home)
+    return target
 
 
 def _managed_block(fragment: str) -> str:
@@ -208,6 +222,20 @@ def plan(source: Path, codex_home: Path) -> tuple[list[Change], list[str], dict]
                 )
             changes.append(Change(key, agent_target, current_agent, agent))
 
+    for key, prior_agent_digest in recorded.items():
+        if key == "AGENTS.md#browser-delegation" or key in agents:
+            continue
+        retired_target = _retired_agent_target(codex_home, key)
+        current_retired = _read(retired_target) if retired_target.exists() else None
+        if current_retired is None:
+            continue
+        if _digest(current_retired) != prior_agent_digest:
+            conflicts.append(
+                f"locally modified retired agent file: {retired_target}"
+            )
+            continue
+        changes.append(Change(key, retired_target, current_retired, None))
+
     managed = {"AGENTS.md#browser-delegation": _digest(desired_block)}
     managed.update({key: _digest(agent) for key, agent in agents.items()})
     source_content = [fragment]
@@ -250,7 +278,10 @@ def apply_changes(codex_home: Path, changes: list[Change], state: dict) -> str |
                 "target": str(change.target.relative_to(codex_home)),
                 "existed": change.current is not None,
                 "backup": backup_name if change.current is not None else None,
-                "applied_digest": _digest(change.desired),
+                "applied_digest": (
+                    _digest(change.desired) if change.desired is not None else None
+                ),
+                "applied_exists": change.desired is not None,
             }
             if change.current is not None:
                 _atomic_write(transaction_dir / backup_name, change.current)
@@ -275,9 +306,15 @@ def apply_changes(codex_home: Path, changes: list[Change], state: dict) -> str |
                 raise ConfigError(
                     f"Target changed after planning; rerun before applying: {change.target}"
                 )
-            _atomic_write(change.target, change.desired)
-            if _read(change.target) != change.desired:
-                raise ConfigError(f"Post-write verification failed: {change.target}")
+            if change.desired is None:
+                if change.target.exists():
+                    change.target.unlink()
+                if change.target.exists():
+                    raise ConfigError(f"Post-delete verification failed: {change.target}")
+            else:
+                _atomic_write(change.target, change.desired)
+                if _read(change.target) != change.desired:
+                    raise ConfigError(f"Post-write verification failed: {change.target}")
             completed_keys.add(change.key)
         state["last_transaction"] = transaction
         _atomic_write(state_path, json.dumps(state, indent=2, sort_keys=True) + "\n")
@@ -335,9 +372,14 @@ def rollback(
             _read(transaction_dir / entry["backup"]) if entry["existed"] else None
         )
         observed = _read(target) if target.exists() else None
-        if observed is None or _digest(observed) != entry.get("applied_digest"):
+        if entry.get("applied_exists", True):
+            if observed is None or _digest(observed) != entry.get("applied_digest"):
+                raise ConfigError(
+                    f"Refusing rollback because target changed after apply: {target}"
+                )
+        elif observed is not None:
             raise ConfigError(
-                f"Refusing rollback because target changed after apply: {target}"
+                f"Refusing rollback because retired target was recreated: {target}"
             )
         resolved_targets.append((entry, target, backup))
     state_backup = transaction_dir / "state.backup.json"
@@ -361,7 +403,7 @@ def rollback(
 def print_diff(changes: list[Change]) -> None:
     for change in changes:
         current = (change.current or "").splitlines(keepends=True)
-        desired = change.desired.splitlines(keepends=True)
+        desired = (change.desired or "").splitlines(keepends=True)
         sys.stdout.writelines(
             difflib.unified_diff(
                 current,

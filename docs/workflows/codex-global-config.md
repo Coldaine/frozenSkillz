@@ -13,7 +13,7 @@ none is embedded as prompt text in `config.toml`:
 | Reviewed source | Live Codex surface | Effect |
 |---|---|---|
 | `agents/chrome-pilot.toml` | `~/.codex/agents/chrome-pilot.toml` | Codex discovers the custom agent whose authoritative name is `chrome_pilot`. |
-| `agents/history-researcher.toml` | `~/.codex/agents/history-researcher.toml` | Codex discovers the staged `history_researcher` localization and analysis worker. |
+| `agents/chat-history-researcher.toml` | `~/.codex/agents/chat-history-researcher.toml` | Codex discovers the staged `chat_history_researcher` localization and analysis worker. |
 | `AGENTS.browser-delegation.md` | Managed block in `~/.codex/AGENTS.md` | The primary agent is instructed to delegate browser work to `chrome_pilot`. |
 | No source in this profile | `~/.codex/config.toml` | Unchanged. It owns global Codex settings, not durable natural-language instructions. |
 
@@ -23,14 +23,14 @@ The activation chain is:
 frozenSkillz reviewed sources
   |-- chrome-pilot.toml ----------> ~/.codex/agents/chrome-pilot.toml
   |                                  makes the named worker discoverable
-  |-- history-researcher.toml ----> ~/.codex/agents/history-researcher.toml
+  |-- chat-history-researcher.toml -> ~/.codex/agents/chat-history-researcher.toml
   |                                  makes the named worker discoverable
   `-- browser delegation Markdown -> managed block in ~/.codex/AGENTS.md
                                      tells the primary when to use that worker
 ```
 
 The agent TOML files make workers available. The global Markdown supplies browser activation policy;
-the personal `chat-history` skill owns activation and staged dispatch for `history_researcher`.
+the personal `chat-history` skill owns activation and staged dispatch for `chat_history_researcher`.
 
 Codex discovers standalone personal agents from `~/.codex/agents/`; no duplicate named-agent entry
 is required in `config.toml`. The `[agents]` table in
@@ -75,8 +75,10 @@ The synchronizer owns the complete reviewed agent files named by
 `scripts/sync_codex_global_config.py` under `~/.codex/agents/` and only the marked
 browser-delegation block inside `~/.codex/AGENTS.md`. It preserves all other global instructions
 and agent files and fails on malformed markers, unmanaged collisions at an owned agent path, and
-edits to previously managed content. The exact unmarked delegation fragment may be adopted once
-during migration; arbitrary live content is never adopted as managed state.
+edits to previously managed content. When a reviewed agent filename is retired, the synchronizer
+removes the old live file only if it still matches the recorded managed digest; a locally modified
+retired file is a conflict. The exact unmarked delegation fragment may be adopted once during
+migration; arbitrary live content is never adopted as managed state.
 
 ## Runtime verification boundary
 
@@ -97,7 +99,7 @@ type without a full-history fork, and the worker returned the title of the page 
 opened. This confirms the installed profile is runtime-loadable; repeat the bounded
 probe after changing the profile or upgrading Codex.
 
-The same runtime was used on 2026-08-03 to dispatch the exact `history_researcher` type in
+The same runtime was used on 2026-08-03 to dispatch the predecessor `history_researcher` type in
 `LOCALIZE` mode without a full-history fork. The worker loaded the installed `chat-history` skill,
 wrote the assigned temporary Markdown artifact, and returned only its brief status and path. Named
 custom-agent selection rejected a full-history fork before the successful retry, so coordinator

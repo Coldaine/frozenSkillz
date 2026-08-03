@@ -16,7 +16,7 @@ Use those clues to choose the actual retrieval route:
 - If a provider export is already available, give only the relevant bounded export or conversation
   to a semantic reader.
 
-`history_researcher` must not take interactive browser control. Its job ends after it returns the
+`chat_history_researcher` must not take interactive browser control. Its job ends after it returns the
 localization clues and required retrieval route to the coordinator.
 
 Pieces localization is not the transcript. OCR, captured titles, URLs, summaries, and relevance

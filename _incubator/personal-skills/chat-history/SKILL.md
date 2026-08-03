@@ -27,7 +27,7 @@ provider reference reached by the route.
 
 ## Staged delegation contract
 
-Use the `history_researcher` custom agent. It has two modes: `LOCALIZE` and `ANALYZE`.
+Use the `chat_history_researcher` custom agent. It has two modes: `LOCALIZE` and `ANALYZE`.
 Spawn the named custom agent without a full-history fork; give it a complete task brief instead.
 Named custom-agent selection is incompatible with inheriting the parent's full conversation.
 
@@ -52,7 +52,7 @@ Need information from previous conversations
 │  └─ yes → answer directly
 │
 └─ no → create a temporary run directory
-   └─ dispatch one or two history_researcher agents in LOCALIZE mode
+   └─ dispatch one or two chat_history_researcher agents in LOCALIZE mode
       │
       │  Give each:
       │  - the user's actual semantic question;
@@ -202,6 +202,6 @@ Load only the provider reached by the tree:
   usage, and health retrieval.
 - [Pieces](references/pieces.md) for browser/app/time localization that can produce better index
   queries or identify the authenticated provider-history route. Pieces metadata is not the
-  conversation body, and `history_researcher` does not take interactive browser control.
+  conversation body, and `chat_history_researcher` does not take interactive browser control.
 - [Raw recovery](references/raw-recovery.md) only after indexed coverage has been checked and a
   concrete gap remains.
