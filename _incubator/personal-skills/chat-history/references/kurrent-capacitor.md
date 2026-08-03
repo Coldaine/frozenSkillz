@@ -70,5 +70,4 @@ Do not run broad imports merely to answer a lookup when the server already has t
   minutes and persist results. Do not invoke it during ordinary history lookup unless the user asks
   for evaluation.
 - Use governed analytics only when available. State the queried field definitions and do not turn
-  aggregate telemetry into a claim about conversation quality.
-
+aggregate telemetry into a claim about conversation quality.

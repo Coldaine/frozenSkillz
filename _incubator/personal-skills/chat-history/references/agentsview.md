@@ -139,4 +139,3 @@ agentsview pg status
 Configured roots, credentials, or a running server do not prove every machine or harness is current.
 Check machine counts, latest session times, and sync status before making a fleet-wide negative
 claim.
-
