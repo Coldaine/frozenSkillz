@@ -4,8 +4,20 @@ Use AgentsView for broad cross-harness retrieval, project/session inventories, l
 coverage, message and tool windows, and session telemetry. The CLI defaults to local SQLite; add
 `--pg` for the configured PostgreSQL archive or `--server <url>` for an explicit daemon.
 
-On Windows, resolve `agentsview` from `PATH`, then fall back to
-`$env:LOCALAPPDATA\AgentsView\agentsview.exe`.
+On Windows, resolve `agentsview` from `PATH`, then fall back to the standard install and fail clearly
+if neither exists:
+
+```powershell
+$agentsViewCommand = Get-Command agentsview -ErrorAction SilentlyContinue
+$agentsView = if ($agentsViewCommand) {
+    $agentsViewCommand.Source
+} else {
+    Join-Path $env:LOCALAPPDATA 'AgentsView\agentsview.exe'
+}
+if (-not (Test-Path -LiteralPath $agentsView)) {
+    throw 'AgentsView was not found on PATH or in the standard local install.'
+}
+```
 
 ## Read-only retrieval path
 
