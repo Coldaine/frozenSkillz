@@ -3,12 +3,14 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/sync_codex_global_config.py"
 SPEC = importlib.util.spec_from_file_location("sync_codex_global_config", SCRIPT)
+if SPEC is None or SPEC.loader is None:
+    raise RuntimeError(f"Cannot load synchronization module from {SCRIPT}")
 sync_module = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 sys.modules[SPEC.name] = sync_module
 SPEC.loader.exec_module(sync_module)
 
@@ -121,6 +123,49 @@ class SyncCodexGlobalConfigTests(unittest.TestCase):
 
         with self.assertRaises(sync_module.ConfigError):
             sync_module.plan(self.source, self.codex_home)
+
+    def test_reversed_markers_fail_with_config_error(self):
+        (self.codex_home / "AGENTS.md").write_text(
+            f"{sync_module.END_MARKER}\n{sync_module.START_MARKER}\n",
+            encoding="utf-8",
+        )
+
+        with self.assertRaises(sync_module.ConfigError):
+            sync_module.plan(self.source, self.codex_home)
+
+    def test_symlinked_agents_file_is_rejected(self):
+        real = self.root / "real-agents.md"
+        real.write_text("outside\n", encoding="utf-8")
+        target = self.codex_home / "AGENTS.md"
+        try:
+            target.symlink_to(real)
+        except OSError:
+            self.skipTest("symlink creation is unavailable")
+
+        with self.assertRaises(sync_module.ConfigError):
+            sync_module.plan(self.source, self.codex_home)
+
+    def test_failed_second_target_rolls_back_first_target(self):
+        agents_target = self.codex_home / "AGENTS.md"
+        agents_target.write_text("original\n", encoding="utf-8")
+        changes, conflicts, state = sync_module.plan(self.source, self.codex_home)
+        self.assertEqual([], conflicts)
+        real_atomic_write = sync_module._atomic_write
+        agent_target = self.codex_home / "agents/chrome-pilot.toml"
+
+        def fail_agent_write(path, content):
+            if path == agent_target:
+                raise OSError("simulated agent write failure")
+            return real_atomic_write(path, content)
+
+        with (
+            mock.patch.object(sync_module, "_atomic_write", side_effect=fail_agent_write),
+            self.assertRaises(sync_module.ConfigError),
+        ):
+            sync_module.apply_changes(self.codex_home, changes, state)
+
+        self.assertEqual("original\n", agents_target.read_text(encoding="utf-8"))
+        self.assertFalse(agent_target.exists())
 
 
 if __name__ == "__main__":

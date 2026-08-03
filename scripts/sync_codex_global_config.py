@@ -75,8 +75,11 @@ def _find_block(current: str) -> tuple[int, int, str] | None:
         raise ConfigError("AGENTS.md has malformed browser-delegation markers")
     if start_count == 0:
         return None
-    start = current.index(START_MARKER)
-    end = current.index(END_MARKER, start) + len(END_MARKER)
+    start = current.find(START_MARKER)
+    end_start = current.find(END_MARKER, start + len(START_MARKER))
+    if start < 0 or end_start < 0 or end_start <= start:
+        raise ConfigError("AGENTS.md has malformed browser-delegation markers")
+    end = end_start + len(END_MARKER)
     return start, end, current[start:end]
 
 
@@ -136,7 +139,10 @@ def plan(source: Path, codex_home: Path) -> tuple[list[Change], list[str], dict]
     recorded = state["managed"]
 
     agents_target = codex_home / "AGENTS.md"
-    current_agents = _read(agents_target) if agents_target.exists() else ""
+    if agents_target.is_symlink():
+        raise ConfigError(f"Refusing to replace symlinked target: {agents_target}")
+    agents_target_exists = agents_target.exists()
+    current_agents = _read(agents_target) if agents_target_exists else ""
     desired_agents, current_block = _render_agents(current_agents, fragment)
     desired_block = _managed_block(fragment)
 
@@ -149,10 +155,17 @@ def plan(source: Path, codex_home: Path) -> tuple[list[Change], list[str], dict]
     changes: list[Change] = []
     if current_agents != desired_agents:
         changes.append(
-            Change("AGENTS.md#browser-delegation", agents_target, current_agents, desired_agents)
+            Change(
+                "AGENTS.md#browser-delegation",
+                agents_target,
+                current_agents if agents_target_exists else None,
+                desired_agents,
+            )
         )
 
     agent_target = codex_home / "agents/chrome-pilot.toml"
+    if agent_target.is_symlink():
+        raise ConfigError(f"Refusing to replace symlinked target: {agent_target}")
     current_agent = _read(agent_target) if agent_target.exists() else None
     prior_agent_digest = recorded.get("agents/chrome-pilot.toml")
     if current_agent != agent:
@@ -209,12 +222,31 @@ def apply_changes(codex_home: Path, changes: list[Change], state: dict) -> str |
         manifest["state_existed"] = False
     _atomic_write(transaction_dir / "manifest.json", json.dumps(manifest, indent=2) + "\n")
 
-    for change in changes:
-        _atomic_write(change.target, change.desired)
-        if _read(change.target) != change.desired:
-            raise ConfigError(f"Post-write verification failed: {change.target}")
-    state["last_transaction"] = transaction
-    _atomic_write(state_path, json.dumps(state, indent=2, sort_keys=True) + "\n")
+    try:
+        for change in changes:
+            observed = _read(change.target) if change.target.exists() else None
+            if observed != change.current:
+                raise ConfigError(
+                    f"Target changed after planning; rerun before applying: {change.target}"
+                )
+            _atomic_write(change.target, change.desired)
+            if _read(change.target) != change.desired:
+                raise ConfigError(f"Post-write verification failed: {change.target}")
+        state["last_transaction"] = transaction
+        _atomic_write(state_path, json.dumps(state, indent=2, sort_keys=True) + "\n")
+    except BaseException as exc:
+        try:
+            rollback(codex_home, transaction)
+        except BaseException as rollback_exc:
+            raise ConfigError(
+                f"Apply failed and rollback also failed for transaction {transaction}: "
+                f"{exc}; rollback: {rollback_exc}"
+            ) from rollback_exc
+        if isinstance(exc, ConfigError):
+            raise
+        raise ConfigError(
+            f"Apply failed and transaction {transaction} was rolled back: {exc}"
+        ) from exc
     return transaction
 
 
