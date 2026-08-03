@@ -25,6 +25,16 @@ python scripts/sync_frozen_skills.py --consumer codex --check
 python scripts/sync_frozen_skills.py --consumer codex --apply
 ```
 
+Machine-global Codex prompts and custom agents use a separate native-config lane:
+
+```powershell
+python scripts/sync_codex_global_config.py --check
+python scripts/sync_codex_global_config.py --apply
+```
+
+That command preserves unrelated content in `~/.codex/AGENTS.md`; see
+[`docs/workflows/codex-global-config.md`](docs/workflows/codex-global-config.md).
+
 Every run selects either `--consumer` or a named `--deployment` subset. Codex defaults to its private `~/.codex/skills` root; Claude, Cursor, and Gemini require an explicit `--destination` until a consumer-private default is qualified. The synchronizer:
 
 - validates that the Claude, Codex, Cursor, and Gemini manifests have the same plugin identity and version;
