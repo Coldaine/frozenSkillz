@@ -34,7 +34,7 @@ de-personalized.
 
 | Skill | Next action |
 |---|---|
-| `chat-history` | Current personal skill; staged semantic-localization router implemented 2026-08-03. One or two `chat_history_researcher` workers localize through KCap, AgentsView, and Pieces, return brief candidate maps, then resume for bounded analysis written to temporary Markdown artifacts. Live copy synchronized; custom-agent profile uses Luna/high/fast and the reviewed global-config lane. The predecessor profile passed exact named-agent activation and temporary-artifact writing on Codex CLI 0.146.0; verify the renamed profile and forward-test a real two-stage retrieval before promotion. |
+| `chat-history` | Current personal skill; staged semantic-localization router implemented 2026-08-03. One or two `chat_history_researcher` workers localize through KCap, AgentsView, and Pieces, return brief candidate maps, then resume for bounded analysis written to temporary Markdown artifacts. Live copy synchronized; custom-agent profile uses Luna/high/fast and the reviewed global-config lane. Exact named-agent activation, installed-skill loading, and temporary-artifact writing passed on Codex CLI 0.146.0; forward-test a real two-stage retrieval before promotion. |
 | `retrospective` | Revived 2026-07-31 (owner overruled deletion — key skill): timeline script now covers all harnesses via AgentsView `--db` mode; needs trigger decision (see SKILL.md Triggering); then de-personalize. |
 | `project-docs` | Gated pending de-personalization. |
 | `skill-install` | Verify recipes. |
