@@ -24,27 +24,27 @@ def main(argv: list[str] | None = None) -> int:
     skills_common = ["--consumer", args.consumer]
     if args.skills_destination:
         skills_common.extend(["--destination", str(args.skills_destination)])
+    elif args.codex_home != Path.home() / ".codex":
+        skills_common.extend(["--destination", str(args.codex_home / "skills")])
     config_common = ["--codex-home", str(args.codex_home)]
 
     if args.check:
-        results = (
-            sync_frozen_skills.main(["--check", *skills_common]),
-            sync_codex_global_config.main(["--check", *config_common]),
-        )
+        results = []
+        results.append(sync_frozen_skills.main(["--check", *skills_common]))
+        results.append(sync_codex_global_config.main(["--check", *config_common]))
         return 2 if 2 in results else 1 if 1 in results else 0
 
-    preflight = (
-        sync_frozen_skills.main(["--check", *skills_common]),
-        sync_codex_global_config.main(["--check", *config_common]),
-    )
+    preflight = []
+    preflight.append(sync_frozen_skills.main(["--check", *skills_common]))
+    preflight.append(sync_codex_global_config.main(["--check", *config_common]))
     if 2 in preflight:
         print("Synchronization refused because preflight found a conflict.", file=sys.stderr)
         return 2
-    applied = (
-        sync_frozen_skills.main(["--apply", *skills_common]),
-        sync_codex_global_config.main(["--apply", *config_common]),
-    )
-    return 2 if 2 in applied else 0
+    skill_result = sync_frozen_skills.main(["--apply", *skills_common])
+    if skill_result != 0:
+        print("Configuration apply skipped because skill apply failed.", file=sys.stderr)
+        return skill_result
+    return sync_codex_global_config.main(["--apply", *config_common])
 
 
 if __name__ == "__main__":

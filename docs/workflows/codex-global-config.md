@@ -56,7 +56,15 @@ The native-config adapter supports `--check`, `--diff`, `--apply`, and
 `--rollback <transaction-id>`. It records source revision and content hashes under
 `~/.codex/.frozenSkillz/codex-global-config/`, refuses locally modified managed
 content, writes atomically, backs up every changed target in a transaction, and
-re-reads each write before recording success.
+re-reads each write before recording success. Explicit rollback is limited to the
+latest applied transaction and refuses targets changed since that transaction, so
+neither an older backup nor rollback can overwrite newer edits.
+
+The unified command performs a shared preflight and then applies each adapter. Each
+adapter enforces its own conflict and transaction boundary; the wrapper is not one
+cross-adapter filesystem transaction. If an unexpected failure occurs after one
+adapter succeeds, rerun `--check` to identify the remaining drift and `--apply` to
+converge it.
 
 ## Ownership rules
 

@@ -27,7 +27,10 @@ class SyncCodexGlobalConfigTests(unittest.TestCase):
             self.fragment, encoding="utf-8"
         )
         (self.source / "agents/chrome-pilot.toml").write_text(
-            'name = "chrome_pilot"\n', encoding="utf-8"
+            'name = "chrome_pilot"\n'
+            'description = "Browser worker"\n'
+            'developer_instructions = "Use Chrome."\n',
+            encoding="utf-8",
         )
         self.codex_home = self.root / ".codex"
         self.codex_home.mkdir()
@@ -116,6 +119,53 @@ class SyncCodexGlobalConfigTests(unittest.TestCase):
             (self.codex_home / sync_module.MANAGEMENT_ROOT / sync_module.STATE_FILE).exists()
         )
 
+    def test_rollback_rejects_a_non_current_transaction(self):
+        _changes, first = self._apply()
+        self.assertIsNotNone(first)
+        (self.source / "AGENTS.browser-delegation.md").write_text(
+            "## Required\n\nUpdated reviewed rule.\n", encoding="utf-8"
+        )
+        _changes, second = self._apply()
+        self.assertIsNotNone(second)
+
+        with self.assertRaises(sync_module.ConfigError):
+            sync_module.rollback(self.codex_home, first)
+
+    def test_rollback_rejects_unrelated_post_apply_edit(self):
+        target = self.codex_home / "AGENTS.md"
+        target.write_text("original\n", encoding="utf-8")
+        _changes, transaction = self._apply()
+        target.write_text(target.read_text(encoding="utf-8") + "later\n", encoding="utf-8")
+
+        with self.assertRaises(sync_module.ConfigError):
+            sync_module.rollback(self.codex_home, transaction)
+
+        self.assertIn("later", target.read_text(encoding="utf-8"))
+
+    def test_matching_files_without_state_are_not_current(self):
+        self._apply()
+        state_path = self.codex_home / sync_module.MANAGEMENT_ROOT / sync_module.STATE_FILE
+        state_path.unlink()
+
+        self.assertEqual(
+            1,
+            sync_module.main(
+                ["--check", "--source", str(self.source), "--codex-home", str(self.codex_home)]
+            ),
+        )
+
+    def test_invalid_agent_toml_fails_hard(self):
+        (self.source / "agents/chrome-pilot.toml").write_text("name = [\n", encoding="utf-8")
+        with self.assertRaises(sync_module.ConfigError):
+            sync_module.plan(self.source, self.codex_home)
+
+    def test_agent_toml_requires_codex_agent_fields(self):
+        (self.source / "agents/chrome-pilot.toml").write_text(
+            'name = "chrome_pilot"\n', encoding="utf-8"
+        )
+        with self.assertRaises(sync_module.ConfigError):
+            sync_module.plan(self.source, self.codex_home)
+
     def test_malformed_markers_fail_hard(self):
         (self.codex_home / "AGENTS.md").write_text(
             f"{sync_module.START_MARKER}\n", encoding="utf-8"
@@ -139,6 +189,18 @@ class SyncCodexGlobalConfigTests(unittest.TestCase):
         target = self.codex_home / "AGENTS.md"
         try:
             target.symlink_to(real)
+        except OSError:
+            self.skipTest("symlink creation is unavailable")
+
+        with self.assertRaises(sync_module.ConfigError):
+            sync_module.plan(self.source, self.codex_home)
+
+    def test_symlinked_agents_directory_is_rejected(self):
+        real = self.root / "outside-agents"
+        real.mkdir()
+        target = self.codex_home / "agents"
+        try:
+            target.symlink_to(real, target_is_directory=True)
         except OSError:
             self.skipTest("symlink creation is unavailable")
 

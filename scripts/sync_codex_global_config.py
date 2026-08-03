@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import tomllib
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -62,6 +63,21 @@ def _atomic_write(path: Path, content: str) -> None:
     except BaseException:
         temporary.unlink(missing_ok=True)
         raise
+
+
+def _reject_symlink_path(path: Path, root: Path) -> None:
+    """Reject a target or existing ancestor that is a symbolic link."""
+
+    root = root.resolve()
+    try:
+        relative = path.relative_to(root)
+    except ValueError as exc:
+        raise ConfigError(f"Target escapes Codex home: {path}") from exc
+    current = root
+    for part in relative.parts:
+        current /= part
+        if current.is_symlink():
+            raise ConfigError(f"Refusing symlinked managed path: {current}")
 
 
 def _managed_block(fragment: str) -> str:
@@ -135,12 +151,22 @@ def _source_revision(source: Path) -> str:
 def plan(source: Path, codex_home: Path) -> tuple[list[Change], list[str], dict]:
     fragment = _read(source / "AGENTS.browser-delegation.md")
     agent = _read(source / "agents/chrome-pilot.toml")
+    try:
+        agent_config = tomllib.loads(agent)
+    except tomllib.TOMLDecodeError as exc:
+        raise ConfigError(f"Cannot parse chrome-pilot.toml: {exc}") from exc
+    required_agent_keys = {"name", "description", "developer_instructions"}
+    missing_agent_keys = required_agent_keys - agent_config.keys()
+    if missing_agent_keys:
+        raise ConfigError(
+            "chrome-pilot.toml is missing required keys: "
+            + ", ".join(sorted(missing_agent_keys))
+        )
     state = _load_state(codex_home)
     recorded = state["managed"]
 
     agents_target = codex_home / "AGENTS.md"
-    if agents_target.is_symlink():
-        raise ConfigError(f"Refusing to replace symlinked target: {agents_target}")
+    _reject_symlink_path(agents_target, codex_home)
     agents_target_exists = agents_target.exists()
     current_agents = _read(agents_target) if agents_target_exists else ""
     desired_agents, current_block = _render_agents(current_agents, fragment)
@@ -164,8 +190,8 @@ def plan(source: Path, codex_home: Path) -> tuple[list[Change], list[str], dict]
         )
 
     agent_target = codex_home / "agents/chrome-pilot.toml"
-    if agent_target.is_symlink():
-        raise ConfigError(f"Refusing to replace symlinked target: {agent_target}")
+    _reject_symlink_path(agent_target, codex_home)
+    _reject_symlink_path(codex_home / MANAGEMENT_ROOT / STATE_FILE, codex_home)
     current_agent = _read(agent_target) if agent_target.exists() else None
     prior_agent_digest = recorded.get("agents/chrome-pilot.toml")
     if current_agent != agent:
@@ -187,15 +213,19 @@ def plan(source: Path, codex_home: Path) -> tuple[list[Change], list[str], dict]
     return changes, conflicts, next_state
 
 
+def _state_changed(codex_home: Path, desired: dict) -> bool:
+    current = _load_state(codex_home)
+    comparable_keys = ("schema", "source_revision", "source_digest", "managed")
+    return any(current.get(key) != desired.get(key) for key in comparable_keys)
+
+
 def _transaction_id() -> str:
     return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
 
 
 def apply_changes(codex_home: Path, changes: list[Change], state: dict) -> str | None:
     state_path = codex_home / MANAGEMENT_ROOT / STATE_FILE
-    current_state = _load_state(codex_home)
-    comparable_keys = ("schema", "source_revision", "source_digest", "managed")
-    state_changed = any(current_state.get(key) != state.get(key) for key in comparable_keys)
+    state_changed = _state_changed(codex_home, state)
     if not changes and not state_changed:
         return None
     transaction = _transaction_id()
@@ -210,6 +240,7 @@ def apply_changes(codex_home: Path, changes: list[Change], state: dict) -> str |
             "target": str(change.target.relative_to(codex_home)),
             "existed": change.current is not None,
             "backup": backup_name if change.current is not None else None,
+            "applied_digest": _digest(change.desired),
         }
         if change.current is not None:
             _atomic_write(transaction_dir / backup_name, change.current)
@@ -236,7 +267,7 @@ def apply_changes(codex_home: Path, changes: list[Change], state: dict) -> str |
         _atomic_write(state_path, json.dumps(state, indent=2, sort_keys=True) + "\n")
     except BaseException as exc:
         try:
-            rollback(codex_home, transaction)
+            rollback(codex_home, transaction, require_current=False)
         except BaseException as rollback_exc:
             raise ConfigError(
                 f"Apply failed and rollback also failed for transaction {transaction}: "
@@ -250,7 +281,14 @@ def apply_changes(codex_home: Path, changes: list[Change], state: dict) -> str |
     return transaction
 
 
-def rollback(codex_home: Path, transaction: str) -> None:
+def rollback(codex_home: Path, transaction: str, *, require_current: bool = True) -> None:
+    if require_current:
+        state = _load_state(codex_home)
+        if state.get("last_transaction") != transaction:
+            raise ConfigError(
+                "Rollback is limited to the latest applied transaction; "
+                f"current is {state.get('last_transaction')!r}, requested {transaction!r}"
+            )
     transaction_dir = codex_home / MANAGEMENT_ROOT / "transactions" / transaction
     manifest_path = transaction_dir / "manifest.json"
     if not manifest_path.is_file():
@@ -259,10 +297,20 @@ def rollback(codex_home: Path, transaction: str) -> None:
         manifest = json.loads(_read(manifest_path))
     except json.JSONDecodeError as exc:
         raise ConfigError(f"Cannot parse transaction manifest: {exc}") from exc
+    resolved_targets: list[tuple[dict, Path]] = []
     for entry in manifest["targets"]:
         target = (codex_home / entry["target"]).resolve()
         if codex_home.resolve() not in target.parents:
             raise ConfigError(f"Transaction target escapes Codex home: {target}")
+        resolved_targets.append((entry, target))
+    if require_current:
+        for entry, target in resolved_targets:
+            observed = _read(target) if target.exists() else None
+            if observed is None or _digest(observed) != entry.get("applied_digest"):
+                raise ConfigError(
+                    f"Refusing rollback because target changed after apply: {target}"
+                )
+    for entry, target in resolved_targets:
         if entry["existed"]:
             _atomic_write(target, _read(transaction_dir / entry["backup"]))
         elif target.exists():
@@ -311,9 +359,12 @@ def main(argv: list[str] | None = None) -> int:
             for conflict in conflicts:
                 print(f"CONFLICT: {conflict}", file=sys.stderr)
             return 2
+        state_changed = _state_changed(codex_home, state)
         if args.diff:
             print_diff(changes)
-            return 1 if changes else 0
+            if state_changed and not changes:
+                print("Required: update global configuration management state")
+            return 1 if changes or state_changed else 0
         if args.apply:
             transaction = apply_changes(codex_home, changes, state)
             if transaction:
@@ -321,9 +372,11 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 print("Global Codex configuration is current.")
             return 0
-        if changes:
+        if changes or state_changed:
             for change in changes:
                 print(f"Required: update {change.target}")
+            if state_changed and not changes:
+                print("Required: update global configuration management state")
             return 1
         print("Global Codex configuration is current.")
         return 0
