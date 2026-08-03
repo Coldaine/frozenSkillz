@@ -10,7 +10,7 @@ if neither exists:
 ```powershell
 $agentsViewCommand = Get-Command agentsview -ErrorAction SilentlyContinue
 $agentsView = if ($agentsViewCommand) {
-    $agentsViewCommand.Source
+    $agentsViewCommand.Path
 } else {
     Join-Path $env:LOCALAPPDATA 'AgentsView\agentsview.exe'
 }
