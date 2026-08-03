@@ -19,7 +19,8 @@ $env:PYTHONUTF8 = '1'
 ## Choose the narrowest fallback
 
 1. If KCap knows the session, retrieve its full transcript with `kcap recap --full <session-id>`.
-2. If AgentsView knows the local session, use `agentsview session export <session-id>` to recover its
+2. If AgentsView knows the local session, first resolve `$agentsView` with the Windows block in
+   [AgentsView](agentsview.md), then use `& $agentsView session export <session-id>` to recover its
    raw source JSONL.
 3. If the session is not indexed, use `artifact_hunt.py` only to localize candidate artifacts when
    stable anchors exist:

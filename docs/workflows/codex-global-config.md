@@ -31,6 +31,10 @@ frozenSkillz reviewed sources
 
 The agent TOML files make workers available. The global Markdown supplies browser activation policy;
 the personal `chat-history` skill owns activation and staged dispatch for `chat_history_researcher`.
+Because that skill remains in the gated personal lane, the global-config synchronizer requires an
+installed `~/.agents/skills/chat-history/SKILL.md` with the `chat-history` identity before it will
+plan or install the dependent agent. A clean machine therefore fails hard instead of receiving a
+worker that cannot load its router; the incubator copy is not silently promoted or installed.
 
 Codex discovers standalone personal agents from `~/.codex/agents/`; no duplicate named-agent entry
 is required in `config.toml`. The `[agents]` table in

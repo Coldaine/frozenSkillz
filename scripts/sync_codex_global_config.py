@@ -26,6 +26,9 @@ MANAGEMENT_ROOT = Path(".frozenSkillz/codex-global-config")
 STATE_FILE = "state.json"
 STATE_SCHEMA = 1
 AGENT_FILES = ("chrome-pilot.toml", "chat-history-researcher.toml")
+AGENT_SKILL_DEPENDENCIES = {
+    "chat-history-researcher.toml": "chat-history",
+}
 
 
 class ConfigError(RuntimeError):
@@ -99,6 +102,23 @@ def _managed_block(fragment: str) -> str:
     return f"{START_MARKER}\n{fragment.strip()}\n{END_MARKER}"
 
 
+def _require_installed_skill(skills_root: Path, skill_name: str) -> None:
+    skill_file = skills_root / skill_name / "SKILL.md"
+    if not skill_file.is_file():
+        raise ConfigError(
+            f"Required installed skill is missing for managed agent: {skill_file}"
+        )
+    content = _read(skill_file)
+    frontmatter = content.split("---", 2)
+    expected_name = f"name: {skill_name}"
+    if len(frontmatter) < 3 or expected_name not in {
+        line.strip() for line in frontmatter[1].splitlines()
+    }:
+        raise ConfigError(
+            f"Required installed skill has the wrong identity: {skill_file}"
+        )
+
+
 def _find_block(current: str) -> tuple[int, int, str] | None:
     start_count = current.count(START_MARKER)
     end_count = current.count(END_MARKER)
@@ -163,11 +183,18 @@ def _source_revision(source: Path) -> str:
         return "unversioned"
 
 
-def plan(source: Path, codex_home: Path) -> tuple[list[Change], list[str], dict]:
+def plan(
+    source: Path, codex_home: Path, skills_root: Path | None = None
+) -> tuple[list[Change], list[str], dict]:
+    if skills_root is None:
+        skills_root = codex_home.parent / ".agents" / "skills"
     fragment = _read(source / "AGENTS.browser-delegation.md")
     required_agent_keys = {"name", "description", "developer_instructions"}
     agents: dict[str, str] = {}
     for agent_file in AGENT_FILES:
+        required_skill = AGENT_SKILL_DEPENDENCIES.get(agent_file)
+        if required_skill is not None:
+            _require_installed_skill(skills_root, required_skill)
         agent = _read(source / "agents" / agent_file)
         try:
             agent_config = tomllib.loads(agent)
@@ -423,15 +450,27 @@ def main(argv: list[str] | None = None) -> int:
     mode.add_argument("--rollback", metavar="TRANSACTION")
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--codex-home", type=Path, default=Path.home() / ".codex")
+    parser.add_argument(
+        "--agents-skills-root",
+        type=Path,
+        help="Installed personal-skill root; defaults to the .agents/skills sibling of Codex home.",
+    )
     args = parser.parse_args(argv)
     codex_home = args.codex_home.resolve()
+    skills_root = (
+        args.agents_skills_root.resolve()
+        if args.agents_skills_root is not None
+        else (codex_home.parent / ".agents" / "skills").resolve()
+    )
 
     try:
         if args.rollback:
             rollback(codex_home, args.rollback)
             print(f"Rolled back transaction {args.rollback}.")
             return 0
-        changes, conflicts, state = plan(args.source.resolve(), codex_home)
+        changes, conflicts, state = plan(
+            args.source.resolve(), codex_home, skills_root
+        )
         if conflicts:
             for conflict in conflicts:
                 print(f"CONFLICT: {conflict}", file=sys.stderr)

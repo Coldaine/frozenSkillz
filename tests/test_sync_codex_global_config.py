@@ -53,11 +53,26 @@ class SyncCodexGlobalConfigTests(unittest.TestCase):
         )
         self.codex_home = self.root / ".codex"
         self.codex_home.mkdir()
+        self.skills_root = self.root / ".agents" / "skills"
+        self.chat_history_skill = self._write_installed_skill(self.skills_root)
         self.predecessor_agent = (
             'name = "history_researcher"\n'
             'description = "Predecessor history worker"\n'
             'developer_instructions = "Localize, then analyze."\n'
         )
+
+    def _write_installed_skill(self, skills_root, name="chat-history"):
+        skill_file = skills_root / "chat-history" / "SKILL.md"
+        skill_file.parent.mkdir(parents=True, exist_ok=True)
+        skill_file.write_text(
+            "---\n"
+            f"name: {name}\n"
+            "description: Test fixture for the installed gated router.\n"
+            "---\n\n"
+            "# Chat History\n",
+            encoding="utf-8",
+        )
+        return skill_file
 
     def _apply(self):
         changes, conflicts, state = sync_module.plan(self.source, self.codex_home)
@@ -188,6 +203,87 @@ class SyncCodexGlobalConfigTests(unittest.TestCase):
         self.assertEqual([], conflicts)
         self.assertEqual(3, len(changes))
         self.assertEqual("unchanged\n", target.read_text(encoding="utf-8"))
+
+    def test_missing_required_chat_history_skill_blocks_apply_without_mutation(self):
+        agents_target = self.codex_home / "AGENTS.md"
+        agents_target.write_text("unchanged\n", encoding="utf-8")
+        self.chat_history_skill.unlink()
+        stderr = io.StringIO()
+
+        with (
+            mock.patch("sys.stdout", new=io.StringIO()),
+            mock.patch("sys.stderr", new=stderr),
+        ):
+            result = sync_module.main(
+                [
+                    "--apply",
+                    "--source",
+                    str(self.source),
+                    "--codex-home",
+                    str(self.codex_home),
+                ]
+            )
+
+        self.assertEqual(2, result)
+        self.assertIn("Required installed skill is missing", stderr.getvalue())
+        self.assertEqual("unchanged\n", agents_target.read_text(encoding="utf-8"))
+        self.assertFalse((self.codex_home / "agents").exists())
+        self.assertFalse(self._state_path().exists())
+
+    def test_wrong_installed_chat_history_skill_identity_blocks_apply(self):
+        agents_target = self.codex_home / "AGENTS.md"
+        agents_target.write_text("unchanged\n", encoding="utf-8")
+        self._write_installed_skill(self.skills_root, name="not-chat-history")
+        stderr = io.StringIO()
+
+        with (
+            mock.patch("sys.stdout", new=io.StringIO()),
+            mock.patch("sys.stderr", new=stderr),
+        ):
+            result = sync_module.main(
+                [
+                    "--apply",
+                    "--source",
+                    str(self.source),
+                    "--codex-home",
+                    str(self.codex_home),
+                ]
+            )
+
+        self.assertEqual(2, result)
+        self.assertIn("Required installed skill has the wrong identity", stderr.getvalue())
+        self.assertEqual("unchanged\n", agents_target.read_text(encoding="utf-8"))
+        self.assertFalse((self.codex_home / "agents").exists())
+        self.assertFalse(self._state_path().exists())
+
+    def test_explicit_valid_agents_skills_root_applies_and_converges(self):
+        self.chat_history_skill.unlink()
+        alternate_skills_root = self.root / "alternate-agents-skills"
+        self._write_installed_skill(alternate_skills_root)
+        common = [
+            "--source",
+            str(self.source),
+            "--codex-home",
+            str(self.codex_home),
+            "--agents-skills-root",
+            str(alternate_skills_root),
+        ]
+
+        with mock.patch("sys.stdout", new=io.StringIO()):
+            apply_result = sync_module.main(["--apply", *common])
+
+        self.assertEqual(0, apply_result)
+        installed_agent = self.codex_home / "agents/chat-history-researcher.toml"
+        self.assertEqual(
+            self.chat_history_agent, installed_agent.read_text(encoding="utf-8")
+        )
+        state = sync_module._load_state(self.codex_home)
+        self.assertEqual(
+            sync_module._digest(self.chat_history_agent),
+            state["managed"]["agents/chat-history-researcher.toml"],
+        )
+        with mock.patch("sys.stdout", new=io.StringIO()):
+            self.assertEqual(0, sync_module.main(["--check", *common]))
 
     def test_predecessor_rename_plans_diffs_applies_and_converges(self):
         old_target, new_target, state_path = self._seed_predecessor()
