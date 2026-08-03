@@ -7,12 +7,13 @@ entrypoint as skill distribution, with a target-specific adapter underneath.
 
 ## Native surface mapping
 
-The first profile pairs two artifacts, and neither is embedded as prompt text in
-`config.toml`:
+The reviewed lane currently carries two custom-agent profiles and one global activation fragment;
+none is embedded as prompt text in `config.toml`:
 
 | Reviewed source | Live Codex surface | Effect |
 |---|---|---|
 | `agents/chrome-pilot.toml` | `~/.codex/agents/chrome-pilot.toml` | Codex discovers the custom agent whose authoritative name is `chrome_pilot`. |
+| `agents/chat-history-researcher.toml` | `~/.codex/agents/chat-history-researcher.toml` | Codex discovers the staged `chat_history_researcher` localization and analysis worker. |
 | `AGENTS.browser-delegation.md` | Managed block in `~/.codex/AGENTS.md` | The primary agent is instructed to delegate browser work to `chrome_pilot`. |
 | No source in this profile | `~/.codex/config.toml` | Unchanged. It owns global Codex settings, not durable natural-language instructions. |
 
@@ -22,15 +23,21 @@ The activation chain is:
 frozenSkillz reviewed sources
   |-- chrome-pilot.toml ----------> ~/.codex/agents/chrome-pilot.toml
   |                                  makes the named worker discoverable
-  `-- delegation Markdown --------> managed block in ~/.codex/AGENTS.md
+  |-- chat-history-researcher.toml -> ~/.codex/agents/chat-history-researcher.toml
+  |                                  makes the named worker discoverable
+  `-- browser delegation Markdown -> managed block in ~/.codex/AGENTS.md
                                      tells the primary when to use that worker
 ```
 
-The TOML makes the worker available; the Markdown supplies the activation policy.
-Neither artifact alone provides the complete behavior.
+The agent TOML files make workers available. The global Markdown supplies browser activation policy;
+the personal `chat-history` skill owns activation and staged dispatch for `chat_history_researcher`.
+Because that skill remains in the gated personal lane, the global-config synchronizer requires an
+installed `~/.agents/skills/chat-history/SKILL.md` with the `chat-history` identity before it will
+plan or install the dependent agent. A clean machine therefore fails hard instead of receiving a
+worker that cannot load its router; the incubator copy is not silently promoted or installed.
 
-Codex discovers standalone personal agents from `~/.codex/agents/`; no duplicate
-`[agents.chrome_pilot]` entry is required in `config.toml`. The `[agents]` table in
+Codex discovers standalone personal agents from `~/.codex/agents/`; no duplicate named-agent entry
+is required in `config.toml`. The `[agents]` table in
 `config.toml` remains the home for global multi-agent settings such as enablement,
 thread limits, and default subagent model or effort.
 
@@ -68,22 +75,23 @@ converge it.
 
 ## Ownership rules
 
-The synchronizer owns the complete `~/.codex/agents/chrome-pilot.toml` file and
-only the marked browser-delegation block inside `~/.codex/AGENTS.md`. It preserves
-all other global instructions and fails on malformed markers, unmanaged agent-file
-collisions, and edits to previously managed content. The exact unmarked delegation
-fragment may be adopted once during migration; arbitrary live content is never
-adopted as managed state.
+The synchronizer owns the complete reviewed agent files named by
+`scripts/sync_codex_global_config.py` under `~/.codex/agents/` and only the marked
+browser-delegation block inside `~/.codex/AGENTS.md`. It preserves all other global instructions
+and agent files and fails on malformed markers, unmanaged collisions at an owned agent path, and
+edits to previously managed content. When a reviewed agent filename is retired, the synchronizer
+removes the old live file only if it still matches the recorded managed digest; a locally modified
+retired file is a conflict. The exact unmarked delegation fragment may be adopted once during
+migration; arbitrary live content is never adopted as managed state.
 
 ## Runtime verification boundary
 
-`--check` proves that reviewed files are materialized and unmodified. It does not
-prove that an already-running client session has refreshed its custom-agent roster
-or that a particular orchestration adapter exposes named-agent selection. Start a
-new Codex session after installing or updating custom agents, delegate one bounded
-browser task, and inspect the spawned thread for the `chrome_pilot` instructions
-and configured model. Treat a generic child whose task is merely named
-`chrome_pilot` as **not runtime-loaded**.
+`--check` proves that reviewed files are materialized and unmodified. It does not prove that an
+already-running client session has refreshed its custom-agent roster or that a particular
+orchestration adapter exposes named-agent selection. Start a new Codex session after installing or
+updating custom agents, delegate one bounded task to the exact named type, and inspect the spawned
+thread for that profile's instructions and configured model. Treat a generic child whose task is
+merely labeled with the agent name as **not runtime-loaded**.
 
 If the active adapter exposes no named-agent selector, report that runtime boundary;
 do not claim that the profile was used based only on its filename or task label.
@@ -94,6 +102,13 @@ ephemeral `codex exec` session and dispatching a bounded Chrome task to the exac
 type without a full-history fork, and the worker returned the title of the page it
 opened. This confirms the installed profile is runtime-loadable; repeat the bounded
 probe after changing the profile or upgrading Codex.
+
+The same runtime was used on 2026-08-03 to dispatch the exact `chat_history_researcher` type in
+`LOCALIZE` mode without a full-history fork. The worker identified its Luna/high/fast profile,
+loaded the installed `chat-history` skill, reproduced its first core rule, and wrote the assigned
+temporary Markdown artifact. The global-config migration also removed the recorded predecessor
+profile and converged on the renamed file. Named custom-agent selection rejects a full-history fork,
+so coordinator instructions must provide a complete brief and use no full-history fork.
 
 ## Design references
 

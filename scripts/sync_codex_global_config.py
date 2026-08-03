@@ -25,6 +25,10 @@ END_MARKER = "<!-- frozenSkillz:browser-delegation:end -->"
 MANAGEMENT_ROOT = Path(".frozenSkillz/codex-global-config")
 STATE_FILE = "state.json"
 STATE_SCHEMA = 1
+AGENT_FILES = ("chrome-pilot.toml", "chat-history-researcher.toml")
+AGENT_SKILL_DEPENDENCIES = {
+    "chat-history-researcher.toml": "chat-history",
+}
 
 
 class ConfigError(RuntimeError):
@@ -36,7 +40,7 @@ class Change:
     key: str
     target: Path
     current: str | None
-    desired: str
+    desired: str | None
 
 
 def _read(path: Path) -> str:
@@ -80,8 +84,39 @@ def _reject_symlink_path(path: Path, root: Path) -> None:
             raise ConfigError(f"Refusing symlinked managed path: {current}")
 
 
+def _retired_agent_target(codex_home: Path, key: str) -> Path:
+    relative = Path(key)
+    if (
+        relative.is_absolute()
+        or len(relative.parts) != 2
+        or relative.parts[0] != "agents"
+        or relative.suffix != ".toml"
+    ):
+        raise ConfigError(f"Invalid retired managed agent key: {key!r}")
+    target = codex_home / relative
+    _reject_symlink_path(target, codex_home)
+    return target
+
+
 def _managed_block(fragment: str) -> str:
     return f"{START_MARKER}\n{fragment.strip()}\n{END_MARKER}"
+
+
+def _require_installed_skill(skills_root: Path, skill_name: str) -> None:
+    skill_file = skills_root / skill_name / "SKILL.md"
+    if not skill_file.is_file():
+        raise ConfigError(
+            f"Required installed skill is missing for managed agent: {skill_file}"
+        )
+    content = _read(skill_file)
+    frontmatter = content.split("---", 2)
+    expected_name = f"name: {skill_name}"
+    if len(frontmatter) < 3 or expected_name not in {
+        line.strip() for line in frontmatter[1].splitlines()
+    }:
+        raise ConfigError(
+            f"Required installed skill has the wrong identity: {skill_file}"
+        )
 
 
 def _find_block(current: str) -> tuple[int, int, str] | None:
@@ -148,20 +183,30 @@ def _source_revision(source: Path) -> str:
         return "unversioned"
 
 
-def plan(source: Path, codex_home: Path) -> tuple[list[Change], list[str], dict]:
+def plan(
+    source: Path, codex_home: Path, skills_root: Path | None = None
+) -> tuple[list[Change], list[str], dict]:
+    if skills_root is None:
+        skills_root = codex_home.parent / ".agents" / "skills"
     fragment = _read(source / "AGENTS.browser-delegation.md")
-    agent = _read(source / "agents/chrome-pilot.toml")
-    try:
-        agent_config = tomllib.loads(agent)
-    except tomllib.TOMLDecodeError as exc:
-        raise ConfigError(f"Cannot parse chrome-pilot.toml: {exc}") from exc
     required_agent_keys = {"name", "description", "developer_instructions"}
-    missing_agent_keys = required_agent_keys - agent_config.keys()
-    if missing_agent_keys:
-        raise ConfigError(
-            "chrome-pilot.toml is missing required keys: "
-            + ", ".join(sorted(missing_agent_keys))
-        )
+    agents: dict[str, str] = {}
+    for agent_file in AGENT_FILES:
+        required_skill = AGENT_SKILL_DEPENDENCIES.get(agent_file)
+        if required_skill is not None:
+            _require_installed_skill(skills_root, required_skill)
+        agent = _read(source / "agents" / agent_file)
+        try:
+            agent_config = tomllib.loads(agent)
+        except tomllib.TOMLDecodeError as exc:
+            raise ConfigError(f"Cannot parse {agent_file}: {exc}") from exc
+        missing_agent_keys = required_agent_keys - agent_config.keys()
+        if missing_agent_keys:
+            raise ConfigError(
+                f"{agent_file} is missing required keys: "
+                + ", ".join(sorted(missing_agent_keys))
+            )
+        agents[f"agents/{agent_file}"] = agent
     state = _load_state(codex_home)
     recorded = state["managed"]
 
@@ -189,26 +234,46 @@ def plan(source: Path, codex_home: Path) -> tuple[list[Change], list[str], dict]
             )
         )
 
-    agent_target = codex_home / "agents/chrome-pilot.toml"
-    _reject_symlink_path(agent_target, codex_home)
     _reject_symlink_path(codex_home / MANAGEMENT_ROOT / STATE_FILE, codex_home)
-    current_agent = _read(agent_target) if agent_target.exists() else None
-    prior_agent_digest = recorded.get("agents/chrome-pilot.toml")
-    if current_agent != agent:
-        if current_agent is not None and (
-            prior_agent_digest is None or _digest(current_agent) != prior_agent_digest
-        ):
-            conflicts.append(f"unmanaged or locally modified agent file: {agent_target}")
-        changes.append(Change("agents/chrome-pilot.toml", agent_target, current_agent, agent))
+    for key, agent in agents.items():
+        agent_target = codex_home / key
+        _reject_symlink_path(agent_target, codex_home)
+        current_agent = _read(agent_target) if agent_target.exists() else None
+        prior_agent_digest = recorded.get(key)
+        if current_agent != agent:
+            if current_agent is not None and (
+                prior_agent_digest is None or _digest(current_agent) != prior_agent_digest
+            ):
+                conflicts.append(
+                    f"unmanaged or locally modified agent file: {agent_target}"
+                )
+            changes.append(Change(key, agent_target, current_agent, agent))
+
+    for key, prior_agent_digest in recorded.items():
+        if key == "AGENTS.md#browser-delegation" or key in agents:
+            continue
+        retired_target = _retired_agent_target(codex_home, key)
+        current_retired = _read(retired_target) if retired_target.exists() else None
+        if current_retired is None:
+            continue
+        if _digest(current_retired) != prior_agent_digest:
+            conflicts.append(
+                f"locally modified retired agent file: {retired_target}"
+            )
+            continue
+        changes.append(Change(key, retired_target, current_retired, None))
+
+    managed = {"AGENTS.md#browser-delegation": _digest(desired_block)}
+    managed.update({key: _digest(agent) for key, agent in agents.items()})
+    source_content = [fragment]
+    for key, agent in agents.items():
+        source_content.extend((key, agent))
 
     next_state = {
         "schema": STATE_SCHEMA,
         "source_revision": _source_revision(source),
-        "source_digest": _digest(fragment + "\0" + agent),
-        "managed": {
-            "AGENTS.md#browser-delegation": _digest(desired_block),
-            "agents/chrome-pilot.toml": _digest(agent),
-        },
+        "source_digest": _digest("\0".join(source_content)),
+        "managed": managed,
     }
     return changes, conflicts, next_state
 
@@ -240,7 +305,10 @@ def apply_changes(codex_home: Path, changes: list[Change], state: dict) -> str |
                 "target": str(change.target.relative_to(codex_home)),
                 "existed": change.current is not None,
                 "backup": backup_name if change.current is not None else None,
-                "applied_digest": _digest(change.desired),
+                "applied_digest": (
+                    _digest(change.desired) if change.desired is not None else None
+                ),
+                "applied_exists": change.desired is not None,
             }
             if change.current is not None:
                 _atomic_write(transaction_dir / backup_name, change.current)
@@ -265,9 +333,15 @@ def apply_changes(codex_home: Path, changes: list[Change], state: dict) -> str |
                 raise ConfigError(
                     f"Target changed after planning; rerun before applying: {change.target}"
                 )
-            _atomic_write(change.target, change.desired)
-            if _read(change.target) != change.desired:
-                raise ConfigError(f"Post-write verification failed: {change.target}")
+            if change.desired is None:
+                if change.target.exists():
+                    change.target.unlink()
+                if change.target.exists():
+                    raise ConfigError(f"Post-delete verification failed: {change.target}")
+            else:
+                _atomic_write(change.target, change.desired)
+                if _read(change.target) != change.desired:
+                    raise ConfigError(f"Post-write verification failed: {change.target}")
             completed_keys.add(change.key)
         state["last_transaction"] = transaction
         _atomic_write(state_path, json.dumps(state, indent=2, sort_keys=True) + "\n")
@@ -325,9 +399,14 @@ def rollback(
             _read(transaction_dir / entry["backup"]) if entry["existed"] else None
         )
         observed = _read(target) if target.exists() else None
-        if observed is None or _digest(observed) != entry.get("applied_digest"):
+        if entry.get("applied_exists", True):
+            if observed is None or _digest(observed) != entry.get("applied_digest"):
+                raise ConfigError(
+                    f"Refusing rollback because target changed after apply: {target}"
+                )
+        elif observed is not None:
             raise ConfigError(
-                f"Refusing rollback because target changed after apply: {target}"
+                f"Refusing rollback because retired target was recreated: {target}"
             )
         resolved_targets.append((entry, target, backup))
     state_backup = transaction_dir / "state.backup.json"
@@ -351,7 +430,7 @@ def rollback(
 def print_diff(changes: list[Change]) -> None:
     for change in changes:
         current = (change.current or "").splitlines(keepends=True)
-        desired = change.desired.splitlines(keepends=True)
+        desired = (change.desired or "").splitlines(keepends=True)
         sys.stdout.writelines(
             difflib.unified_diff(
                 current,
@@ -371,15 +450,27 @@ def main(argv: list[str] | None = None) -> int:
     mode.add_argument("--rollback", metavar="TRANSACTION")
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--codex-home", type=Path, default=Path.home() / ".codex")
+    parser.add_argument(
+        "--agents-skills-root",
+        type=Path,
+        help="Installed personal-skill root; defaults to the .agents/skills sibling of Codex home.",
+    )
     args = parser.parse_args(argv)
     codex_home = args.codex_home.resolve()
+    skills_root = (
+        args.agents_skills_root.resolve()
+        if args.agents_skills_root is not None
+        else (codex_home.parent / ".agents" / "skills").resolve()
+    )
 
     try:
         if args.rollback:
             rollback(codex_home, args.rollback)
             print(f"Rolled back transaction {args.rollback}.")
             return 0
-        changes, conflicts, state = plan(args.source.resolve(), codex_home)
+        changes, conflicts, state = plan(
+            args.source.resolve(), codex_home, skills_root
+        )
         if conflicts:
             for conflict in conflicts:
                 print(f"CONFLICT: {conflict}", file=sys.stderr)

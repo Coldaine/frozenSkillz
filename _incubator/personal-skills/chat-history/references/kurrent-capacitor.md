@@ -1,0 +1,73 @@
+# Kurrent Capacitor route
+
+Use KCap when the task is centered on a repository, project, PR, file, session chain, or the
+reasoning behind implementation work. Prefer the `kcap-sessions` MCP tools when available.
+
+## Capability gate
+
+Check the live surface before depending on optional features:
+
+```powershell
+kcap status --no-update-check
+kcap whoami --no-update-check
+kcap projects
+```
+
+Projects require a supporting plan. Analytics require a server that implements the analytics
+endpoints. Treat a 403 or unsupported-server response as an unavailable branch and continue through
+session search or AgentsView.
+
+## Session discovery and drill-down
+
+Use the MCP sequence:
+
+1. `search_sessions` with a natural-language question; default to the current repo or pass
+   `repo: "all"` only when cross-repo discovery is intended.
+2. `get_session_summary` to orient on a candidate.
+3. `list_turns` to map the session semantically without loading its entire transcript.
+4. `get_turn` for one complete turn, or `get_session_transcript` around the returned event index.
+5. Preserve `agent_id` when the hit belongs to a subagent stream.
+
+CLI fallback:
+
+```powershell
+kcap recap --repo
+kcap recap <session-id>
+kcap recap --per-turn <session-id>
+kcap recap --get-turn <n> <session-id>
+kcap recap --chain <session-id>
+kcap recap --full <session-id>
+```
+
+Use `--full` only after a summary or turn map shows that the whole transcript is required.
+
+## PR and file reasoning
+
+Use the read-only review MCP routes to recover implementation context:
+
+- `get_pr_summary`
+- `list_pr_files`
+- `list_sessions`
+- `get_file_context`
+- `search_context`
+- `get_transcript`
+
+Read the current diff and repository authority separately. Transcript reasoning explains what the
+agent intended; it does not prove the implementation is correct.
+
+## Import and coverage
+
+KCap can import Claude, Codex, Cursor, Copilot, Gemini, Kiro, Pi, OpenCode, and Antigravity
+sessions. Scope imports deliberately by repo, organization, working directory, date, or session.
+Do not run broad imports merely to answer a lookup when the server already has the session.
+
+## Scores, summaries, and evaluations
+
+- Treat session-search scores as candidate ordering only.
+- Treat generated summaries and per-turn prose as navigation; open the relevant turn for
+  consequential claims.
+- `kcap eval` is an LLM-as-judge workflow, not deterministic transcript retrieval. It can take
+  minutes and persist results. Do not invoke it during ordinary history lookup unless the user asks
+  for evaluation.
+- Use governed analytics only when available. State the queried field definitions and do not turn
+aggregate telemetry into a claim about conversation quality.
