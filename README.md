@@ -25,6 +25,19 @@ python scripts/sync_frozen_skills.py --consumer codex --check
 python scripts/sync_frozen_skills.py --consumer codex --apply
 ```
 
+For a complete Codex update, synchronize both reviewed skills and native global
+configuration through the unified entrypoint:
+
+```powershell
+python scripts/sync_frozen.py --consumer codex --check
+python scripts/sync_frozen.py --consumer codex --apply
+```
+
+The existing skill synchronizer remains the component responsible for exact skill
+directories. The Codex adapter handles native files with different ownership rules
+and preserves unrelated content in `~/.codex/AGENTS.md`; see
+[`docs/workflows/codex-global-config.md`](docs/workflows/codex-global-config.md).
+
 Every run selects either `--consumer` or a named `--deployment` subset. Codex defaults to its private `~/.codex/skills` root; Claude, Cursor, and Gemini require an explicit `--destination` until a consumer-private default is qualified. The synchronizer:
 
 - validates that the Claude, Codex, Cursor, and Gemini manifests have the same plugin identity and version;

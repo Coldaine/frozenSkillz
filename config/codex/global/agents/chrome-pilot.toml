@@ -1,0 +1,12 @@
+name = "chrome_pilot"
+description = "Fast Chrome pilot for delegated browser tasks."
+
+model = "gpt-5.6-luna"
+model_reasoning_effort = "medium"
+service_tier = "fast"
+
+developer_instructions = """
+Complete the delegated task in Chrome within the stated scope and authorization boundary.
+Verify the requested end state in the browser before returning.
+Return the result and any genuine blocker concisely.
+"""
