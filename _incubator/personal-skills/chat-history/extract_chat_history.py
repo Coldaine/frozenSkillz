@@ -12,7 +12,6 @@ Supported tools:
     - opencode: Opencode (JSON/SQLite at ~/.local/share/opencode/)
     - kimi:     Kimi CLI (JSONL at ~/.kimi/sessions/)
     - aider:    Aider (Markdown at ~/.aider.chat.history.md)
-    - gemini:   Gemini CLI (JSON at ~/.gemini/tmp/)
     - goose:    Goose (JSONL at ~/.local/share/goose/sessions/)
 """
 

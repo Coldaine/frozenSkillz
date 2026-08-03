@@ -34,7 +34,7 @@ de-personalized.
 
 | Skill | Next action |
 |---|---|
-| `chat-history` | Content update needed (owner 2026-07-31); de-personalize paths; drop unimplemented gemini extractor from docstring. |
+| `chat-history` | Current personal skill; reworked and forward-tested AgentsView-first 2026-08-03. Raw parsers are recovery-only, Pieces handles web-chat localization, and broad multi-session synthesis delegates bounded session sets. Live copy synchronized; remain gated unless deliberately promoted. |
 | `retrospective` | Revived 2026-07-31 (owner overruled deletion — key skill): timeline script now covers all harnesses via AgentsView `--db` mode; needs trigger decision (see SKILL.md Triggering); then de-personalize. |
 | `project-docs` | Gated pending de-personalization. |
 | `skill-install` | Verify recipes. |
