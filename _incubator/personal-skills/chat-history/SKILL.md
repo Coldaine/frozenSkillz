@@ -76,7 +76,11 @@ Need information from previous conversations
          │              └─ if browser/app localization is plausible, use Pieces
          │                 → references/pieces.md
          │                 ├─ project/app/time clues found
-         │                 │  └─ retry KCap or AgentsView with those clues
+         │                 │  ├─ same conversation is indexed
+         │                 │  │  └─ retry KCap or AgentsView with those clues
+         │                 │  └─ provider history or export is the source
+         │                 │     └─ return URL/title/time/account clues to the coordinator
+         │                 │        so it can dispatch chrome_pilot for retrieval
          │                 └─ nothing useful → record the coverage gap
          │
          ├─ Known subject, but unknown conversation
@@ -98,8 +102,11 @@ Need information from previous conversations
          │
          ├─ Browser application, page, title, or approximate time is the clue
          │  └─ use Pieces to localize the activity → references/pieces.md
-         │     └─ translate discovered project/time/app clues into a KCap or
-         │        AgentsView search; Pieces localization is not the transcript
+         │     ├─ conversation is indexed
+         │     │  └─ translate project/time/app clues into KCap or AgentsView search
+         │     └─ authenticated provider page, history, or export is required
+         │        └─ return the clues to the coordinator; it dispatches chrome_pilot
+         │           to retrieve the bounded conversation or export
          │
          └─ Almost no usable context
             └─ AgentsView broad semantic search → references/agentsview.md
@@ -194,6 +201,7 @@ Load only the provider reached by the tree:
 - [AgentsView](references/agentsview.md) for broad local, cross-harness, machine, fleet, message,
   usage, and health retrieval.
 - [Pieces](references/pieces.md) for browser/app/time localization that can produce better index
-  queries.
+  queries or identify the authenticated provider-history route. Pieces metadata is not the
+  conversation body, and `history_researcher` does not take interactive browser control.
 - [Raw recovery](references/raw-recovery.md) only after indexed coverage has been checked and a
   concrete gap remains.

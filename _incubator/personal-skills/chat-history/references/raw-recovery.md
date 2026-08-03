@@ -29,15 +29,11 @@ $env:PYTHONUTF8 = '1'
      --terms 'known anchor,variant' --root '<narrow-root>' --format jsonl
    ```
 
-4. `extract_chat_history.py` can create a prompt-only project/date index:
-
-   ```powershell
-   python (Join-Path $chatHistoryRoot 'extract_chat_history.py') `
-     --date YYYYMMDD --project-only --cwd '<project-path>' --output-dir '<temporary-output>'
-   ```
-
-   It extracts user messages, not the assistant and tool records needed for exact reconstruction.
-   Never treat its output as a full transcript.
+4. `extract_chat_history.py` is a prompt-only bulk locator. Its current `--date` option does not
+   enforce a bounded extraction and must not be used as a date boundary. Use the script only when
+   an explicitly unbounded prompt index is acceptable, always with a dedicated temporary output
+   directory. It extracts user messages, not the assistant and tool records needed for exact
+   reconstruction. Never treat its output as a full transcript.
 5. For exact reconstruction that neither index can provide, locate the one known raw session file
    and give that bounded file to a subagent. Require it to preserve speaker, event order, tool calls,
    and tool results and to report missing event types rather than infer them.
