@@ -2,26 +2,88 @@
 
 This repository owns reviewed, machine-global Codex configuration under
 `config/codex/global/`. This lane is for Codex-native prompts and custom-agent
-profiles that must apply across projects; it is separate from skill distribution.
+profiles that must apply across projects. It uses the same operator-facing update
+entrypoint as skill distribution, with a target-specific adapter underneath.
 
-The first profile pairs two artifacts:
+## Native surface mapping
 
-- `agents/chrome-pilot.toml` defines the fast Luna browser worker.
-- `AGENTS.browser-delegation.md` requires the primary agent to delegate browser
-  work to that worker whenever browser use is required.
+The first profile pairs two artifacts, and neither is embedded as prompt text in
+`config.toml`:
 
-Install or refresh the profile:
+| Reviewed source | Live Codex surface | Effect |
+|---|---|---|
+| `agents/chrome-pilot.toml` | `~/.codex/agents/chrome-pilot.toml` | Codex discovers the custom agent whose authoritative name is `chrome_pilot`. |
+| `AGENTS.browser-delegation.md` | Managed block in `~/.codex/AGENTS.md` | The primary agent is instructed to delegate browser work to `chrome_pilot`. |
+| No source in this profile | `~/.codex/config.toml` | Unchanged. It owns global Codex settings, not durable natural-language instructions. |
 
-```powershell
-python scripts/sync_codex_global_config.py --apply
+The activation chain is:
+
+```text
+frozenSkillz reviewed sources
+  |-- chrome-pilot.toml ----------> ~/.codex/agents/chrome-pilot.toml
+  |                                  makes the named worker discoverable
+  `-- delegation Markdown --------> managed block in ~/.codex/AGENTS.md
+                                     tells the primary when to use that worker
 ```
 
-Check for drift without writing:
+The TOML makes the worker available; the Markdown supplies the activation policy.
+Neither artifact alone provides the complete behavior.
+
+Codex discovers standalone personal agents from `~/.codex/agents/`; no duplicate
+`[agents.chrome_pilot]` entry is required in `config.toml`. The `[agents]` table in
+`config.toml` remains the home for global multi-agent settings such as enablement,
+thread limits, and default subagent model or effort.
+
+## Update delivery
+
+Check or apply the complete Codex distribution:
 
 ```powershell
-python scripts/sync_codex_global_config.py --check
+python scripts/sync_frozen.py --consumer codex --check
+python scripts/sync_frozen.py --consumer codex --apply
 ```
+
+`sync_frozen.py` is the operator entrypoint. It runs a conflict-checking preflight,
+then delegates to two format-specific components:
+
+- `sync_frozen_skills.py` owns exact skill directories and its distribution state.
+- `sync_codex_global_config.py` owns native Codex files and partial-file blocks.
+
+This separation avoids applying directory-replacement semantics to shared config
+files while keeping one command for routine Codex updates.
+
+The native-config adapter supports `--check`, `--diff`, `--apply`, and
+`--rollback <transaction-id>`. It records source revision and content hashes under
+`~/.codex/.frozenSkillz/codex-global-config/`, refuses locally modified managed
+content, writes atomically, backs up every changed target in a transaction, and
+re-reads each write before recording success.
+
+## Ownership rules
 
 The synchronizer owns the complete `~/.codex/agents/chrome-pilot.toml` file and
 only the marked browser-delegation block inside `~/.codex/AGENTS.md`. It preserves
-all other global instructions and fails on malformed or duplicate markers.
+all other global instructions and fails on malformed markers, unmanaged agent-file
+collisions, and edits to previously managed content. The exact unmarked delegation
+fragment may be adopted once during migration; arbitrary live content is never
+adopted as managed state.
+
+## Runtime verification boundary
+
+`--check` proves that reviewed files are materialized and unmodified. It does not
+prove that an already-running client session has refreshed its custom-agent roster
+or that a particular orchestration adapter exposes named-agent selection. Start a
+new Codex session after installing or updating custom agents, delegate one bounded
+browser task, and inspect the spawned thread for the `chrome_pilot` instructions
+and configured model. Treat a generic child whose task is merely named
+`chrome_pilot` as **not runtime-loaded**.
+
+If the active adapter exposes no named-agent selector, report that runtime boundary;
+do not claim that the profile was used based only on its filename or task label.
+
+## Design references
+
+- [Codex subagents](https://developers.openai.com/codex/subagents/): native custom-agent locations, schema, inheritance, and activation.
+- [Codex AGENTS.md](https://developers.openai.com/codex/guides/agents-md/): global instruction discovery and precedence.
+- [Oh My OpenAgent](https://github.com/code-yeongyu/oh-my-openagent): harness-specific adapters behind a shared installation/runtime architecture.
+- [Oh My ClaudeCode reference](https://github.com/Yeachan-Heo/oh-my-claudecode/blob/main/docs/REFERENCE.md): native-surface installation plus doctor checks and owned-file cleanup.
+- [Superpowers](https://github.com/obra/superpowers): harness-native installation and update delivery.
