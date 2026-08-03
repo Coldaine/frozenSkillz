@@ -230,29 +230,34 @@ def apply_changes(codex_home: Path, changes: list[Change], state: dict) -> str |
         return None
     transaction = _transaction_id()
     transaction_dir = codex_home / MANAGEMENT_ROOT / "transactions" / transaction
-    transaction_dir.mkdir(parents=True)
     manifest = {"schema": 1, "transaction": transaction, "targets": []}
+    try:
+        transaction_dir.mkdir(parents=True)
+        for index, change in enumerate(changes):
+            backup_name = f"{index}.backup"
+            entry = {
+                "key": change.key,
+                "target": str(change.target.relative_to(codex_home)),
+                "existed": change.current is not None,
+                "backup": backup_name if change.current is not None else None,
+                "applied_digest": _digest(change.desired),
+            }
+            if change.current is not None:
+                _atomic_write(transaction_dir / backup_name, change.current)
+            manifest["targets"].append(entry)
 
-    for index, change in enumerate(changes):
-        backup_name = f"{index}.backup"
-        entry = {
-            "key": change.key,
-            "target": str(change.target.relative_to(codex_home)),
-            "existed": change.current is not None,
-            "backup": backup_name if change.current is not None else None,
-            "applied_digest": _digest(change.desired),
-        }
-        if change.current is not None:
-            _atomic_write(transaction_dir / backup_name, change.current)
-        manifest["targets"].append(entry)
+        if state_path.exists():
+            shutil.copy2(state_path, transaction_dir / "state.backup.json")
+            manifest["state_existed"] = True
+        else:
+            manifest["state_existed"] = False
+        _atomic_write(
+            transaction_dir / "manifest.json", json.dumps(manifest, indent=2) + "\n"
+        )
+    except OSError as exc:
+        raise ConfigError(f"Cannot prepare transaction {transaction}: {exc}") from exc
 
-    if state_path.exists():
-        shutil.copy2(state_path, transaction_dir / "state.backup.json")
-        manifest["state_existed"] = True
-    else:
-        manifest["state_existed"] = False
-    _atomic_write(transaction_dir / "manifest.json", json.dumps(manifest, indent=2) + "\n")
-
+    completed_keys: set[str] = set()
     try:
         for change in changes:
             observed = _read(change.target) if change.target.exists() else None
@@ -263,11 +268,17 @@ def apply_changes(codex_home: Path, changes: list[Change], state: dict) -> str |
             _atomic_write(change.target, change.desired)
             if _read(change.target) != change.desired:
                 raise ConfigError(f"Post-write verification failed: {change.target}")
+            completed_keys.add(change.key)
         state["last_transaction"] = transaction
         _atomic_write(state_path, json.dumps(state, indent=2, sort_keys=True) + "\n")
     except BaseException as exc:
         try:
-            rollback(codex_home, transaction, require_current=False)
+            rollback(
+                codex_home,
+                transaction,
+                require_current=False,
+                target_keys=completed_keys,
+            )
         except BaseException as rollback_exc:
             raise ConfigError(
                 f"Apply failed and rollback also failed for transaction {transaction}: "
@@ -281,7 +292,13 @@ def apply_changes(codex_home: Path, changes: list[Change], state: dict) -> str |
     return transaction
 
 
-def rollback(codex_home: Path, transaction: str, *, require_current: bool = True) -> None:
+def rollback(
+    codex_home: Path,
+    transaction: str,
+    *,
+    require_current: bool = True,
+    target_keys: set[str] | None = None,
+) -> None:
     if require_current:
         state = _load_state(codex_home)
         if state.get("last_transaction") != transaction:
@@ -297,28 +314,36 @@ def rollback(codex_home: Path, transaction: str, *, require_current: bool = True
         manifest = json.loads(_read(manifest_path))
     except json.JSONDecodeError as exc:
         raise ConfigError(f"Cannot parse transaction manifest: {exc}") from exc
-    resolved_targets: list[tuple[dict, Path]] = []
+    resolved_targets: list[tuple[dict, Path, str | None]] = []
     for entry in manifest["targets"]:
+        if target_keys is not None and entry["key"] not in target_keys:
+            continue
         target = (codex_home / entry["target"]).resolve()
         if codex_home.resolve() not in target.parents:
             raise ConfigError(f"Transaction target escapes Codex home: {target}")
-        resolved_targets.append((entry, target))
-    if require_current:
-        for entry, target in resolved_targets:
-            observed = _read(target) if target.exists() else None
-            if observed is None or _digest(observed) != entry.get("applied_digest"):
-                raise ConfigError(
-                    f"Refusing rollback because target changed after apply: {target}"
-                )
-    for entry, target in resolved_targets:
+        backup = (
+            _read(transaction_dir / entry["backup"]) if entry["existed"] else None
+        )
+        observed = _read(target) if target.exists() else None
+        if observed is None or _digest(observed) != entry.get("applied_digest"):
+            raise ConfigError(
+                f"Refusing rollback because target changed after apply: {target}"
+            )
+        resolved_targets.append((entry, target, backup))
+    state_backup = transaction_dir / "state.backup.json"
+    state_content = _read(state_backup) if manifest.get("state_existed") else None
+    for entry, target, backup in resolved_targets:
         if entry["existed"]:
-            _atomic_write(target, _read(transaction_dir / entry["backup"]))
+            if backup is None:
+                raise ConfigError(f"Transaction backup is missing for {target}")
+            _atomic_write(target, backup)
         elif target.exists():
             target.unlink()
     state_path = codex_home / MANAGEMENT_ROOT / STATE_FILE
-    state_backup = transaction_dir / "state.backup.json"
     if manifest.get("state_existed"):
-        _atomic_write(state_path, _read(state_backup))
+        if state_content is None:
+            raise ConfigError(f"Transaction state backup is missing: {state_backup}")
+        _atomic_write(state_path, state_content)
     elif state_path.exists():
         state_path.unlink()
 

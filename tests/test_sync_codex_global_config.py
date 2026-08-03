@@ -229,6 +229,78 @@ class SyncCodexGlobalConfigTests(unittest.TestCase):
         self.assertEqual("original\n", agents_target.read_text(encoding="utf-8"))
         self.assertFalse(agent_target.exists())
 
+    def test_concurrent_later_target_is_preserved_during_failure_rollback(self):
+        agents_target = self.codex_home / "AGENTS.md"
+        agents_target.write_text("original\n", encoding="utf-8")
+        changes, conflicts, state = sync_module.plan(self.source, self.codex_home)
+        self.assertEqual([], conflicts)
+        real_atomic_write = sync_module._atomic_write
+        agent_target = self.codex_home / "agents/chrome-pilot.toml"
+
+        def create_concurrent_target(path, content):
+            result = real_atomic_write(path, content)
+            if path == agents_target:
+                agent_target.parent.mkdir(exist_ok=True)
+                agent_target.write_text("concurrent owner\n", encoding="utf-8")
+            return result
+
+        with (
+            mock.patch.object(
+                sync_module, "_atomic_write", side_effect=create_concurrent_target
+            ),
+            self.assertRaises(sync_module.ConfigError),
+        ):
+            sync_module.apply_changes(self.codex_home, changes, state)
+
+        self.assertEqual("original\n", agents_target.read_text(encoding="utf-8"))
+        self.assertEqual("concurrent owner\n", agent_target.read_text(encoding="utf-8"))
+
+    def test_rollback_validates_all_backups_before_mutating_targets(self):
+        agents_target = self.codex_home / "AGENTS.md"
+        agents_target.write_text("original\n", encoding="utf-8")
+        self._apply()
+        (self.source / "AGENTS.browser-delegation.md").write_text(
+            "## Required\n\nUpdated reviewed rule.\n", encoding="utf-8"
+        )
+        (self.source / "agents/chrome-pilot.toml").write_text(
+            'name = "chrome_pilot"\n'
+            'description = "Updated worker"\n'
+            'developer_instructions = "Updated instructions."\n',
+            encoding="utf-8",
+        )
+        changes, transaction = self._apply()
+        self.assertEqual(2, len(changes))
+        transaction_dir = (
+            self.codex_home
+            / sync_module.MANAGEMENT_ROOT
+            / "transactions"
+            / transaction
+        )
+        (transaction_dir / "1.backup").unlink()
+        applied_agents = agents_target.read_text(encoding="utf-8")
+
+        with self.assertRaises(sync_module.ConfigError):
+            sync_module.rollback(self.codex_home, transaction)
+
+        self.assertEqual(applied_agents, agents_target.read_text(encoding="utf-8"))
+
+    def test_transaction_setup_failure_is_a_config_error(self):
+        changes, conflicts, state = sync_module.plan(self.source, self.codex_home)
+        self.assertEqual([], conflicts)
+        transaction = "collision"
+        (
+            self.codex_home
+            / sync_module.MANAGEMENT_ROOT
+            / "transactions"
+            / transaction
+        ).mkdir(parents=True)
+
+        with (
+            mock.patch.object(sync_module, "_transaction_id", return_value=transaction),
+            self.assertRaises(sync_module.ConfigError),
+        ):
+            sync_module.apply_changes(self.codex_home, changes, state)
+
 
 if __name__ == "__main__":
     unittest.main()
