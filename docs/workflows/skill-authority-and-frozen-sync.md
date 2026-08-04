@@ -117,7 +117,7 @@ There are two kinds, distinguished by whether the deployment declares a `consume
 "deployments": {
   "hermes-ops": {
     "description": "Reviewed shared skills exposed to the standing Hermes operations runtime. Hermes is a bare-SKILL.md service runtime, not a client: it reads skill directories from a read-only bind mount, so it declares no consumer.",
-    "skills": ["doppler", "pdm-cli-operations"]
+    "skills": ["doppler", "pdm-cli-operations", "homelab-operator"]
   }
 }
 ```

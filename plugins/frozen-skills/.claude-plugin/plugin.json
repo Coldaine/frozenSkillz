@@ -1,15 +1,15 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "frozen-skills",
-  "description": "Installs reviewed delegation-contract, Doppler, external-skill-intake, OMC maintenance, and official PDM operations skills. Content under _incubator is not included.",
-  "version": "2.6.0",
+  "description": "Installs reviewed delegation-contract, Doppler, external-skill-intake, OMC maintenance, official PDM operations, and homelab operator skills. Content under _incubator is not included.",
+  "version": "2.7.0",
   "category": "reference",
   "author": {
     "name": "Coldaine",
     "url": "https://github.com/Coldaine"
   },
   "license": "MIT",
-  "tags": ["secrets", "doppler", "intake", "omc", "proxmox", "pdm", "reference"],
+  "tags": ["secrets", "doppler", "intake", "omc", "proxmox", "pdm", "homelab", "operations", "reference"],
   "skills": [
     {
       "name": "delegation-contract",
@@ -35,6 +35,11 @@
       "name": "pdm-cli-operations",
       "path": "skills/pdm-cli-operations",
       "description": "Inspect and operate Proxmox VE and PBS fleets through the official PDM client or an environment-owned wrapper. Use for inventory, guest lifecycle, tasks, metrics, snapshots, migration, and PDM troubleshooting; not native PVE/PBS break-glass work."
+    },
+    {
+      "name": "homelab-operator",
+      "path": "skills/homelab-operator",
+      "description": "Conversationally inspect, diagnose, operate, and verify homelab systems and repositories from Hermes with native tools and ownership boundaries. Use for goal-driven Git, SSH, GitHub, Kubernetes, Flux, Talos, Teleport, database, hardware, tunnel, storage, and API operations; this skill does not grant access."
     }
   ]
 }

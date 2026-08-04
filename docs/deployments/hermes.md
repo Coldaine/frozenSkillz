@@ -12,7 +12,16 @@ The deploy script lives in `Coldaine/coldaine-homelab` at `deployments/hermes/sy
 
 Hermes reads bare `SKILL.md` directories from that path. Nothing renders a client package for it.
 
-It consumes exactly `doppler` and `pdm-cli-operations`, expressed as the consumer-less `hermes-ops` deployment in `plugins/distribution.json`.
+The post-promotion `hermes-ops` profile is defined to consume exactly `doppler`, `pdm-cli-operations`, and `homelab-operator` in `plugins/distribution.json`. `homelab-operator` provides conversational guidance for selecting and safely using the native homelab/repository tools; it does not grant access or provision those tools. The currently deployed homelab pin remains older until the homelab deployment is explicitly updated and synchronized.
+
+## Tool ownership
+
+Tool installation and Hermes image composition are owned by the homelab
+repository and deployment, not by frozenSkillz. This document records the
+skill-consumption contract; it does not claim that tools or live provisioning
+are present or have been performed. Hermes may use a tool only when the image,
+runtime identity, network reachability, and native authorization prove that it
+is available for the requested operation.
 
 ## Invocation
 
@@ -27,4 +36,4 @@ python3 scripts/sync_frozen_skills.py --apply --deployment hermes-ops --destinat
 
 The pin rule itself is in [`../workflows/skill-authority-and-frozen-sync.md`](../workflows/skill-authority-and-frozen-sync.md) → **Pinning From a Production Consumer**. Hermes enforces it mechanically: the deploy script refuses to proceed unless its pinned commit is reachable from a fetched `refs/remotes/origin` ref, exiting 69 otherwise. The consumer checked this before the repository wrote the rule down.
 
-Current pin `da5ae4eeb4acf9470e84dfa7877663c7d666a734` is reachable from exactly one ref, `origin/fix/validate-skill-frontmatter` — an unmerged branch whose pull request (#44) is closed. Repointing it is an edit in `coldaine-homelab` and is blocked until deployment support lands on `main`.
+Current pin `da5ae4eeb4acf9470e84dfa7877663c7d666a734` is reachable from exactly one ref, `origin/fix/validate-skill-frontmatter` — an unmerged branch whose pull request (#44) is closed. Repointing it is an edit in `coldaine-homelab`; until that happens, this promotion is not live in Hermes. This frozenSkillz change does not claim that live Hermes provisioning or synchronization has occurred.

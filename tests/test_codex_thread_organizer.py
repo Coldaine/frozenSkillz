@@ -204,6 +204,7 @@ class CodexThreadOrganizerPackagingTests(unittest.TestCase):
             "external-skill-intake",
             "omc-reference",
             "pdm-cli-operations",
+            "homelab-operator",
         }
         with tempfile.TemporaryDirectory() as temporary:
             smoke_root = Path(temporary)

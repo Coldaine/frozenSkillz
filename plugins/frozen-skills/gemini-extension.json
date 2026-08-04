@@ -1,7 +1,7 @@
 {
   "name": "frozen-skills",
-  "description": "Installs reviewed delegation-contract, Doppler, external-skill-intake, OMC maintenance, and official PDM operations skills. Content under _incubator is not included.",
-  "version": "2.6.0",
+  "description": "Installs reviewed delegation-contract, Doppler, external-skill-intake, OMC maintenance, official PDM operations, and homelab operator skills. Content under _incubator is not included.",
+  "version": "2.7.0",
   "author": {
     "name": "Coldaine",
     "url": "https://github.com/Coldaine"
@@ -28,6 +28,10 @@
     {
       "name": "pdm-cli-operations",
       "path": "skills/pdm-cli-operations"
+    },
+    {
+      "name": "homelab-operator",
+      "path": "skills/homelab-operator"
     }
   ]
 }

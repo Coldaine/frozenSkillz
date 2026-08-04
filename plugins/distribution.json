@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "plugin": "frozen-skills",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "shared": [
     {
       "name": "delegation-contract",
@@ -22,6 +22,10 @@
     {
       "name": "pdm-cli-operations",
       "path": "frozen-skills/skills/pdm-cli-operations"
+    },
+    {
+      "name": "homelab-operator",
+      "path": "frozen-skills/skills/homelab-operator"
     }
   ],
   "consumer_packages": {
@@ -46,7 +50,8 @@
       "description": "Reviewed shared skills exposed to the standing Hermes operations runtime. Hermes is a bare-SKILL.md service runtime, not a Claude/Codex/Cursor/Gemini client: it reads skill directories from a read-only bind mount, so it has no client packaging format and declares no consumer.",
       "skills": [
         "doppler",
-        "pdm-cli-operations"
+        "pdm-cli-operations",
+        "homelab-operator"
       ]
     }
   }
